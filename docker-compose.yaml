@@ -4,5 +4,6 @@ services:
   case-itau-front:
     image: 210486/case-itau-front:v1
     container_name: case-itau-front
+    build: .
     ports:
       - "4201:80"

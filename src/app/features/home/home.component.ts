@@ -12,8 +12,6 @@ export class HomeComponent implements OnInit {
   constructor(private homeSrv: HomeService) { }
 
   ngOnInit(): void {
-    console.log("eeeee");
-    
     this.homeSrv.getCats().subscribe({
       next: (res) => {
         console.log(res);

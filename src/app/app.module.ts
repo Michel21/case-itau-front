@@ -6,11 +6,13 @@ import { AppComponent } from './app.component';
 import { HomeComponent } from './features/home/home.component';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ApiInterceptor } from './security/api.interceptor';
+import { ListDetailComponent } from './features/list-detail/list-detail.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    HomeComponent
+    HomeComponent,
+    ListDetailComponent
   ],
   imports: [
     BrowserModule,
