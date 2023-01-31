@@ -1,0 +1,88 @@
+@import "../../../../assets/scss/global";
+
+.main-header {
+  background: $nutral-lighter-color;
+  border-top: 5px solid $color-white;
+  box-shadow: 0 2px 8px -2px rgb(34 34 34 / 40%);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  max-width: 100%;
+  width: 100%;
+  background: $color-white;
+  z-index: 100;
+
+  .grid {
+    grid-gap: 10px;
+    @include grid(2);
+    padding: 0;
+  }
+
+  .title-header {
+    line-height: 18px;
+    margin-left: 25px;
+
+    h1 {
+      font-weight: 800;
+    }
+
+    p {
+      color: #787878;
+      font-size: 12px;
+      margin-top: 5px;
+    }
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    margin-left: 24px;
+    background-color: $nutral-lighter-color;
+
+    a {
+      position: relative;
+      width: 100px;
+      height: 67px;
+      font-size: 20px;
+      color: $color-white;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top;
+      }
+    }
+  }
+
+  .navbar {
+    min-height: 77px;
+    padding-top: 5px;
+
+    &__link {
+      display: flex;
+      align-items: center;
+      ul {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        grid-gap: 10px;
+        justify-content: space-evenly;
+
+        li {
+          a {
+            font-size: 14px;
+            color: #787878;
+            cursor: pointer;
+            font-weight: 600;
+          }
+        }
+      }
+    }
+
+    &-nav {
+      margin: 10px;
+    }
+  }
+}

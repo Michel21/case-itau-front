@@ -1,0 +1,30 @@
+// Desktop First
+$for-phone-only: 'screen and (max-width: 599px)';
+$for-tablet-portait-up: 'screen and (min-width: 600px)';
+$for-tablet-portait-only: 'screen and (min-width: 600px) and (max-width: 899px)';
+$for-tablet-landscape-up: 'screen and (min-width: 900px)';
+$for-tablet-landscape-only: 'screen and (min-width: 900px) and (max-width: 1199px)';
+$for-desktop-up: 'screen and (min-width: 1200px)';
+$for-desktop-only: 'screen and (min-width: 1200px) and (max-width: 1799px)';
+$for-big-desktop-up: 'screen and (min-width: 1800px)';
+
+// Mobile First
+$smartphones-portrait: 'screen and (min-width:320px)'; /* smartphones, portrait iPhone, portrait 480x320 phones (Android) */
+$smartphones-landscape: 'screen and (min-width:480px)'; /* smartphones, Android phones, landscape iPhone */
+$tablets-portrai: 'screen and (min-width:600px)'; /* portrait tablets, portrait iPad, e-readers (Nook/Kindle), landscape 800x480 phones (Android) */
+$tablets-landscape: 'screen and (min-width:801px)'; /* tablet, landscape iPad, lo-res laptops ands desktops */
+$tablets-big-landscape: 'screen and (min-width:1025px)'; /* big landscape tablets, laptops, and desktops */
+$desktops-laptops: 'screen and (min-width:1281px)'; /* hi-res laptops and desktops */
+
+@mixin responsive-media($media) {
+  @if $media{
+    @media #{$media}{
+      @content
+    }
+  }
+}
+
+@mixin responsive-media-devices($device-1, $device-2) {
+  @include responsive-media($device-1) {@content}
+  @include responsive-media($device-2) {@content}
+}

@@ -1,0 +1,111 @@
+$button-pressed-background: #18cf65;
+$button-primary: #003152;
+
+.btn-styles{
+  border: 1px solid #aeb6e6;
+  padding: 0.5rem 0.75rem !important;
+  margin: 0;
+  color: black;
+  border-color: #fff;
+  border-radius: 5px;
+
+  background-color: $button-pressed-background;
+  border-color: $button-pressed-background;
+  box-shadow: inset 0 0 5px 0 rgba(0,0,0,.2);
+}
+
+.listContainer{
+  width: calc(100% - 48px);
+  margin: 0px auto;
+  &__header{
+    display: flex;
+    justify-content: space-between;
+    padding: 40px 0;
+    flex-wrap: wrap;
+
+    &__title{
+      h1{
+        font-size: 2rem;
+        margin-bottom: 20px;
+      }
+    }
+    &__search{
+      margin-bottom: 20px;
+      input {
+        font-size: 16px;
+        width: 280px;
+        height: 44px;
+        font-size: max(16px, 1em);
+        font-family: inherit;
+        padding: 0.25em 0.5em;
+        background-color: #fff;
+        border: 2px solid #ccc;
+        border-radius: 4px;
+        box-shadow: inset 0 1px 2px rgba(10,10,10,.1);
+      }
+  
+    }
+
+  }
+  &__wrapper{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      // justify-items: center;
+      padding: 40px 0;
+      @media screen and (min-width:320px){
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      }
+
+    &__card-list{
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px -2px rgb(34 34 34 / 40%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: fit-content;
+      max-width: 380px;
+
+      h1{
+        text-align: center;
+        margin-left: 24px;
+      }
+  
+      img{
+        max-width: 100%;
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+        object-position: top;
+        border-bottom: 1px solid #efefef;
+        @media screen and (min-width:320px){
+          max-height: 37%;
+        }
+      }
+      
+      &__mais-details{
+        @extend .btn-styles;
+        width: calc(100% - 16px);
+        margin-top: auto;
+        margin-bottom: 10px;
+       }
+    }
+    &__content{
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      grid-gap: 10px;
+    }
+  }
+}
+
+.btn-primary{
+  @extend .btn-styles;
+}
+
+.sceletonContainer{
+  width: 330px; 
+}
+

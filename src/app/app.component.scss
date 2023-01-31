@@ -1,0 +1,24 @@
+.main{
+  height: 100vh;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: auto;
+
+  .container{
+    display: flex;
+    flex-direction: row;
+    .wrapper{
+      flex: 1;
+      flex-direction: column;
+    }
+  }
+
+  &_content{
+    flex: 1;
+    justify-content: stretch;
+    margin-top: 77px;
+    background-color: #E7EEF1;
+  }
+}

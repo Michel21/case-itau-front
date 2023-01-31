@@ -5,7 +5,7 @@ import { HomeComponent } from './home.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
-  { path: 'list-detalhe', component: ListDetailComponent },
+  { path: 'list-detalhe/:id', component: ListDetailComponent },
 ];
 
 @NgModule({

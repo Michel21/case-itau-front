@@ -1,0 +1,141 @@
+@import 'responsive-media.scss';
+
+@mixin grid($cols) {
+  display: grid;
+  box-sizing: border-box;
+  grid-template-columns: repeat($cols, 1fr);
+  grid-column-gap: 24px;
+
+  .aling-center{
+    align-self: center;
+  }
+  .justify-center{
+    justify-self: center;
+  }
+}
+
+.grid{
+ @include grid(4);
+ padding: 0 32px;
+}
+.cell{
+  &-1-phone{
+    grid-column: span 1;
+  }
+  &-2-phone{
+    grid-column: span 2;
+  }
+  &-3-phone{
+    grid-column: span 3;
+  }
+  &-4-phone{
+    grid-column: span 4;
+  }
+}
+@include responsive-media($for-tablet-portait-up){
+  .grid{
+    @include grid(8);
+    padding: 0 50px;
+  }
+  .cell{
+    &-1-tablet{
+      grid-column: span 1;
+    }
+    &-2-tablet{
+      grid-column: span 2;
+    }
+    &-3-tablet{
+      grid-column: span 3;
+    }
+    &-4-tablet{
+      grid-column: span 4;
+    }
+    &-5-tablet{
+      grid-column: span 5;
+    }
+    &-6tablet{
+      grid-column: span 6;
+    }
+    &-7-tablet{
+      grid-column: span 7;
+    }
+    &-8-tablet{
+      grid-column: span 8;
+    }
+  }
+}
+@include responsive-media($for-desktop-up){
+  .grid{
+    @include grid(12);
+    padding: 0 135px;
+  }
+  .no-desktop{
+    display: none;
+  }
+  .cell{
+    &-1-desktop{
+      grid-column: span 1;
+    }
+    &-2-desktop{
+      grid-column: span 2;
+    }
+    &-3-desktop{
+      grid-column: span 3;
+    }
+    &-4-desktop{
+      grid-column: span 4;
+    }
+    &-5-desktop{
+      grid-column: span 5;
+    }
+    &-6desktop{
+      grid-column: span 6;
+    }
+    &-7-desktop{
+      grid-column: span 7;
+    }
+    &-8-desktop{
+      grid-column: span 8;
+    }
+    &-9-desktop{
+      grid-column: span 9;
+    }
+    &-10-desktop{
+      grid-column: span 10;
+    }
+    &-11-desktop{
+      grid-column: span 11;
+    }
+    &-12-desktop{
+      grid-column: span 12;
+    }
+  }
+}
+@include responsive-media($for-big-desktop-up){
+  .grid{
+    margin: auto;
+    max-width: 1440px;
+  }
+}
+@include responsive-media($for-phone-only){
+  .no-phone{
+    display: none;
+  }
+}
+@include responsive-media($for-tablet-portait-only){
+  .no-tablet{
+    display: none;
+  }
+}
+@include responsive-media($for-tablet-landscape-only){
+  .no-tablet{
+    display: none;
+  }
+}
+@include responsive-media($for-desktop-only){
+  .no-desktop{
+    display: none;
+  }
+}
+
+

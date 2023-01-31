@@ -1,6 +1,49 @@
-<section>
-  <div>
-    <h1>Lista de Gatos v3</h1>
+<section class="listContainer">
+  <div class="listContainer__header">
+    <div class="listContainer__header__title">
+      <h1>Lista de Gatos</h1>
+    </div>
+    <div class="listContainer__header__search">
+      <input placeholder="Pesquisar Origem" #input>
+    </div>
   </div>
-  <button routerLink="list-detalhe"></button>
+
+
+  <div class="listContainer__wrapper">
+    <ng-container *ngIf="objectListaResponse.length > 0;else sceleton">
+      <ng-container *ngFor="let item of objectListaResponse">
+        <div class="listContainer__wrapper__card-list">
+          <img appLazyLoad [src]="item?.image?.url" 
+          [width]="item?.image?.width" 
+          alt="imagem capa"
+          loading="lazy"
+          (error)="doSomethingOnError($event)"
+          >
+          <div class="listContainer__wrapper__content">
+            <h1>{{item?.name}}</h1>
+            <span><strong>Origem:</strong> {{item?.origin}}</span>
+            <span><strong>Temperamento:</strong> {{item?.temperament}}</span>
+            <p><strong>Descrição:</strong> {{item?.description}}</p>
+          </div>
+          <button class="listContainer__wrapper__card-list__mais-details" 
+           [routerLink]="['list-detalhe', item?.id]"
+           [state]="navExtra.state"
+           (click)="onNavigateTo(item)"
+           >Mais Detalhes
+          </button>
+        </div>
+      </ng-container>
+    </ng-container>
+    <ng-template #sceleton>
+      <ng-conatiner *ngFor="let item of listScheleton">
+        <div class="sceletonContainer">
+          <app-loading-placeholder 
+          [height]="'585px'" 
+          [border]="true"
+          >
+          </app-loading-placeholder>
+        </div>
+      </ng-conatiner>
+    </ng-template>
+  </div>
 </section>

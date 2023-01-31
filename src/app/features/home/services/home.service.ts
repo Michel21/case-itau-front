@@ -1,30 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { urlConfig } from 'src/config/url.config';
+import { urlConfig } from '../../../../config/url.config';
+import { ICatsTypes } from '../../../types/cats-types';
 
-interface ICatsTypes {
-  id: string;
-  url: string;
-  width: string;
-  height: string;
-  mime_type: string;
-  entities: [];
-  breeds: [
-    {
-      id: 3;
-      name: string;
-      wikipedia_url: string;
-    },
-    {
-      id: 2;
-      name: string;
-      wikipedia_url: string;
-    }
-  ];
-  animals: [];
-  categories: [];
-}
 
 @Injectable({
   providedIn: 'root'

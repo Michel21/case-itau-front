@@ -1,0 +1,50 @@
+/*RESET*/
+* {
+  margin: 0;
+  padding: 0;
+
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  text-rendering: optimizeLegibility;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased !important;
+    -webkit-overflow-scrolling: touch;
+}
+
+/*VARIABLES*/
+$font-small: 0.875em;
+$font-normal: 1em;
+$font-medium: 1.2em;
+$font-large: 1.4em;
+
+$weight-light: 300;
+$weight-normal: 400;
+$weight-bold: 700;
+$weight-black: 900;
+
+$radius-normal: 5px;
+$radius-medium: 10px;
+$radius-large: 20px;
+$radius-round: 50%;
+
+$index-back: -1;
+$index-fold: 2;
+$index-menu: 3;
+
+/*ELEMENTS*/
+img {
+  max-width: 100%;
+}
+
+img a {
+  border: none;
+}
+
+ul {
+  list-style: none;
+}
+
+

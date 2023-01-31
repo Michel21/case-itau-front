@@ -1,4 +1,4 @@
-import { environment } from "src/environments/environment";
+import { environment } from "../environments/environment";
 
 export const urlConfig = Object.freeze({
   api_cat: environment.api,

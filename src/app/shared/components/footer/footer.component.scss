@@ -1,0 +1,28 @@
+@import "../../../../assets/scss/global";
+
+.footer-container{
+  display: flex;
+  height: 78px;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+  background: $color-white;
+  
+  .btn-left{
+    border: none;
+    height: 48px;
+    width: 218px;
+    background: $primary-blue-color;
+    margin-left: 25px;
+    color: $color-white;
+  }
+  .btn-right{
+    width: 224px;
+    height: 48px;
+    border: 1px solid #165C7D;
+    background-color: $nutral-lighter-color;
+    margin-left: 20px;
+    color: $primary-blue-color;
+  }
+}

@@ -6,4 +6,4 @@ services:
     container_name: case-itau-front
     build: .
     ports:
-      - "4201:80"
+      - "4202:80"

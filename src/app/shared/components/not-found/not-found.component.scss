@@ -1,0 +1,18 @@
+@import "../../../assets/scss/global";
+.notFound{
+  display: flex;
+  justify-content: center;
+  justify-content: space-around;
+  width: 100%;
+  &_content{
+    background: $secundary-color-dark;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    width: 600px;
+    justify-content: center;
+    margin-top: 40px;
+    height: 300px;
+    text-align: center;
+  }
+}
