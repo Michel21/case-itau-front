@@ -1,0 +1,214 @@
+<div id="extrato-container" class="extrato-container">
+  <!-- Cabeçalho -->
+  <div class="header">
+    <div class="logo">bradesco corporate</div>
+    <div class="subtitle">global solutions</div>
+    <div class="report-details">
+      <div><strong>Saldo e extrato</strong></div>
+      <div>
+        <strong>Data da transação:</strong> 
+        <span>{{ dataTransacao }}</span>
+      </div>
+      <div>
+        <strong>Número de controle:</strong> 
+        <span>{{ numeroControle }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detalhes da Pesquisa -->
+  <div class="search-details">
+    <h3>Detalhes da Pesquisa</h3>
+    <div class="detail-grid">
+      <div class="detail-item">
+        <span class="detail-label">Empresa | CNPJ: </span>
+        <span class="detail-value">{{ dadosAtuais.empresa }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Agência | Conta: </span>
+        <span class="detail-value">{{ dadosAtuais.agencia }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Data da busca: </span>
+        <span class="detail-value">{{ dadosAtuais.dataBusca }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Tipo de investimento: </span>
+        <span class="detail-value">{{ dadosAtuais.tipoInvestimento }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Tipo de Produto: </span>
+        <span class="detail-value">{{ dadosAtuais.tipoProduto }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabela Principal com Dados Dinâmicos -->
+  <div class="table-container">
+    <table class="financial-table">
+      <thead>
+        <tr style="background-color: #ddd; padding: 12px 0;">
+          <th style="text-align: left; padding-left: 3px;">Data aplic.</th>
+          <th style="text-align: left; padding-left: 3px;">Data vencto.</th>
+          <th style="text-align: left; padding-left: 3px;">Resgate/Carência</th>
+          <th style="text-align: center;">Taxa (%)</th>
+          <th style="text-align: right; padding-right: 3px;">Valor princ. (BRL)</th>
+          <th style="text-align: right; padding-right: 3px;">Valor Bruto (BRL)</th> 
+          <th style="text-align: right; padding-right: 3px;">Renda total (BRL)</th>
+          <th style="text-align: right; padding-right: 3px;">IOF (BRL)</th>
+          <th style="text-align: right; padding-right: 3px;">IRRF (BRL)</th>
+          <th style="text-align: right; padding-right: 3px;">Valor Líquido (BRL)</th>
+          <th style="text-align: right; padding-right: 3px;">Renda bruta per</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Saldo Anterior -->
+        <tr *ngIf="temSaldoAnterior">
+          <th colspan="11" style="background-color: #eee; padding: 12px 0; font-weight: bold; border-bottom: 1px solid #ddd;">
+            Saldo anterior em {{ dadosAtuais.saldoAnterior?.dataSaldo }}
+          </th>
+        </tr>
+        <tr *ngFor="let item of dadosAtuais.saldoAnterior?.itens">
+          <td class="date">{{ item.dataAplicacao | extratoFormat:'data' }}</td>
+          <td class="date">{{ item.dataVencimento | extratoFormat:'data' }}</td>
+          <td class="date">{{ item.dataResgate | extratoFormat:'data' }}</td>
+          <td class="percentage">{{ item.taxa | extratoFormat:'percentual' }}</td>
+          <td class="currency">{{ item.valorPrincipal | extratoFormat:'moeda' }}</td>
+          <td class="currency">{{ item.valorBruto | extratoFormat:'moeda' }}</td>
+          <td class="currency">{{ item.rendaTotal | extratoFormat:'moeda' }}</td>
+          <td class="currency">{{ item.iof | extratoFormat:'moeda' }}</td>
+          <td class="currency">{{ item.irrf | extratoFormat:'moeda' }}</td>
+          <td class="currency">{{ item.valorLiquido | extratoFormat:'moeda' }}</td>
+          <td class="currency">{{ item.rendaBrutaPer | extratoFormat:'moeda' }}</td>
+        </tr>
+        <tr class="total-row" *ngIf="temSaldoAnterior">
+          <td><strong>Total</strong></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="currency"><strong>{{ dadosAtuais.saldoAnterior?.totalValorPrincipal | extratoFormat:'moeda' }}</strong></td>
+          <td class="currency"><strong>{{ dadosAtuais.saldoAnterior?.totalValorBruto | extratoFormat:'moeda' }}</strong></td>
+          <td class="currency"><strong>{{ dadosAtuais.saldoAnterior?.totalRendaTotal | extratoFormat:'moeda' }}</strong></td>
+          <td class="currency"><strong>{{ dadosAtuais.saldoAnterior?.totalIof | extratoFormat:'moeda' }}</strong></td>
+          <td class="currency"><strong>{{ dadosAtuais.saldoAnterior?.totalIrrf | extratoFormat:'moeda' }}</strong></td>
+          <td class="currency"><strong>{{ dadosAtuais.saldoAnterior?.totalValorLiquido | extratoFormat:'moeda' }}</strong></td>
+          <td class="currency"><strong>{{ dadosAtuais.saldoAnterior?.totalRendaBrutaPer | extratoFormat:'moeda' }}</strong></td>
+        </tr>
+
+        <!-- Aplicações -->
+        <tr *ngIf="temAplicacoes">
+          <th colspan="11" style="background-color: #ddd; padding: 12px; font-weight: bold; border-bottom: 1px solid #ddd;">Aplicações</th>
+        </tr>
+        <tr *ngFor="let item of dadosAtuais.aplicacoes?.itens">
+          <td class="date">{{ item.dataAplicacao | extratoFormat:'data' }}</td>
+          <td class="date">{{ item.dataVencimento | extratoFormat:'data' }}</td>
+          <td class="date">{{ item.dataResgate | extratoFormat:'data' }}</td>
+          <td class="percentage">{{ item.taxa | extratoFormat:'percentual' }}</td>
+          <td class="currency">{{ item.valorPrincipal | extratoFormat:'moeda' }}</td>
+          <td class="currency">{{ item.valorBruto | extratoFormat:'moeda' }}</td>
+          <td class="currency">{{ item.rendaTotal | extratoFormat:'moeda' }}</td>
+          <td class="currency">{{ item.iof | extratoFormat:'moeda' }}</td>
+          <td class="currency">{{ item.irrf | extratoFormat:'moeda' }}</td>
+          <td class="currency">{{ item.valorLiquido | extratoFormat:'moeda' }}</td>
+          <td class="currency">{{ item.rendaBrutaPer | extratoFormat:'moeda' }}</td>
+        </tr>
+        <tr class="total-row" *ngIf="temAplicacoes">
+          <td><strong>Total</strong></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="currency"><strong>{{ dadosAtuais.aplicacoes?.totalValorPrincipal | extratoFormat:'moeda' }}</strong></td>
+          <td class="currency"><strong>{{ dadosAtuais.aplicacoes?.totalValorBruto | extratoFormat:'moeda' }}</strong></td>
+          <td class="currency"><strong>{{ dadosAtuais.aplicacoes?.totalRendaTotal | extratoFormat:'moeda' }}</strong></td>
+          <td class="currency"><strong>{{ dadosAtuais.aplicacoes?.totalIof | extratoFormat:'moeda' }}</strong></td>
+          <td class="currency"><strong>{{ dadosAtuais.aplicacoes?.totalIrrf | extratoFormat:'moeda' }}</strong></td>
+          <td class="currency"><strong>{{ dadosAtuais.aplicacoes?.totalValorLiquido | extratoFormat:'moeda' }}</strong></td>
+          <td class="currency"><strong>{{ dadosAtuais.aplicacoes?.totalRendaBrutaPer | extratoFormat:'moeda' }}</strong></td>
+        </tr>
+
+        <!-- Resgates/Vencimentos -->
+        <tr *ngIf="temResgates">
+          <th colspan="11" style="background-color: #eee; padding: 12px; font-weight: bold; border-bottom: 1px solid #ddd;">Resgates/Vencimentos</th>
+        </tr>
+        <tr *ngFor="let item of dadosAtuais.resgates?.itens">
+          <td class="date">{{ item.dataAplicacao | extratoFormat:'data' }}</td>
+          <td class="date">{{ item.dataVencimento | extratoFormat:'data' }}</td>
+          <td class="date">{{ item.dataResgate | extratoFormat:'data' }}</td>
+          <td class="percentage">{{ item.taxa | extratoFormat:'percentual' }}</td>
+          <td class="currency">{{ item.valorPrincipal | extratoFormat:'moeda' }}</td>
+          <td class="currency">{{ item.valorBruto | extratoFormat:'moeda' }}</td>
+          <td class="currency">{{ item.rendaTotal | extratoFormat:'moeda' }}</td>
+          <td class="currency">{{ item.iof | extratoFormat:'moeda' }}</td>
+          <td class="currency">{{ item.irrf | extratoFormat:'moeda' }}</td>
+          <td class="currency">{{ item.valorLiquido | extratoFormat:'moeda' }}</td>
+          <td class="currency">{{ item.rendaBrutaPer | extratoFormat:'moeda' }}</td>
+        </tr>
+        <tr class="total-row" *ngIf="temResgates">
+          <td><strong>Total</strong></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="currency"><strong>{{ dadosAtuais.resgates?.totalValorPrincipal | extratoFormat:'moeda' }}</strong></td>
+          <td class="currency"><strong>{{ dadosAtuais.resgates?.totalValorBruto | extratoFormat:'moeda' }}</strong></td>
+          <td class="currency"><strong>{{ dadosAtuais.resgates?.totalRendaTotal | extratoFormat:'moeda' }}</strong></td>
+          <td class="currency"><strong>{{ dadosAtuais.resgates?.totalIof | extratoFormat:'moeda' }}</strong></td>
+          <td class="currency"><strong>{{ dadosAtuais.resgates?.totalIrrf | extratoFormat:'moeda' }}</strong></td>
+          <td class="currency"><strong>{{ dadosAtuais.resgates?.totalValorLiquido | extratoFormat:'moeda' }}</strong></td>
+          <td class="currency"><strong>{{ dadosAtuais.resgates?.totalRendaBrutaPer | extratoFormat:'moeda' }}</strong></td>
+        </tr>
+
+        <!-- Saldo Final -->
+        <tr *ngIf="temSaldoFinal">
+          <th colspan="11" style="background-color: #ddd; padding: 12px; font-weight: bold; border-bottom: 1px solid #ddd;">
+            Saldo final em {{ dadosAtuais.saldoFinal?.dataSaldo }}
+          </th>
+        </tr>
+        <tr *ngFor="let item of dadosAtuais.saldoFinal?.itens">
+          <td class="date">{{ item.dataAplicacao | extratoFormat:'data' }}</td>
+          <td class="date">{{ item.dataVencimento | extratoFormat:'data' }}</td>
+          <td class="date">{{ item.dataResgate | extratoFormat:'data' }}</td>
+          <td class="percentage">{{ item.taxa | extratoFormat:'percentual' }}</td>
+          <td class="currency">{{ item.valorPrincipal | extratoFormat:'moeda' }}</td>
+          <td class="currency">{{ item.valorBruto | extratoFormat:'moeda' }}</td>
+          <td class="currency">{{ item.rendaTotal | extratoFormat:'moeda' }}</td>
+          <td class="currency">{{ item.iof | extratoFormat:'moeda' }}</td>
+          <td class="currency">{{ item.irrf | extratoFormat:'moeda' }}</td>
+          <td class="currency">{{ item.valorLiquido | extratoFormat:'moeda' }}</td>
+          <td class="currency">{{ item.rendaBrutaPer | extratoFormat:'moeda' }}</td>
+        </tr>
+        <tr class="total-row" *ngIf="temSaldoFinal">
+          <td><strong>Total</strong></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="currency"><strong>{{ dadosAtuais.saldoFinal?.totalValorPrincipal | extratoFormat:'moeda' }}</strong></td>
+          <td class="currency"><strong>{{ dadosAtuais.saldoFinal?.totalValorBruto | extratoFormat:'moeda' }}</strong></td>
+          <td class="currency"><strong>{{ dadosAtuais.saldoFinal?.totalRendaTotal | extratoFormat:'moeda' }}</strong></td>
+          <td class="currency"><strong>{{ dadosAtuais.saldoFinal?.totalIof | extratoFormat:'moeda' }}</strong></td>
+          <td class="currency"><strong>{{ dadosAtuais.saldoFinal?.totalIrrf | extratoFormat:'moeda' }}</strong></td>
+          <td class="currency"><strong>{{ dadosAtuais.saldoFinal?.totalValorLiquido | extratoFormat:'moeda' }}</strong></td>
+          <td class="currency"><strong>{{ dadosAtuais.saldoFinal?.totalRendaBrutaPer | extratoFormat:'moeda' }}</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Rodapé -->
+  <div style="margin-top: 10px; text-align: center; color: #999; font-size: 7px; padding-top: 3px;">
+    <p>Documento gerado automaticamente pelo sistema Bradesco Corporate</p>
+    <p>Para dúvidas, entre em contato com seu gerente de relacionamento</p>
+  </div>
+
+  <!-- Botões de Ação -->
+  <div class="action-buttons" style="margin-top: 20px; text-align: center;">
+    <button (click)="gerarPDF()" class="btn btn-primary">
+      <i class="icon-pdf"></i> Gerar PDF
+    </button>
+    <button (click)="gerarCSV()" class="btn btn-success">
+      <i class="icon-csv"></i> Exportar CSV
+    </button>
+    <button (click)="exportarHTML()" class="btn btn-secondary">
+      <i class="icon-html"></i> Exportar HTML
+    </button>
+  </div>
+</div>
