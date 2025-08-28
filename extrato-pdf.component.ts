@@ -349,7 +349,13 @@ export class ExtratoPdfComponent implements OnInit {
   // Método para gerar CSV
   gerarCSV(): void {
     const csvData = this.converterParaCSV();
-    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+    // Adicionar BOM para UTF-8 e usar encoding correto
+    const BOM = '\uFEFF';
+    const csvContent = BOM + csvData;
+    
+    const blob = new Blob([csvContent], { 
+      type: 'text/csv;charset=utf-8;' 
+    });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -361,8 +367,8 @@ export class ExtratoPdfComponent implements OnInit {
   // Método para converter dados para CSV
   private converterParaCSV(): string {
     const headers = [
-      'Seção',
-      'Data Aplicação',
+      'Secao',
+      'Data Aplicacao',
       'Data Vencimento',
       'Data Resgate',
       'Taxa (%)',
@@ -371,7 +377,7 @@ export class ExtratoPdfComponent implements OnInit {
       'Renda Total (BRL)',
       'IOF (BRL)',
       'IRRF (BRL)',
-      'Valor Líquido (BRL)',
+      'Valor Liquido (BRL)',
       'Renda Bruta Per (BRL)'
     ];
 
@@ -388,11 +394,11 @@ export class ExtratoPdfComponent implements OnInit {
 
     // Adicionar dados das aplicações
     if (this.temAplicacoes) {
-      csvContent += '"Aplicações"\n';
+      csvContent += '"Aplicacoes"\n';
       this.dadosAtuais.aplicacoes?.itens.forEach(item => {
-        csvContent += this.itemParaCSV(item, 'Aplicações') + '\n';
+        csvContent += this.itemParaCSV(item, 'Aplicacoes') + '\n';
       });
-      csvContent += this.totaisParaCSV(this.dadosAtuais.aplicacoes, 'Aplicações') + '\n';
+      csvContent += this.totaisParaCSV(this.dadosAtuais.aplicacoes, 'Aplicacoes') + '\n';
     }
 
     // Adicionar dados dos resgates
@@ -423,14 +429,14 @@ export class ExtratoPdfComponent implements OnInit {
       item.dataAplicacao || '',
       item.dataVencimento || '',
       item.dataResgate || '',
-      item.taxa?.toFixed(2) || '',
-      item.valorPrincipal?.toFixed(2) || '',
-      item.valorBruto?.toFixed(2) || '',
-      item.rendaTotal?.toFixed(2) || '',
-      item.iof?.toFixed(2) || '',
-      item.irrf?.toFixed(2) || '',
-      item.valorLiquido?.toFixed(2) || '',
-      item.rendaBrutaPer?.toFixed(2) || ''
+      item.taxa?.toFixed(2).replace('.', ',') || '',
+      item.valorPrincipal?.toFixed(2).replace('.', ',') || '',
+      item.valorBruto?.toFixed(2).replace('.', ',') || '',
+      item.rendaTotal?.toFixed(2).replace('.', ',') || '',
+      item.iof?.toFixed(2).replace('.', ',') || '',
+      item.irrf?.toFixed(2).replace('.', ',') || '',
+      item.valorLiquido?.toFixed(2).replace('.', ',') || '',
+      item.rendaBrutaPer?.toFixed(2).replace('.', ',') || ''
     ].join(';');
   }
 
@@ -444,13 +450,13 @@ export class ExtratoPdfComponent implements OnInit {
       '',
       '',
       '',
-      secao.totalValorPrincipal?.toFixed(2) || '',
-      secao.totalValorBruto?.toFixed(2) || '',
-      secao.totalRendaTotal?.toFixed(2) || '',
-      secao.totalIof?.toFixed(2) || '',
-      secao.totalIrrf?.toFixed(2) || '',
-      secao.totalValorLiquido?.toFixed(2) || '',
-      secao.totalRendaBrutaPer?.toFixed(2) || ''
+      secao.totalValorPrincipal?.toFixed(2).replace('.', ',') || '',
+      secao.totalValorBruto?.toFixed(2).replace('.', ',') || '',
+      secao.totalRendaTotal?.toFixed(2).replace('.', ',') || '',
+      secao.totalIof?.toFixed(2).replace('.', ',') || '',
+      secao.totalIrrf?.toFixed(2).replace('.', ',') || '',
+      secao.totalValorLiquido?.toFixed(2).replace('.', ',') || '',
+      secao.totalRendaBrutaPer?.toFixed(2).replace('.', ',') || ''
     ].join(';');
   }
 
