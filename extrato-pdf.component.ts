@@ -163,5 +163,44 @@ export class ExtratoPdfComponent implements OnInit {
     const config = this.extratoPdfService.criarConfigPDF(this.dataTransacao, this.numeroControle);
     this.extratoPdfService.gerarCSV(this.dadosAtuais, config);
   }
+
+  // Métodos para resumo executivo
+  getSaldoAnteriorTotal(): number {
+    return this.dadosAtuais.saldoAnterior?.totalValorLiquido || 0;
+  }
+
+  getAplicacoesTotal(): number {
+    return this.dadosAtuais.aplicacoes?.totalValorLiquido || 0;
+  }
+
+  getResgatesTotal(): number {
+    return this.dadosAtuais.resgates?.totalValorLiquido || 0;
+  }
+
+  getSaldoFinalTotal(): number {
+    return this.dadosAtuais.saldoFinal?.totalValorLiquido || 0;
+  }
+
+  getVariacaoPeriodo(): number {
+    const saldoAnterior = this.getSaldoAnteriorTotal();
+    const saldoFinal = this.getSaldoFinalTotal();
+    return saldoFinal - saldoAnterior;
+  }
+
+  getPercentualVariacao(): number {
+    const saldoAnterior = this.getSaldoAnteriorTotal();
+    if (saldoAnterior === 0) return 0;
+    const variacao = this.getVariacaoPeriodo();
+    return (variacao / saldoAnterior) * 100;
+  }
+
+  // Métodos para datas de geração
+  getDataGeracao(): string {
+    return new Date().toLocaleDateString('pt-BR');
+  }
+
+  getHoraGeracao(): string {
+    return new Date().toLocaleTimeString('pt-BR');
+  }
 }
 
