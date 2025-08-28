@@ -373,24 +373,40 @@ export class ExtratoPdfService {
   }
 
   /**
-   * Converte dados para formato CSV com formatação melhorada
+   * Converte dados para formato CSV com padrão corporativo
    */
   private converterParaCSV(dados: ExtratoDados): string {
-    // Cabeçalho principal
-    let csv = 'EXTRATO BANCÁRIO - BRADESCO CORPORATE\n';
+    // Cabeçalho corporativo
+    let csv = 'BRADESCO CORPORATE\n';
     csv += 'Global Solutions\n';
+    csv += 'SALDO E EXTRATO\n';
+    csv += '='.repeat(80) + '\n\n';
+    
+    // Informações do relatório
+    csv += 'INFORMAÇÕES DO RELATÓRIO\n';
+    csv += '-'.repeat(40) + '\n';
     csv += `Data da transação: ${dados.dataBusca}\n`;
-    csv += `Empresa: ${dados.empresa}\n`;
-    csv += `Agência/Conta: ${dados.agencia}\n`;
+    csv += `Número de controle: ${dados.dataBusca.replace(/\//g, '')}001\n`;
+    csv += `Data de geração: ${new Date().toLocaleDateString('pt-BR')}\n`;
+    csv += `Hora de geração: ${new Date().toLocaleTimeString('pt-BR')}\n\n`;
+    
+    // Detalhes da empresa
+    csv += 'DETALHES DA PESQUISA\n';
+    csv += '-'.repeat(40) + '\n';
+    csv += `Empresa | CNPJ: ${dados.empresa}\n`;
+    csv += `Agência | Conta: ${dados.agencia}\n`;
     csv += `Tipo de investimento: ${dados.tipoInvestimento}\n`;
     csv += `Tipo de produto: ${dados.tipoProduto}\n\n`;
-
-    // Cabeçalho da tabela
+    
+    // Cabeçalho da tabela principal
+    csv += 'DADOS DO EXTRATO\n';
+    csv += '-'.repeat(40) + '\n';
     csv += 'Seção,Data Aplicação,Data Vencimento,Data Resgate,Taxa (%),Valor Principal (R$),Valor Bruto (R$),Renda Total (R$),IOF (R$),IRRF (R$),Valor Líquido (R$),Renda Bruta Per (R$)\n';
 
     // Saldo Anterior
     if (dados.saldoAnterior?.itens) {
       csv += `\nSALDO ANTERIOR em ${dados.saldoAnterior.dataSaldo}\n`;
+      csv += '-'.repeat(40) + '\n';
       dados.saldoAnterior.itens.forEach(item => {
         csv += this.itemParaCSV('Saldo Anterior', item);
       });
@@ -400,6 +416,7 @@ export class ExtratoPdfService {
     // Aplicações
     if (dados.aplicacoes?.itens) {
       csv += '\nAPLICAÇÕES\n';
+      csv += '-'.repeat(40) + '\n';
       dados.aplicacoes.itens.forEach(item => {
         csv += this.itemParaCSV('Aplicações', item);
       });
@@ -409,6 +426,7 @@ export class ExtratoPdfService {
     // Resgates
     if (dados.resgates?.itens) {
       csv += '\nRESGATES/VENCIMENTOS\n';
+      csv += '-'.repeat(40) + '\n';
       dados.resgates.itens.forEach(item => {
         csv += this.itemParaCSV('Resgates', item);
       });
@@ -418,15 +436,27 @@ export class ExtratoPdfService {
     // Saldo Final
     if (dados.saldoFinal?.itens) {
       csv += `\nSALDO FINAL em ${dados.saldoFinal.dataSaldo}\n`;
+      csv += '-'.repeat(40) + '\n';
       dados.saldoFinal.itens.forEach(item => {
         csv += this.itemParaCSV('Saldo Final', item);
       });
       csv += this.totaisParaCSV('Saldo Final', dados.saldoFinal);
     }
 
-    // Rodapé
-    csv += '\nDocumento gerado automaticamente pelo sistema Bradesco Corporate\n';
+    // Resumo executivo
+    csv += '\nRESUMO EXECUTIVO\n';
+    csv += '='.repeat(80) + '\n';
+    csv += this.gerarResumoExecutivo(dados);
+    
+    // Rodapé corporativo
+    csv += '\nRODAPÉ CORPORATIVO\n';
+    csv += '='.repeat(80) + '\n';
+    csv += 'Documento gerado automaticamente pelo sistema Bradesco Corporate\n';
+    csv += 'Este documento é confidencial e de uso interno da empresa\n';
     csv += 'Para dúvidas, entre em contato com seu gerente de relacionamento\n';
+    csv += 'Bradesco Corporate - Global Solutions\n';
+    csv += `Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}\n`;
+    csv += '='.repeat(80) + '\n';
 
     return csv;
   }
@@ -451,6 +481,42 @@ export class ExtratoPdfService {
     };
 
     return `"${secao} - TOTAL","","","","","${formatarNumero(dados.totalValorPrincipal)}","${formatarNumero(dados.totalValorBruto)}","${formatarNumero(dados.totalRendaTotal)}","${formatarNumero(dados.totalIof)}","${formatarNumero(dados.totalIrrf)}","${formatarNumero(dados.totalValorLiquido)}","${formatarNumero(dados.totalRendaBrutaPer)}"\n`;
+  }
+
+  /**
+   * Gera resumo executivo dos dados
+   */
+  private gerarResumoExecutivo(dados: ExtratoDados): string {
+    let resumo = '';
+    
+    // Totais por seção
+    const totais = {
+      saldoAnterior: dados.saldoAnterior?.totalValorLiquido || 0,
+      aplicacoes: dados.aplicacoes?.totalValorLiquido || 0,
+      resgates: dados.resgates?.totalValorLiquido || 0,
+      saldoFinal: dados.saldoFinal?.totalValorLiquido || 0
+    };
+
+    resumo += `Saldo Anterior Total: R$ ${this.formatarMoedaCSV(totais.saldoAnterior)}\n`;
+    resumo += `Aplicações Total: R$ ${this.formatarMoedaCSV(totais.aplicacoes)}\n`;
+    resumo += `Resgates Total: R$ ${this.formatarMoedaCSV(totais.resgates)}\n`;
+    resumo += `Saldo Final Total: R$ ${this.formatarMoedaCSV(totais.saldoFinal)}\n\n`;
+    
+    // Variação
+    const variacao = totais.saldoFinal - totais.saldoAnterior;
+    const percentualVariacao = totais.saldoAnterior > 0 ? (variacao / totais.saldoAnterior) * 100 : 0;
+    
+    resumo += `Variação do Período: R$ ${this.formatarMoedaCSV(variacao)}\n`;
+    resumo += `Percentual de Variação: ${percentualVariacao.toFixed(2).replace('.', ',')}%\n`;
+    
+    return resumo;
+  }
+
+  /**
+   * Formata moeda para CSV
+   */
+  private formatarMoedaCSV(valor: number): string {
+    return valor.toFixed(2).replace('.', ',');
   }
 
   /**
