@@ -201,8 +201,11 @@
 
   <!-- Botões de Ação -->
   <div class="action-buttons" style="margin-top: 20px; text-align: center;">
-    <button (click)="gerarPDF()" class="btn btn-primary">
-      <i class="icon-pdf"></i> Gerar PDF
+    <button (click)="gerarPDFCorporativo()" class="btn btn-primary">
+      <i class="icon-pdf"></i> PDF Corporativo
+    </button>
+    <button (click)="gerarPDF()" class="btn btn-secondary">
+      <i class="icon-pdf"></i> Imprimir PDF
     </button>
     <button (click)="gerarCSV()" class="btn btn-success">
       <i class="icon-csv"></i> Exportar CSV
