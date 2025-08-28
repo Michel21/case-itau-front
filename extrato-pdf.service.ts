@@ -59,16 +59,11 @@ export class ExtratoPdfService {
    */
   async gerarPDFCorporativo(dados: ExtratoDados, config: PDFConfig): Promise<void> {
     try {
-      // Verificar se jsPDF está disponível
-      if (typeof window !== 'undefined' && (window as any).jsPDF) {
-        await this.gerarPDFComJsPDF(dados, config);
-      } else {
-        // Fallback para print se jsPDF não estiver disponível
-        this.gerarPDFPrint();
-      }
+      // Tentar usar jsPDF se disponível
+      await this.gerarPDFComJsPDF(dados, config);
     } catch (error) {
-      console.error('Erro ao gerar PDF:', error);
-      // Fallback para print
+      console.error('Erro ao gerar PDF com jsPDF, usando fallback:', error);
+      // Fallback para print se jsPDF não estiver disponível
       this.gerarPDFPrint();
     }
   }
@@ -78,45 +73,57 @@ export class ExtratoPdfService {
    */
   private async gerarPDFComJsPDF(dados: ExtratoDados, config: PDFConfig): Promise<void> {
     try {
-      // Importar jsPDF dinamicamente
-      const jsPDF = (await import('jspdf')).default;
-
-      // Configurar PDF corporativo
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 15;
-
-      // Configurar fonte e cores corporativas
-      pdf.setFont('helvetica');
-      pdf.setFontSize(12);
-
-      // Cabeçalho corporativo
-      this.adicionarCabecalhoPDF(pdf, config, margin, pageWidth);
-
-      // Informações do relatório
-      this.adicionarInformacoesRelatorio(pdf, config, margin);
-
-      // Detalhes da empresa
-      this.adicionarDetalhesEmpresa(pdf, dados, margin);
-
-      // Gerar tabela de dados
-      let yPosition = 140;
-      yPosition = this.adicionarSecaoPDF(pdf, 'SALDO ANTERIOR', dados.saldoAnterior, yPosition, pageWidth, margin);
-      yPosition = this.adicionarSecaoPDF(pdf, 'APLICAÇÕES', dados.aplicacoes, yPosition, pageWidth, margin);
-      yPosition = this.adicionarSecaoPDF(pdf, 'RESGATES/VENCIMENTOS', dados.resgates, yPosition, pageWidth, margin);
-      yPosition = this.adicionarSecaoPDF(pdf, 'SALDO FINAL', dados.saldoFinal, yPosition, pageWidth, margin);
-
-      // Rodapé corporativo
-      this.adicionarRodapePDF(pdf, margin, pageHeight);
-
-      // Salvar PDF
-      pdf.save(config.fileName);
-
+      // Verificar se jsPDF está disponível globalmente
+      if (typeof window !== 'undefined' && (window as any).jsPDF) {
+        const jsPDF = (window as any).jsPDF;
+        await this.criarPDFComJsPDF(jsPDF, dados, config);
+      } else {
+        // Tentar importar dinamicamente
+        const jsPDFModule = await import('jspdf');
+        const jsPDF = jsPDFModule.default;
+        await this.criarPDFComJsPDF(jsPDF, dados, config);
+      }
     } catch (error) {
-      console.error('Erro ao gerar PDF com jsPDF:', error);
-      throw error;
+      console.error('Erro ao importar jsPDF:', error);
+      throw new Error('jsPDF não está disponível. Use o botão "Imprimir PDF" como alternativa.');
     }
+  }
+
+  /**
+   * Cria PDF usando jsPDF
+   */
+  private async criarPDFComJsPDF(jsPDF: any, dados: ExtratoDados, config: PDFConfig): Promise<void> {
+    // Configurar PDF corporativo
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 15;
+
+    // Configurar fonte e cores corporativas
+    pdf.setFont('helvetica');
+    pdf.setFontSize(12);
+
+    // Cabeçalho corporativo
+    this.adicionarCabecalhoPDF(pdf, config, margin, pageWidth);
+
+    // Informações do relatório
+    this.adicionarInformacoesRelatorio(pdf, config, margin);
+
+    // Detalhes da empresa
+    this.adicionarDetalhesEmpresa(pdf, dados, margin);
+
+    // Gerar tabela de dados
+    let yPosition = 140;
+    yPosition = this.adicionarSecaoPDF(pdf, 'SALDO ANTERIOR', dados.saldoAnterior, yPosition, pageWidth, margin);
+    yPosition = this.adicionarSecaoPDF(pdf, 'APLICAÇÕES', dados.aplicacoes, yPosition, pageWidth, margin);
+    yPosition = this.adicionarSecaoPDF(pdf, 'RESGATES/VENCIMENTOS', dados.resgates, yPosition, pageWidth, margin);
+    yPosition = this.adicionarSecaoPDF(pdf, 'SALDO FINAL', dados.saldoFinal, yPosition, pageWidth, margin);
+
+    // Rodapé corporativo
+    this.adicionarRodapePDF(pdf, margin, pageHeight);
+
+    // Salvar PDF
+    pdf.save(config.fileName);
   }
 
   /**
@@ -349,7 +356,7 @@ export class ExtratoPdfService {
   }
 
   /**
-   * Gera arquivo CSV
+   * Gera arquivo CSV com formatação melhorada
    */
   gerarCSV(dados: ExtratoDados, config: PDFConfig): void {
     const BOM = '\uFEFF';
@@ -366,13 +373,24 @@ export class ExtratoPdfService {
   }
 
   /**
-   * Converte dados para formato CSV
+   * Converte dados para formato CSV com formatação melhorada
    */
   private converterParaCSV(dados: ExtratoDados): string {
-    let csv = 'Secao,Data Aplicacao,Data Vencimento,Data Resgate,Taxa (%),Valor Principal,Valor Bruto,Renda Total,IOF,IRRF,Valor Liquido,Renda Bruta Per\n';
+    // Cabeçalho principal
+    let csv = 'EXTRATO BANCÁRIO - BRADESCO CORPORATE\n';
+    csv += 'Global Solutions\n';
+    csv += `Data da transação: ${dados.dataBusca}\n`;
+    csv += `Empresa: ${dados.empresa}\n`;
+    csv += `Agência/Conta: ${dados.agencia}\n`;
+    csv += `Tipo de investimento: ${dados.tipoInvestimento}\n`;
+    csv += `Tipo de produto: ${dados.tipoProduto}\n\n`;
+
+    // Cabeçalho da tabela
+    csv += 'Seção,Data Aplicação,Data Vencimento,Data Resgate,Taxa (%),Valor Principal (R$),Valor Bruto (R$),Renda Total (R$),IOF (R$),IRRF (R$),Valor Líquido (R$),Renda Bruta Per (R$)\n';
 
     // Saldo Anterior
     if (dados.saldoAnterior?.itens) {
+      csv += `\nSALDO ANTERIOR em ${dados.saldoAnterior.dataSaldo}\n`;
       dados.saldoAnterior.itens.forEach(item => {
         csv += this.itemParaCSV('Saldo Anterior', item);
       });
@@ -381,14 +399,16 @@ export class ExtratoPdfService {
 
     // Aplicações
     if (dados.aplicacoes?.itens) {
+      csv += '\nAPLICAÇÕES\n';
       dados.aplicacoes.itens.forEach(item => {
-        csv += this.itemParaCSV('Aplicacoes', item);
+        csv += this.itemParaCSV('Aplicações', item);
       });
-      csv += this.totaisParaCSV('Aplicacoes', dados.aplicacoes);
+      csv += this.totaisParaCSV('Aplicações', dados.aplicacoes);
     }
 
     // Resgates
     if (dados.resgates?.itens) {
+      csv += '\nRESGATES/VENCIMENTOS\n';
       dados.resgates.itens.forEach(item => {
         csv += this.itemParaCSV('Resgates', item);
       });
@@ -397,27 +417,40 @@ export class ExtratoPdfService {
 
     // Saldo Final
     if (dados.saldoFinal?.itens) {
+      csv += `\nSALDO FINAL em ${dados.saldoFinal.dataSaldo}\n`;
       dados.saldoFinal.itens.forEach(item => {
         csv += this.itemParaCSV('Saldo Final', item);
       });
       csv += this.totaisParaCSV('Saldo Final', dados.saldoFinal);
     }
 
+    // Rodapé
+    csv += '\nDocumento gerado automaticamente pelo sistema Bradesco Corporate\n';
+    csv += 'Para dúvidas, entre em contato com seu gerente de relacionamento\n';
+
     return csv;
   }
 
   /**
-   * Converte item para linha CSV
+   * Converte item para linha CSV com formatação melhorada
    */
   private itemParaCSV(secao: string, item: ExtratoItem): string {
-    return `${secao},${item.dataAplicacao},${item.dataVencimento},${item.dataResgate},${item.taxa.toFixed(2).replace('.', ',')},${item.valorPrincipal.toFixed(2).replace('.', ',')},${item.valorBruto.toFixed(2).replace('.', ',')},${item.rendaTotal.toFixed(2).replace('.', ',')},${item.iof.toFixed(2).replace('.', ',')},${item.irrf.toFixed(2).replace('.', ',')},${item.valorLiquido.toFixed(2).replace('.', ',')},${item.rendaBrutaPer.toFixed(2).replace('.', ',')}\n`;
+    const formatarNumero = (valor: number) => {
+      return valor.toFixed(2).replace('.', ',');
+    };
+
+    return `"${secao}","${item.dataAplicacao}","${item.dataVencimento}","${item.dataResgate}","${formatarNumero(item.taxa)}","${formatarNumero(item.valorPrincipal)}","${formatarNumero(item.valorBruto)}","${formatarNumero(item.rendaTotal)}","${formatarNumero(item.iof)}","${formatarNumero(item.irrf)}","${formatarNumero(item.valorLiquido)}","${formatarNumero(item.rendaBrutaPer)}"\n`;
   }
 
   /**
-   * Converte totais para linha CSV
+   * Converte totais para linha CSV com formatação melhorada
    */
   private totaisParaCSV(secao: string, dados: ExtratoSecao): string {
-    return `${secao} - TOTAL,,,,${dados.totalValorPrincipal.toFixed(2).replace('.', ',')},${dados.totalValorBruto.toFixed(2).replace('.', ',')},${dados.totalRendaTotal.toFixed(2).replace('.', ',')},${dados.totalIof.toFixed(2).replace('.', ',')},${dados.totalIrrf.toFixed(2).replace('.', ',')},${dados.totalValorLiquido.toFixed(2).replace('.', ',')},${dados.totalRendaBrutaPer.toFixed(2).replace('.', ',')}\n`;
+    const formatarNumero = (valor: number) => {
+      return valor.toFixed(2).replace('.', ',');
+    };
+
+    return `"${secao} - TOTAL","","","","","${formatarNumero(dados.totalValorPrincipal)}","${formatarNumero(dados.totalValorBruto)}","${formatarNumero(dados.totalRendaTotal)}","${formatarNumero(dados.totalIof)}","${formatarNumero(dados.totalIrrf)}","${formatarNumero(dados.totalValorLiquido)}","${formatarNumero(dados.totalRendaBrutaPer)}"\n`;
   }
 
   /**
