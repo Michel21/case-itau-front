@@ -55,181 +55,148 @@ export class ExtratoPdfService {
   constructor() { }
 
   /**
-   * Gera PDF corporativo usando jsPDF
+   * Gera PDF corporativo com fallback robusto
    */
   async gerarPDFCorporativo(dados: ExtratoDados, config: PDFConfig): Promise<void> {
     try {
-      // Tentar usar jsPDF se disponível
+      // Tenta usar jsPDF se disponível
       await this.gerarPDFComJsPDF(dados, config);
     } catch (error) {
-      console.error('Erro ao gerar PDF com jsPDF, usando fallback:', error);
-      // Fallback para print se jsPDF não estiver disponível
-      this.gerarPDFPrint();
+      console.warn('jsPDF não disponível, usando impressão do navegador:', error);
+      // Fallback para impressão do navegador com formatação corporativa
+      this.gerarPDFPrintCorporativo(dados, config);
     }
   }
 
   /**
-   * Gera PDF usando jsPDF com layout corporativo
+   * Gera PDF usando jsPDF (se disponível)
    */
   private async gerarPDFComJsPDF(dados: ExtratoDados, config: PDFConfig): Promise<void> {
-    try {
-      // Verificar se jsPDF está disponível globalmente
-      if (typeof window !== 'undefined' && (window as any).jsPDF) {
-        const jsPDF = (window as any).jsPDF;
-        await this.criarPDFComJsPDF(jsPDF, dados, config);
-      } else {
-        // Tentar importar dinamicamente
+    let jsPDF: any;
+    
+    // Tenta encontrar jsPDF globalmente primeiro
+    if ((window as any).jsPDF) {
+      jsPDF = (window as any).jsPDF;
+    } else {
+      // Tenta importação dinâmica
+      try {
         const jsPDFModule = await import('jspdf');
-        const jsPDF = jsPDFModule.default;
-        await this.criarPDFComJsPDF(jsPDF, dados, config);
+        jsPDF = jsPDFModule.default || jsPDFModule.jsPDF;
+      } catch (importError) {
+        throw new Error('jsPDF não está disponível. Execute: npm install jspdf html2canvas');
       }
-    } catch (error) {
-      console.error('Erro ao importar jsPDF:', error);
-      throw new Error('jsPDF não está disponível. Use o botão "Imprimir PDF" como alternativa.');
     }
-  }
 
-  /**
-   * Cria PDF usando jsPDF
-   */
-  private async criarPDFComJsPDF(jsPDF: any, dados: ExtratoDados, config: PDFConfig): Promise<void> {
-    // Configurar PDF corporativo
+    if (!jsPDF) {
+      throw new Error('jsPDF não pôde ser carregado');
+    }
+
+    // Cria o PDF
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const margin = 15;
+    const margin = 20;
+    let yPosition = 20;
 
-    // Configurar fonte e cores corporativas
-    pdf.setFont('helvetica');
-    pdf.setFontSize(12);
-
-    // Cabeçalho corporativo
-    this.adicionarCabecalhoPDF(pdf, config, margin, pageWidth);
-
-    // Informações do relatório
-    this.adicionarInformacoesRelatorio(pdf, config, margin);
-
-    // Detalhes da empresa
-    this.adicionarDetalhesEmpresa(pdf, dados, margin);
-
-    // Gerar tabela de dados
-    let yPosition = 140;
-    yPosition = this.adicionarSecaoPDF(pdf, 'SALDO ANTERIOR', dados.saldoAnterior, yPosition, pageWidth, margin);
-    yPosition = this.adicionarSecaoPDF(pdf, 'APLICAÇÕES', dados.aplicacoes, yPosition, pageWidth, margin);
-    yPosition = this.adicionarSecaoPDF(pdf, 'RESGATES/VENCIMENTOS', dados.resgates, yPosition, pageWidth, margin);
-    yPosition = this.adicionarSecaoPDF(pdf, 'SALDO FINAL', dados.saldoFinal, yPosition, pageWidth, margin);
-
-    // Rodapé corporativo
-    this.adicionarRodapePDF(pdf, margin, pageHeight);
-
-    // Salvar PDF
-    pdf.save(config.fileName);
-  }
-
-  /**
-   * Adiciona cabeçalho corporativo ao PDF
-   */
-  private adicionarCabecalhoPDF(pdf: any, config: PDFConfig, margin: number, pageWidth: number): void {
-    pdf.setFillColor(0, 0, 0);
+    // Adiciona cabeçalho corporativo
     pdf.setFontSize(18);
     pdf.setFont('helvetica', 'bold');
-    pdf.text(config.title, margin, 25);
-    
-    pdf.setFontSize(10);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text(config.subtitle, margin, 32);
-    
-    // Linha separadora
-    pdf.setDrawColor(200, 200, 200);
-    pdf.line(margin, 40, pageWidth - margin, 40);
-  }
+    pdf.text('BRADESCO CORPORATE', pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 8;
 
-  /**
-   * Adiciona informações do relatório ao PDF
-   */
-  private adicionarInformacoesRelatorio(pdf: any, config: PDFConfig, margin: number): void {
     pdf.setFontSize(12);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('SALDO E EXTRATO', margin, 55);
-    
-    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(`Data da transação: ${config.dataTransacao}`, margin, 65);
-    pdf.text(`Número de controle: ${config.numeroControle}`, margin, 72);
-  }
+    pdf.text('Global Solutions', pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 8;
 
-  /**
-   * Adiciona detalhes da empresa ao PDF
-   */
-  private adicionarDetalhesEmpresa(pdf: any, dados: ExtratoDados, margin: number): void {
-    pdf.setFontSize(11);
+    pdf.setFontSize(14);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('DETALHES DA PESQUISA', margin, 85);
-    
-    pdf.setFontSize(9);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text(`Empresa | CNPJ: ${dados.empresa}`, margin, 95);
-    pdf.text(`Agência | Conta: ${dados.agencia}`, margin, 102);
-    pdf.text(`Data da busca: ${dados.dataBusca}`, margin, 109);
-    pdf.text(`Tipo de investimento: ${dados.tipoInvestimento}`, margin, 116);
-    pdf.text(`Tipo de Produto: ${dados.tipoProduto}`, margin, 123);
-  }
-
-  /**
-   * Adiciona rodapé corporativo ao PDF
-   */
-  private adicionarRodapePDF(pdf: any, margin: number, pageHeight: number): void {
-    pdf.setFontSize(8);
-    pdf.setFont('helvetica', 'italic');
-    pdf.text('Documento gerado automaticamente pelo sistema Bradesco Corporate', margin, pageHeight - 20);
-    pdf.text('Para dúvidas, entre em contato com seu gerente de relacionamento', margin, pageHeight - 15);
-  }
-
-  /**
-   * Adiciona seção de dados ao PDF
-   */
-  private adicionarSecaoPDF(pdf: any, titulo: string, secao: ExtratoSecao | undefined, yPosition: number, pageWidth: number, margin: number): number {
-    if (!secao || !secao.itens || secao.itens.length === 0) {
-      return yPosition;
-    }
-
-    // Verificar se precisa de nova página
-    if (yPosition > 250) {
-      pdf.addPage();
-      yPosition = 20;
-    }
-
-    // Título da seção
-    pdf.setFontSize(11);
-    pdf.setFont('helvetica', 'bold');
-    pdf.setFillColor(240, 240, 240);
-    pdf.rect(margin, yPosition - 5, pageWidth - 2 * margin, 8, 'F');
-    pdf.text(titulo, margin + 2, yPosition);
-
+    pdf.text('SALDO E EXTRATO', pageWidth / 2, yPosition, { align: 'center' });
     yPosition += 15;
 
-    // Cabeçalho da tabela
-    pdf.setFontSize(7);
+    // Adiciona informações do relatório
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
+    pdf.text('INFORMAÇÕES DO RELATÓRIO', margin, yPosition);
+    yPosition += 8;
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(`Data da transação: ${dados.dataBusca}`, margin, yPosition);
+    yPosition += 5;
+    pdf.text(`Número de controle: ${config.numeroControle}`, margin, yPosition);
+    yPosition += 5;
+    pdf.text(`Data de geração: ${new Date().toLocaleDateString('pt-BR')}`, margin, yPosition);
+    yPosition += 5;
+    pdf.text(`Hora de geração: ${new Date().toLocaleTimeString('pt-BR')}`, margin, yPosition);
+    yPosition += 10;
+
+    // Adiciona detalhes da empresa
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('DETALHES DA PESQUISA', margin, yPosition);
+    yPosition += 8;
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(`Empresa: ${dados.empresa}`, margin, yPosition);
+    yPosition += 5;
+    pdf.text(`Agência/Conta: ${dados.agencia}`, margin, yPosition);
+    yPosition += 5;
+    pdf.text(`Tipo de investimento: ${dados.tipoInvestimento}`, margin, yPosition);
+    yPosition += 5;
+    pdf.text(`Tipo de produto: ${dados.tipoProduto}`, margin, yPosition);
+    yPosition += 15;
+
+    // Adiciona dados do extrato
+    this.adicionarSecaoPDF(pdf, dados, 'SALDO ANTERIOR', dados.saldoAnterior, margin, yPosition);
+    yPosition += 40;
+    
+    this.adicionarSecaoPDF(pdf, dados, 'APLICAÇÕES', dados.aplicacoes, margin, yPosition);
+    yPosition += 40;
+    
+    this.adicionarSecaoPDF(pdf, dados, 'RESGATES/VENCIMENTOS', dados.resgates, margin, yPosition);
+    yPosition += 40;
+    
+    this.adicionarSecaoPDF(pdf, dados, 'SALDO FINAL', dados.saldoFinal, margin, yPosition);
+
+    // Adiciona rodapé corporativo
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    pdf.setFontSize(8);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text('Documento gerado automaticamente pelo sistema Bradesco Corporate', pageWidth / 2, pageHeight - 20, { align: 'center' });
+    pdf.text('Este documento é confidencial e de uso interno da empresa', pageWidth / 2, pageHeight - 15, { align: 'center' });
+    pdf.text('Bradesco Corporate - Global Solutions', pageWidth / 2, pageHeight - 10, { align: 'center' });
+
+    // Salva o PDF
+    const fileName = `extrato_bradesco_${dados.dataBusca.replace(/\//g, '')}.pdf`;
+    pdf.save(fileName);
+  }
+
+  /**
+   * Adiciona seção ao PDF usando jsPDF
+   */
+  private adicionarSecaoPDF(pdf: any, dados: ExtratoDados, titulo: string, secao: ExtratoSecao | null, margin: number, yPosition: number): void {
+    if (!secao?.itens || secao.itens.length === 0) return;
+
+    // Título da seção
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(`${titulo}${secao.dataSaldo ? ` em ${secao.dataSaldo}` : ''}`, margin, yPosition);
+    yPosition += 8;
+
+    // Cabeçalho da tabela
+    pdf.setFontSize(8);
+    pdf.setFont('helvetica', 'bold');
+    const headers = ['Data Aplic.', 'Data Vencto.', 'Data Resgate', 'Taxa (%)', 'Valor Princ.', 'Valor Bruto', 'Renda Total', 'IOF', 'IRRF', 'Valor Líquido', 'Renda Bruta'];
     const colWidths = [20, 20, 20, 15, 25, 25, 25, 15, 15, 25, 25];
-    const headers = ['Data Aplic.', 'Data Vencto.', 'Resgate/Carência', 'Taxa (%)', 'Valor Princ.', 'Valor Bruto', 'Renda Total', 'IOF', 'IRRF', 'Valor Líquido', 'Renda Bruta'];
     
     let xPosition = margin;
     headers.forEach((header, index) => {
       pdf.text(header, xPosition, yPosition);
       xPosition += colWidths[index];
     });
-
-    yPosition += 8;
+    yPosition += 6;
 
     // Dados da seção
     pdf.setFont('helvetica', 'normal');
     secao.itens.forEach(item => {
-      if (yPosition > 270) {
-        pdf.addPage();
-        yPosition = 20;
-      }
-
       xPosition = margin;
       pdf.text(this.formatarData(item.dataAplicacao), xPosition, yPosition);
       xPosition += colWidths[0];
@@ -263,18 +230,13 @@ export class ExtratoPdfService {
       
       pdf.text(this.formatarMoeda(item.rendaBrutaPer), xPosition, yPosition);
 
-      yPosition += 6;
+      yPosition += 5;
     });
 
     // Total da seção
-    if (yPosition > 270) {
-      pdf.addPage();
-      yPosition = 20;
-    }
-
     pdf.setFont('helvetica', 'bold');
     xPosition = margin;
-    pdf.text('TOTAL', xPosition, yPosition);
+    pdf.text(`${titulo} - TOTAL`, xPosition, yPosition);
     xPosition += colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3];
     
     pdf.text(this.formatarMoeda(secao.totalValorPrincipal), xPosition, yPosition);
@@ -296,8 +258,149 @@ export class ExtratoPdfService {
     xPosition += colWidths[9];
     
     pdf.text(this.formatarMoeda(secao.totalRendaBrutaPer), xPosition, yPosition);
+  }
 
-    return yPosition + 15;
+  /**
+   * Gera PDF corporativo usando impressão do navegador
+   */
+  private gerarPDFPrintCorporativo(dados: ExtratoDados, config: PDFConfig): void {
+    // Cria uma nova janela com o conteúdo formatado
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Pop-up bloqueado. Permita pop-ups para gerar o PDF.');
+      return;
+    }
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Extrato Bradesco Corporate</title>
+        <style>
+          @media print {
+            body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .logo { font-size: 24px; font-weight: bold; color: #0066cc; margin-bottom: 5px; }
+            .subtitle { font-size: 16px; color: #666; margin-bottom: 5px; }
+            .title { font-size: 20px; font-weight: bold; margin-bottom: 20px; }
+            .section { margin-bottom: 25px; }
+            .section-title { font-size: 14px; font-weight: bold; margin-bottom: 10px; color: #0066cc; }
+            .info-row { margin-bottom: 5px; }
+            .table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+            .table th, .table td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 11px; }
+            .table th { background-color: #f5f5f5; font-weight: bold; }
+            .total-row { font-weight: bold; background-color: #f9f9f9; }
+            .footer { margin-top: 30px; text-align: center; font-size: 10px; color: #666; }
+            .page-break { page-break-before: always; }
+            @page { margin: 2cm; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="logo">BRADESCO CORPORATE</div>
+          <div class="subtitle">Global Solutions</div>
+          <div class="title">SALDO E EXTRATO</div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">INFORMAÇÕES DO RELATÓRIO</div>
+          <div class="info-row">Data da transação: ${dados.dataBusca}</div>
+          <div class="info-row">Número de controle: ${config.numeroControle}</div>
+          <div class="info-row">Data de geração: ${new Date().toLocaleDateString('pt-BR')}</div>
+          <div class="info-row">Hora de geração: ${new Date().toLocaleTimeString('pt-BR')}</div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">DETALHES DA PESQUISA</div>
+          <div class="info-row">Empresa: ${dados.empresa}</div>
+          <div class="info-row">Agência/Conta: ${dados.agencia}</div>
+          <div class="info-row">Tipo de investimento: ${dados.tipoInvestimento}</div>
+          <div class="info-row">Tipo de produto: ${dados.tipoProduto}</div>
+        </div>
+
+        ${this.gerarHTMLSecao('SALDO ANTERIOR', dados.saldoAnterior)}
+        ${this.gerarHTMLSecao('APLICAÇÕES', dados.aplicacoes)}
+        ${this.gerarHTMLSecao('RESGATES/VENCIMENTOS', dados.resgates)}
+        ${this.gerarHTMLSecao('SALDO FINAL', dados.saldoFinal)}
+
+        <div class="footer">
+          <div>Documento gerado automaticamente pelo sistema Bradesco Corporate</div>
+          <div>Este documento é confidencial e de uso interno da empresa</div>
+          <div>Para dúvidas, entre em contato com seu gerente de relacionamento</div>
+          <div>Bradesco Corporate - Global Solutions</div>
+          <div>Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}</div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    
+    // Aguarda o carregamento e imprime
+    printWindow.onload = () => {
+      printWindow.print();
+      printWindow.close();
+    };
+  }
+
+  /**
+   * Gera HTML para uma seção do extrato
+   */
+  private gerarHTMLSecao(titulo: string, secao: ExtratoSecao | null): string {
+    if (!secao?.itens || secao.itens.length === 0) return '';
+
+    return `
+      <div class="section">
+        <div class="section-title">${titulo}${secao.dataSaldo ? ` em ${secao.dataSaldo}` : ''}</div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Data Aplicação</th>
+              <th>Data Vencimento</th>
+              <th>Data Resgate</th>
+              <th>Taxa (%)</th>
+              <th>Valor Principal (R$)</th>
+              <th>Valor Bruto (R$)</th>
+              <th>Renda Total (R$)</th>
+              <th>IOF (R$)</th>
+              <th>IRRF (R$)</th>
+              <th>Valor Líquido (R$)</th>
+              <th>Renda Bruta Per (R$)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${secao.itens.map(item => `
+              <tr>
+                <td>${this.formatarData(item.dataAplicacao)}</td>
+                <td>${this.formatarData(item.dataVencimento)}</td>
+                <td>${this.formatarData(item.dataResgate)}</td>
+                <td>${item.taxa.toFixed(2).replace('.', ',')}</td>
+                <td>${this.formatarMoeda(item.valorPrincipal)}</td>
+                <td>${this.formatarMoeda(item.valorBruto)}</td>
+                <td>${this.formatarMoeda(item.rendaTotal)}</td>
+                <td>${this.formatarMoeda(item.iof)}</td>
+                <td>${this.formatarMoeda(item.irrf)}</td>
+                <td>${this.formatarMoeda(item.valorLiquido)}</td>
+                <td>${this.formatarMoeda(item.rendaBrutaPer)}</td>
+              </tr>
+            `).join('')}
+            <tr class="total-row">
+              <td colspan="5"><strong>${titulo} - TOTAL</strong></td>
+              <td><strong>${this.formatarMoeda(secao.totalValorPrincipal)}</strong></td>
+              <td><strong>${this.formatarMoeda(secao.totalValorBruto)}</strong></td>
+              <td><strong>${this.formatarMoeda(secao.totalRendaTotal)}</strong></td>
+              <td><strong>${this.formatarMoeda(secao.totalIof)}</strong></td>
+              <td><strong>${this.formatarMoeda(secao.totalIrrf)}</strong></td>
+              <td><strong>${this.formatarMoeda(secao.totalValorLiquido)}</strong></td>
+              <td><strong>${this.formatarMoeda(secao.totalRendaBrutaPer)}</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    `;
   }
 
   /**
