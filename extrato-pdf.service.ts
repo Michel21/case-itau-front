@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ExtratoDados } from './types/extrato.types';
+import { ExtratoDados, ExtratoSecao, ExtratoItem } from './types/extrato.types';
 
 export interface PDFConfig {
   title: string;
@@ -149,22 +149,22 @@ export class ExtratoPdfService {
     return csv;
   }
 
-  private itemParaCSVSimples(secao: string, item: any): string {
-    return `${secao},########,########,########,${item.taxa || ''},${this.formatarMoeda(item.valorPrincipal)},${this.formatarMoeda(item.valorBruto)},${this.formatarMoeda(item.rendaTotal)},${this.formatarMoeda(item.iof)},${this.formatarMoeda(item.irrf)},${this.formatarMoeda(item.valorLiquido)},${this.formatarMoeda(item.rendaBrutaPer)}\n`;
+  private itemParaCSVSimples(secao: string, item: ExtratoItem): string {
+    return `${secao},########,########,########,${item.taxa || ''},${this.formatarMoeda(item.valorPrincipal || 0)},${this.formatarMoeda(item.valorBruto || 0)},${this.formatarMoeda(item.rendaTotal || 0)},${this.formatarMoeda(item.iof || 0)},${this.formatarMoeda(item.irrf || 0)},${this.formatarMoeda(item.valorLiquido || 0)},${this.formatarMoeda(item.rendaBrutaPer || 0)}\n`;
   }
 
-  private totaisParaCSVSimples(secao: string, dados: any): string {
-    return `${secao},,,,,${this.formatarMoeda(dados.totalValorPrincipal)},${this.formatarMoeda(dados.totalValorBruto)},${this.formatarMoeda(dados.totalRendaTotal)},${this.formatarMoeda(dados.totalIof)},${this.formatarMoeda(dados.totalIrrf)},${this.formatarMoeda(dados.totalValorLiquido)},${this.formatarMoeda(dados.totalRendaBrutaPer)}\n`;
+  private totaisParaCSVSimples(secao: string, dados: ExtratoSecao): string {
+    return `${secao},,,,,${this.formatarMoeda(dados.totalValorPrincipal)},${this.formatarMoeda(dados.totalValorBruto)},${this.formatarMoeda(dados.totalRendaTotal)},${this.formatarMoeda(dados.totalIof)},${this.formatarMoeda(dados.totalIrrf)},${this.formatarMoeda(dados.totalValorLiquido)},${this.formatarMoeda(dados.totalRendaBrutaPer || 0)}\n`;
   }
 
-  private itemParaCSVProfissional(secao: string, item: any): string {
-    const formatarNumero = (valor: number) => valor.toFixed(2).replace('.', ',');
+  private itemParaCSVProfissional(secao: string, item: ExtratoItem): string {
+    const formatarNumero = (valor: number | undefined) => (valor || 0).toFixed(2).replace('.', ',');
     
-    return `"${secao}","${this.formatarData(item.dataAplicacao)}","${this.formatarData(item.dataVencimento)}","${this.formatarData(item.dataResgate)}","${item.taxa.toFixed(2).replace('.', ',')}","${formatarNumero(item.valorPrincipal)}","${formatarNumero(item.valorBruto)}","${formatarNumero(item.rendaTotal)}","${formatarNumero(item.iof)}","${formatarNumero(item.irrf)}","${formatarNumero(item.valorLiquido)}","${formatarNumero(item.rendaBrutaPer)}"\n`;
+    return `"${secao}","${this.formatarData(item.dataAplicacao)}","${this.formatarData(item.dataVencimento)}","${this.formatarData(item.dataResgate)}","${(item.taxa || 0).toFixed(2).replace('.', ',')}","${formatarNumero(item.valorPrincipal)}","${formatarNumero(item.valorBruto)}","${formatarNumero(item.rendaTotal)}","${formatarNumero(item.iof)}","${formatarNumero(item.irrf)}","${formatarNumero(item.valorLiquido)}","${formatarNumero(item.rendaBrutaPer)}"\n`;
   }
 
-  private totaisParaCSVProfissional(secao: string, dados: any): string {
-    const formatarNumero = (valor: number) => valor.toFixed(2).replace('.', ',');
+  private totaisParaCSVProfissional(secao: string, dados: ExtratoSecao): string {
+    const formatarNumero = (valor: number | undefined) => (valor || 0).toFixed(2).replace('.', ',');
     
     return `"${secao} - TOTAL","","","","","${formatarNumero(dados.totalValorPrincipal)}","${formatarNumero(dados.totalValorBruto)}","${formatarNumero(dados.totalRendaTotal)}","${formatarNumero(dados.totalIof)}","${formatarNumero(dados.totalIrrf)}","${formatarNumero(dados.totalValorLiquido)}","${formatarNumero(dados.totalRendaBrutaPer)}"\n`;
   }
@@ -550,7 +550,7 @@ export class ExtratoPdfService {
 </html>`;
   }
 
-  private gerarHTMLSecao(titulo: string, secao: any): string {
+  private gerarHTMLSecao(titulo: string, secao: ExtratoSecao | null | undefined): string {
     if (!secao?.itens || secao.itens.length === 0) return '';
 
     const tituloCompleto = secao.dataSaldo ? `${titulo} em ${secao.dataSaldo}` : titulo;
@@ -559,19 +559,19 @@ export class ExtratoPdfService {
       <tr class="section-title">
         <th colspan="11">${tituloCompleto}</th>
       </tr>
-      ${secao.itens.map((item: any) => `
+      ${secao.itens.map((item: ExtratoItem) => `
         <tr class="data-row">
-          <td>${this.formatarData(item?.dataAplicacao || '')}</td>
-          <td>${this.formatarData(item?.dataVencimento || '')}</td>
-          <td>${this.formatarData(item?.dataResgate || '') || ''}</td>
-          <td>${item?.taxa || ''}</td>
-          <td class="currency">${this.formatarMoeda(item?.valorPrincipal || 0)}</td>
-          <td class="currency">${this.formatarMoeda(item?.valorBruto || 0)}</td>
-          <td class="currency">${this.formatarMoeda(item?.rendaTotal || 0)}</td>
-          <td class="currency">${this.formatarMoeda(item?.iof || 0)}</td>
-          <td class="currency">${this.formatarMoeda(item?.irrf || 0)}</td>
-          <td class="currency">${this.formatarMoeda(item?.valorLiquido || 0)}</td>
-          <td class="currency">${this.formatarMoeda(item?.rendaBrutaPer || 0)}</td>
+          <td>${this.formatarData(item.dataAplicacao)}</td>
+          <td>${this.formatarData(item.dataVencimento)}</td>
+          <td>${this.formatarData(item.dataResgate)}</td>
+          <td>${item.taxa || ''}</td>
+          <td class="currency">${this.formatarMoeda(item.valorPrincipal || 0)}</td>
+          <td class="currency">${this.formatarMoeda(item.valorBruto || 0)}</td>
+          <td class="currency">${this.formatarMoeda(item.rendaTotal || 0)}</td>
+          <td class="currency">${this.formatarMoeda(item.iof || 0)}</td>
+          <td class="currency">${this.formatarMoeda(item.irrf || 0)}</td>
+          <td class="currency">${this.formatarMoeda(item.valorLiquido || 0)}</td>
+          <td class="currency">${this.formatarMoeda(item.rendaBrutaPer || 0)}</td>
         </tr>
       `).join('')}
       <tr class="total-row">
@@ -579,13 +579,13 @@ export class ExtratoPdfService {
         <td></td>
         <td></td>
         <td></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao?.totalValorPrincipal || 0)}</strong></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao?.totalValorBruto || 0)}</strong></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao?.totalRendaTotal || 0)}</strong></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao?.totalIof || 0)}</strong></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao?.totalIrrf || 0)}</strong></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao?.totalValorLiquido || 0)}</strong></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao?.totalRendaBrutaPer || 0)}</strong></td>
+        <td class="currency"><strong>${this.formatarMoeda(secao.totalValorPrincipal)}</strong></td>
+        <td class="currency"><strong>${this.formatarMoeda(secao.totalValorBruto)}</strong></td>
+        <td class="currency"><strong>${this.formatarMoeda(secao.totalRendaTotal)}</strong></td>
+        <td class="currency"><strong>${this.formatarMoeda(secao.totalIof)}</strong></td>
+        <td class="currency"><strong>${this.formatarMoeda(secao.totalIrrf)}</strong></td>
+        <td class="currency"><strong>${this.formatarMoeda(secao.totalValorLiquido)}</strong></td>
+        <td class="currency"><strong>${this.formatarMoeda(secao.totalRendaBrutaPer || 0)}</strong></td>
       </tr>
     `;
   }
