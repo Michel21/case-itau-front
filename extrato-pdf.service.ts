@@ -1,45 +1,7 @@
 import { Injectable } from '@angular/core';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-
-// Interfaces para tipagem forte
-export interface ExtratoItem {
-  dataAplicacao: string;
-  dataVencimento: string;
-  dataResgate: string;
-  taxa: number;
-  valorPrincipal: number;
-  valorBruto: number;
-  rendaTotal: number;
-  iof: number;
-  irrf: number;
-  valorLiquido: number;
-  rendaBrutaPer: number;
-}
-
-export interface ExtratoSecao {
-  dataSaldo?: string;
-  itens: ExtratoItem[];
-  totalValorPrincipal: number;
-  totalValorBruto: number;
-  totalRendaTotal: number;
-  totalIof: number;
-  totalIrrf: number;
-  totalValorLiquido: number;
-  totalRendaBrutaPer: number;
-}
-
-export interface ExtratoDados {
-  empresa: string;
-  agencia: string;
-  dataBusca: string;
-  tipoInvestimento: string;
-  tipoProduto: string;
-  saldoAnterior: ExtratoSecao | null;
-  aplicacoes: ExtratoSecao | null;
-  resgates: ExtratoSecao | null;
-  saldoFinal: ExtratoSecao | null;
-}
+import { ExtratoDados, ExtratoSecao, ExtratoItem } from './types/extrato.types';
 
 export interface PDFConfig {
   title: string;
