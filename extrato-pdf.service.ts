@@ -744,28 +744,25 @@ export class ExtratoPdfService {
     if (!secao?.itens || secao.itens.length === 0) return '';
 
     const tituloCompleto = secao.dataSaldo ? `${titulo} em ${secao.dataSaldo}` : titulo;
-    const bgColor = titulo === 'SALDO ANTERIOR' || titulo === 'RESGATES/VENCIMENTOS' ? '#eee' : '#ddd';
 
     return `
       <!-- ${titulo} -->
-      <tr>
-        <th colspan="11" style="background-color: ${bgColor}; padding: 12px 35px; font-weight: bold; border-bottom: 1px solid #ddd;">
-          ${tituloCompleto}
-        </th>
+      <tr class="section-title">
+        <th colspan="11">${tituloCompleto}</th>
       </tr>
       ${secao.itens.map(item => `
-        <tr>
-          <td class="date" style="padding-left: 20px;">${this.formatarData(item.dataAplicacao)}</td>
-          <td class="date">${this.formatarData(item.dataVencimento)}</td>
-          <td class="date">${this.formatarData(item.dataResgate)}</td>
-          <td class="percentage">${item.taxa}</td>
+        <tr class="data-row">
+          <td>${this.formatarData(item.dataAplicacao)}</td>
+          <td>${this.formatarData(item.dataVencimento)}</td>
+          <td>${this.formatarData(item.dataResgate) || ''}</td>
+          <td>${item.taxa || ''}</td>
           <td class="currency">${this.formatarMoeda(item.valorPrincipal)}</td>
           <td class="currency">${this.formatarMoeda(item.valorBruto)}</td>
           <td class="currency">${this.formatarMoeda(item.rendaTotal)}</td>
           <td class="currency">${this.formatarMoeda(item.iof)}</td>
           <td class="currency">${this.formatarMoeda(item.irrf)}</td>
           <td class="currency">${this.formatarMoeda(item.valorLiquido)}</td>
-          <td class="currency" style="padding-right: 10px;">${this.formatarMoeda(item.rendaBrutaPer)}</td>
+          <td class="currency">${this.formatarMoeda(item.rendaBrutaPer)}</td>
         </tr>
       `).join('')}
       <tr class="total-row">
@@ -779,7 +776,7 @@ export class ExtratoPdfService {
         <td class="currency"><strong>${this.formatarMoeda(secao.totalIof)}</strong></td>
         <td class="currency"><strong>${this.formatarMoeda(secao.totalIrrf)}</strong></td>
         <td class="currency"><strong>${this.formatarMoeda(secao.totalValorLiquido)}</strong></td>
-        <td class="currency"><strong style="padding-right: 6px;">${this.formatarMoeda(secao.totalRendaBrutaPer)}</strong></td>
+        <td class="currency"><strong>${this.formatarMoeda(secao.totalRendaBrutaPer)}</strong></td>
       </tr>
     `;
   }
@@ -791,43 +788,40 @@ export class ExtratoPdfService {
     if (!secao?.itens || secao.itens.length === 0) return '';
 
     const tituloCompleto = secao.dataSaldo ? `${titulo} em ${secao.dataSaldo}` : titulo;
-    const bgColor = titulo === 'SALDO ANTERIOR' || titulo === 'RESGATES/VENCIMENTOS' ? '#eee' : '#ddd';
 
     return `
       <!-- ${titulo} -->
       <thead>
-        <tr style="background-color: #ddd; padding: 12px 0;">
-          <th style="text-align: left; padding-left: 20px;">Data aplic.</th>
-          <th style="text-align: left; padding-left: 3px;">Data vencto.</th>
-          <th style="text-align: left; padding-left: 3px;">Resgate/Carência</th>
-          <th style="text-align: center;">Taxa (%)</th>
-          <th style="text-align: right; padding-right: 3px;">Valor princ. (BRL)</th>
-          <th style="text-align: right; padding-right: 3px;">Valor Bruto (BRL)</th> 
-          <th style="text-align: right; padding-right: 3px;">Renda total (BRL)</th>
-          <th style="text-align: right; padding-right: 3px;">IOF (BRL)</th>
-          <th style="text-align: right; padding-right: 3px;">IRRF (BRL)</th>
-          <th style="text-align: right; padding-right: 3px;">Valor Líquido (BRL)</th>
-          <th style="text-align: right; padding-right: 10px;">Renda bruta per</th>
+        <tr class="table-header">
+          <th>Data aplic.</th>
+          <th>Data vencto.</th>
+          <th>Resgate/Carência</th>
+          <th>Taxa (%)</th>
+          <th>Valor princ. (BRL)</th>
+          <th>Valor Bruto (BRL)</th> 
+          <th>Renda total (BRL)</th>
+          <th>IOF (BRL)</th>
+          <th>IRRF (BRL)</th>
+          <th>Valor Líquido (BRL)</th>
+          <th>Renda bruta per</th>
         </tr>
       </thead>
-      <tr>
-        <th colspan="11" style="background-color: ${bgColor}; padding: 12px 35px; font-weight: bold; border-bottom: 1px solid #ddd;">
-          ${tituloCompleto}
-        </th>
+      <tr class="section-title">
+        <th colspan="11">${tituloCompleto}</th>
       </tr>
       ${secao.itens.map(item => `
-        <tr>
-          <td class="date" style="padding-left: 20px;">${this.formatarData(item.dataAplicacao)}</td>
-          <td class="date">${this.formatarData(item.dataVencimento)}</td>
-          <td class="date">${this.formatarData(item.dataResgate)}</td>
-          <td class="percentage">${item.taxa}</td>
+        <tr class="data-row">
+          <td>${this.formatarData(item.dataAplicacao)}</td>
+          <td>${this.formatarData(item.dataVencimento)}</td>
+          <td>${this.formatarData(item.dataResgate) || ''}</td>
+          <td>${item.taxa || ''}</td>
           <td class="currency">${this.formatarMoeda(item.valorPrincipal)}</td>
           <td class="currency">${this.formatarMoeda(item.valorBruto)}</td>
           <td class="currency">${this.formatarMoeda(item.rendaTotal)}</td>
           <td class="currency">${this.formatarMoeda(item.iof)}</td>
           <td class="currency">${this.formatarMoeda(item.irrf)}</td>
           <td class="currency">${this.formatarMoeda(item.valorLiquido)}</td>
-          <td class="currency" style="padding-right: 10px;">${this.formatarMoeda(item.rendaBrutaPer)}</td>
+          <td class="currency">${this.formatarMoeda(item.rendaBrutaPer)}</td>
         </tr>
       `).join('')}
       <tr class="total-row">
@@ -841,7 +835,7 @@ export class ExtratoPdfService {
         <td class="currency"><strong>${this.formatarMoeda(secao.totalIof)}</strong></td>
         <td class="currency"><strong>${this.formatarMoeda(secao.totalIrrf)}</strong></td>
         <td class="currency"><strong>${this.formatarMoeda(secao.totalValorLiquido)}</strong></td>
-        <td class="currency"><strong style="padding-right: 6px;">${this.formatarMoeda(secao.totalRendaBrutaPer)}</strong></td>
+        <td class="currency"><strong>${this.formatarMoeda(secao.totalRendaBrutaPer)}</strong></td>
       </tr>
     `;
   }

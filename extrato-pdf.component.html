@@ -1,17 +1,16 @@
 <div class="extrato-container">
     <!-- Cabeçalho -->
     <div class="header">
-        <div class="logo">bradesco corporate</div>
-        <div class="subtitle">global solutions</div>
-        <div class="report-details">
-            <div><strong>Saldo e extrato</strong></div>
-            <div>
-                <strong>Data da transação:</strong> 
-                <span>{{ getDataGeracao() }} - {{ getHoraGeracao() }}</span>
-            </div>
-            <div>
-                <strong>Número de controle:</strong> 
-                <span>{{ dadosAtuais.dataBusca.replace(/\//g, '') }}001</span>
+        <div class="header-left">
+            <div class="logo">bradesco</div>
+            <div class="subtitle">corporate</div>
+            <div class="global-solutions">global solutions</div>
+        </div>
+        <div class="header-right">
+            <div class="report-title">Saldo e extrato</div>
+            <div class="transaction-details">
+                <div>Data da transação: {{ getDataGeracao() }} - {{ getHoraGeracao() }}</div>
+                <div>Número de controle: {{ dadosAtuais.dataBusca.replace(/\//g, '') }}001</div>
             </div>
         </div>
     </div>
@@ -47,39 +46,37 @@
     <div class="table-container">
         <table class="financial-table">
             <thead>
-                <tr style="background-color: #ddd; padding: 12px 0;">
-                    <th style="text-align: left; padding-left: 20px;">Data aplic.</th>
-                    <th style="text-align: left; padding-left: 3px;">Data vencto.</th>
-                    <th style="text-align: left; padding-left: 3px;">Resgate/Carência</th>
-                    <th style="text-align: center;">Taxa (%)</th>
-                    <th style="text-align: right; padding-right: 3px;">Valor princ. (BRL)</th>
-                    <th style="text-align: right; padding-right: 3px;">Valor Bruto (BRL)</th> 
-                    <th style="text-align: right; padding-right: 3px;">Renda total (BRL)</th>
-                    <th style="text-align: right; padding-right: 3px;">IOF (BRL)</th>
-                    <th style="text-align: right; padding-right: 3px;">IRRF (BRL)</th>
-                    <th style="text-align: right; padding-right: 3px;">Valor Líquido (BRL)</th>
-                    <th style="text-align: right; padding-right: 10px;">Renda bruta per</th>
+                <tr class="table-header">
+                    <th>Data aplic.</th>
+                    <th>Data vencto.</th>
+                    <th>Resgate/Carência</th>
+                    <th>Taxa (%)</th>
+                    <th>Valor princ. (BRL)</th>
+                    <th>Valor Bruto (BRL)</th> 
+                    <th>Renda total (BRL)</th>
+                    <th>IOF (BRL)</th>
+                    <th>IRRF (BRL)</th>
+                    <th>Valor Líquido (BRL)</th>
+                    <th>Renda bruta per</th>
                 </tr>
             </thead>
             <tbody>
                 <!-- Saldo Anterior -->
-                <tr *ngIf="dadosAtuais.saldoAnterior?.itens?.length">
-                    <th colspan="11" style="background-color: #eee; padding: 12px 35px; font-weight: bold; border-bottom: 1px solid #ddd;">
-                        Saldo anterior em {{ dadosAtuais.saldoAnterior?.dataSaldo }}
-                    </th>
+                <tr *ngIf="dadosAtuais.saldoAnterior?.itens?.length" class="section-title">
+                    <th colspan="11">Saldo anterior em {{ dadosAtuais.saldoAnterior?.dataSaldo }}</th>
                 </tr>
-                <tr *ngFor="let item of dadosAtuais.saldoAnterior?.itens">
-                    <td class="date" style="padding-left: 20px;">{{ item.dataAplicacao }}</td>
-                    <td class="date">{{ item.dataVencimento }}</td>
-                    <td class="date">{{ item.dataResgate }}</td>
-                    <td class="percentage">{{ item.taxa }}</td>
+                <tr *ngFor="let item of dadosAtuais.saldoAnterior?.itens" class="data-row">
+                    <td>{{ item.dataAplicacao }}</td>
+                    <td>{{ item.dataVencimento }}</td>
+                    <td>{{ item.dataResgate || '' }}</td>
+                    <td>{{ item.taxa || '' }}</td>
                     <td class="currency">{{ item.valorPrincipal | extratoFormat:'moeda' }}</td>
                     <td class="currency">{{ item.valorBruto | extratoFormat:'moeda' }}</td>
                     <td class="currency">{{ item.rendaTotal | extratoFormat:'moeda' }}</td>
                     <td class="currency">{{ item.iof | extratoFormat:'moeda' }}</td>
                     <td class="currency">{{ item.irrf | extratoFormat:'moeda' }}</td>
                     <td class="currency">{{ item.valorLiquido | extratoFormat:'moeda' }}</td>
-                    <td class="currency" style="padding-right: 10px;">{{ item.rendaBrutaPer | extratoFormat:'moeda' }}</td>
+                    <td class="currency">{{ item.rendaBrutaPer | extratoFormat:'moeda' }}</td>
                 </tr>
                 <tr class="total-row" *ngIf="dadosAtuais.saldoAnterior?.itens?.length">
                     <td><strong>Total</strong></td>
@@ -96,23 +93,21 @@
                 </tr>
 
                 <!-- Aplicações -->
-                <tr *ngIf="dadosAtuais.aplicacoes?.itens?.length">
-                    <th colspan="11" style="background-color: #ddd; padding: 12px 35px; font-weight: bold; border-bottom: 1px solid #ddd;">
-                        Aplicações
-                    </th>
+                <tr *ngIf="dadosAtuais.aplicacoes?.itens?.length" class="section-title">
+                    <th colspan="11">Aplicações</th>
                 </tr>
-                <tr *ngFor="let item of dadosAtuais.aplicacoes?.itens">
-                    <td class="date" style="padding-left: 20px;">{{ item.dataAplicacao }}</td>
-                    <td class="date">{{ item.dataVencimento }}</td>
-                    <td class="date">{{ item.dataResgate }}</td>
-                    <td class="percentage">{{ item.taxa }}</td>
+                <tr *ngFor="let item of dadosAtuais.aplicacoes?.itens" class="data-row">
+                    <td>{{ item.dataAplicacao }}</td>
+                    <td>{{ item.dataVencimento }}</td>
+                    <td>{{ item.dataResgate || '' }}</td>
+                    <td>{{ item.taxa || '' }}</td>
                     <td class="currency">{{ item.valorPrincipal | extratoFormat:'moeda' }}</td>
                     <td class="currency">{{ item.valorBruto | extratoFormat:'moeda' }}</td>
                     <td class="currency">{{ item.rendaTotal | extratoFormat:'moeda' }}</td>
                     <td class="currency">{{ item.iof | extratoFormat:'moeda' }}</td>
                     <td class="currency">{{ item.irrf | extratoFormat:'moeda' }}</td>
                     <td class="currency">{{ item.valorLiquido | extratoFormat:'moeda' }}</td>
-                    <td class="currency" style="padding-right: 10px;">{{ item.rendaBrutaPer | extratoFormat:'moeda' }}</td>
+                    <td class="currency">{{ item.rendaBrutaPer | extratoFormat:'moeda' }}</td>
                 </tr>
                 <tr class="total-row" *ngIf="dadosAtuais.aplicacoes?.itens?.length">
                     <td><strong>Total</strong></td>
@@ -129,38 +124,21 @@
                 </tr>
 
                 <!-- Resgates/Vencimentos -->
-                <thead>
-                    <tr style="background-color: #ddd; padding: 12px 0;">
-                        <th style="text-align: left; padding-left: 20px;">Data aplic.</th>
-                        <th style="text-align: left; padding-left: 3px;">Data vencto.</th>
-                        <th style="text-align: left; padding-left: 3px;">Resgate/Carência</th>
-                        <th style="text-align: center;">Taxa (%)</th>
-                        <th style="text-align: right; padding-right: 3px;">Valor princ. (BRL)</th>
-                        <th style="text-align: right; padding-right: 3px;">Valor Bruto (BRL)</th> 
-                        <th style="text-align: right; padding-right: 3px;">Renda total (BRL)</th>
-                        <th style="text-align: right; padding-right: 3px;">IOF (BRL)</th>
-                        <th style="text-align: right; padding-right: 3px;">IRRF (BRL)</th>
-                        <th style="text-align: right; padding-right: 3px;">Valor Líquido (BRL)</th>
-                        <th style="text-align: right; padding-right: 10px;">Renda bruta per</th>
-                    </tr>
-                </thead>
-                <tr *ngIf="dadosAtuais.resgates?.itens?.length">
-                    <th colspan="11" style="background-color: #eee; padding: 12px 35px; font-weight: bold; border-bottom: 1px solid #ddd;">
-                        Resgates/Vencimentos
-                    </th>
+                <tr *ngIf="dadosAtuais.resgates?.itens?.length" class="section-title">
+                    <th colspan="11">Resgates/Vencimentos</th>
                 </tr>
-                <tr *ngFor="let item of dadosAtuais.resgates?.itens">
-                    <td class="date" style="padding-left: 20px;">{{ item.dataAplicacao }}</td>
-                    <td class="date">{{ item.dataVencimento }}</td>
-                    <td class="date">{{ item.dataResgate }}</td>
-                    <td class="percentage">{{ item.taxa }}</td>
+                <tr *ngFor="let item of dadosAtuais.resgates?.itens" class="data-row">
+                    <td>{{ item.dataAplicacao }}</td>
+                    <td>{{ item.dataVencimento }}</td>
+                    <td>{{ item.dataResgate || '' }}</td>
+                    <td>{{ item.taxa || '' }}</td>
                     <td class="currency">{{ item.valorPrincipal | extratoFormat:'moeda' }}</td>
                     <td class="currency">{{ item.valorBruto | extratoFormat:'moeda' }}</td>
                     <td class="currency">{{ item.rendaTotal | extratoFormat:'moeda' }}</td>
                     <td class="currency">{{ item.iof | extratoFormat:'moeda' }}</td>
                     <td class="currency">{{ item.irrf | extratoFormat:'moeda' }}</td>
                     <td class="currency">{{ item.valorLiquido | extratoFormat:'moeda' }}</td>
-                    <td class="currency" style="padding-right: 10px;">{{ item.rendaBrutaPer | extratoFormat:'moeda' }}</td>
+                    <td class="currency">{{ item.rendaBrutaPer | extratoFormat:'moeda' }}</td>
                 </tr>
                 <tr class="total-row" *ngIf="dadosAtuais.resgates?.itens?.length">
                     <td><strong>Total</strong></td>
@@ -173,27 +151,25 @@
                     <td class="currency"><strong>{{ dadosAtuais.resgates?.totalIof | extratoFormat:'moeda' }}</strong></td>
                     <td class="currency"><strong>{{ dadosAtuais.resgates?.totalIrrf | extratoFormat:'moeda' }}</strong></td>
                     <td class="currency"><strong>{{ dadosAtuais.resgates?.totalValorLiquido | extratoFormat:'moeda' }}</strong></td>
-                    <td class="currency"><strong style="padding-right: 6px;">{{ dadosAtuais.resgates?.totalRendaBrutaPer | extratoFormat:'moeda' }}</strong></td>
+                    <td class="currency"><strong>{{ dadosAtuais.resgates?.totalRendaBrutaPer | extratoFormat:'moeda' }}</strong></td>
                 </tr>
 
                 <!-- Saldo Final -->
-                <tr *ngIf="dadosAtuais.saldoFinal?.itens?.length">
-                    <th colspan="11" style="background-color: #ddd; padding: 12px 35px; font-weight: bold; border-bottom: 1px solid #ddd;">
-                        Saldo final em {{ dadosAtuais.saldoFinal?.dataSaldo }}
-                    </th>
+                <tr *ngIf="dadosAtuais.saldoFinal?.itens?.length" class="section-title">
+                    <th colspan="11">Saldo final em {{ dadosAtuais.saldoFinal?.dataSaldo }}</th>
                 </tr>
-                <tr *ngFor="let item of dadosAtuais.saldoFinal?.itens">
-                    <td class="date" style="padding-left: 20px;">{{ item.dataAplicacao }}</td>
-                    <td class="date">{{ item.dataVencimento }}</td>
-                    <td class="date">{{ item.dataResgate }}</td>
-                    <td class="percentage">{{ item.taxa }}</td>
+                <tr *ngFor="let item of dadosAtuais.saldoFinal?.itens" class="data-row">
+                    <td>{{ item.dataAplicacao }}</td>
+                    <td>{{ item.dataVencimento }}</td>
+                    <td>{{ item.dataResgate || '' }}</td>
+                    <td>{{ item.taxa || '' }}</td>
                     <td class="currency">{{ item.valorPrincipal | extratoFormat:'moeda' }}</td>
                     <td class="currency">{{ item.valorBruto | extratoFormat:'moeda' }}</td>
                     <td class="currency">{{ item.rendaTotal | extratoFormat:'moeda' }}</td>
                     <td class="currency">{{ item.iof | extratoFormat:'moeda' }}</td>
                     <td class="currency">{{ item.irrf | extratoFormat:'moeda' }}</td>
                     <td class="currency">{{ item.valorLiquido | extratoFormat:'moeda' }}</td>
-                    <td class="currency" style="padding-right: 10px;">{{ item.rendaBrutaPer | extratoFormat:'moeda' }}</td>
+                    <td class="currency">{{ item.rendaBrutaPer | extratoFormat:'moeda' }}</td>
                 </tr>
                 <tr class="total-row" *ngIf="dadosAtuais.saldoFinal?.itens?.length">
                     <td><strong>Total</strong></td>
@@ -206,7 +182,7 @@
                     <td class="currency"><strong>{{ dadosAtuais.saldoFinal?.totalIof | extratoFormat:'moeda' }}</strong></td>
                     <td class="currency"><strong>{{ dadosAtuais.saldoFinal?.totalIrrf | extratoFormat:'moeda' }}</strong></td>
                     <td class="currency"><strong>{{ dadosAtuais.saldoFinal?.totalValorLiquido | extratoFormat:'moeda' }}</strong></td>
-                    <td class="currency"><strong style="padding-right: 6px;">{{ dadosAtuais.saldoFinal?.totalRendaBrutaPer | extratoFormat:'moeda' }}</strong></td>
+                    <td class="currency"><strong>{{ dadosAtuais.saldoFinal?.totalRendaBrutaPer | extratoFormat:'moeda' }}</strong></td>
                 </tr>
             </tbody>
         </table>
