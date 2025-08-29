@@ -400,41 +400,71 @@ export class ExtratoPdfService {
             max-width: 1200px;
           }
 
-          .header {
-            text-align: left;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            position: relative;
-          }
+                  .header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 25px;
+          padding-bottom: 15px;
+          position: relative;
+        }
 
-          .logo {
-            font-size: 22px;
-            font-weight: bold;
-            color: #000000;
-            margin-bottom: 4px;
-            text-transform: none;
-          }
+        .header-left {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+        }
 
-          .subtitle {
-            font-size: 12px;
-            color: #ffffff;
-            margin-bottom: 20px;
-            text-transform: none;
-            background-color: #666;
-            padding: 4px 8px;
-            display: inline-block;
-            border-radius: 4px;
-          }
+        .logo {
+          font-size: 28px;
+          font-weight: bold;
+          color: #cc0000;
+          margin-bottom: 2px;
+          text-transform: none;
+        }
 
-          .report-details {
-            display: block;
-            margin-bottom: 0;
-            font-size: 12px;
-            color: #666;
-            position: absolute;
-            top: 0px;
-            left: 30%;
-          }
+        .subtitle {
+          font-size: 16px;
+          color: #000;
+          margin-bottom: 4px;
+          text-transform: none;
+          font-weight: normal;
+        }
+
+        .global-solutions {
+          font-size: 12px;
+          color: #ffffff;
+          background-color: #000;
+          padding: 4px 8px;
+          display: inline-block;
+          border-radius: 2px;
+          text-transform: none;
+          font-weight: normal;
+        }
+
+        .header-right {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          text-align: right;
+        }
+
+        .report-title {
+          font-size: 18px;
+          font-weight: bold;
+          color: #000;
+          margin-bottom: 8px;
+        }
+
+        .transaction-details {
+          font-size: 12px;
+          color: #000;
+          line-height: 1.4;
+        }
+
+        .transaction-details div {
+          margin-bottom: 2px;
+        }
 
           .search-details {
             background-color: #fff;
@@ -483,28 +513,161 @@ export class ExtratoPdfService {
             width: 100%;
             border-collapse: collapse;
             background-color: #fff;
-            font-size: 8px;
+            font-size: 10px;
             border: none;
+          }
+
+          .table-header {
+            background-color: #ddd;
+            padding: 12px 0;
           }
           
           .financial-table th {
             background-color: transparent;
             color: #000;
-            padding: 6px 4px;
+            padding: 8px 4px;
             text-align: center;
             border: none;
             font-weight: bold;
-            font-size: 10px;
+            font-size: 11px;
             border-bottom: 1px solid #ccc;
           }
 
           .financial-table td {
-            padding: 5px 4px;
+            padding: 6px 4px;
             text-align: center;
             border: none;
             color: #000;
             font-size: 11px;
             border-bottom: 1px solid #eee;
+          }
+
+          /* Alinhamento específico baseado na imagem */
+          .financial-table th:nth-child(1),
+          .financial-table td:nth-child(1) {
+            text-align: left !important;
+            padding-left: 20px !important;
+          }
+
+          .financial-table th:nth-child(2),
+          .financial-table td:nth-child(2) {
+            text-align: left !important;
+            padding-left: 3px !important;
+          }
+
+          .financial-table th:nth-child(3),
+          .financial-table td:nth-child(3) {
+            text-align: left !important;
+            padding-left: 3px !important;
+          }
+
+          .financial-table th:nth-child(4),
+          .financial-table td:nth-child(4) {
+            text-align: center !important;
+          }
+
+          .financial-table th:nth-child(5),
+          .financial-table td:nth-child(5) {
+            text-align: right !important;
+            padding-right: 3px !important;
+          }
+
+          .financial-table th:nth-child(6),
+          .financial-table td:nth-child(6) {
+            text-align: right !important;
+            padding-right: 3px !important;
+          }
+
+          .financial-table th:nth-child(7),
+          .financial-table td:nth-child(7) {
+            text-align: right !important;
+            padding-right: 3px !important;
+          }
+
+          .financial-table th:nth-child(8),
+          .financial-table td:nth-child(8) {
+            text-align: right !important;
+            padding-right: 3px !important;
+          }
+
+          .financial-table th:nth-child(9),
+          .financial-table td:nth-child(9) {
+            text-align: right !important;
+            padding-right: 3px !important;
+          }
+
+          .financial-table th:nth-child(10),
+          .financial-table td:nth-child(10) {
+            text-align: right !important;
+            padding-right: 3px !important;
+          }
+
+          .financial-table th:nth-child(11),
+          .financial-table td:nth-child(11) {
+            text-align: right !important;
+            padding-right: 10px !important;
+          }
+
+          .section-title {
+            background-color: #eee;
+            padding: 12px 0;
+          }
+
+          .section-title th {
+            background-color: #eee;
+            color: #000;
+            padding: 12px 35px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 12px;
+            border-bottom: 1px solid #ddd;
+          }
+
+          .data-row {
+            background-color: transparent;
+          }
+
+          .data-row:nth-child(even) {
+            background-color: transparent;
+          }
+
+          .total-row {
+            background-color: transparent !important;
+            color: #000 !important;
+            font-weight: bold;
+            border-top: 1px solid #ddd !important;
+            padding: 8px 0 !important;
+            margin-bottom: 10px;
+          }
+
+          .total-row td {
+            color: #000 !important;
+            border-color: transparent !important;
+            border-bottom: none !important;
+            padding: 8px 4px;
+          }
+
+          /* Alinhamento específico para total-row */
+          .total-row td:first-child {
+            text-align: left !important;
+            padding-left: 20px !important;
+          }
+
+          .total-row td:nth-child(2),
+          .total-row td:nth-child(3),
+          .total-row td:nth-child(4) {
+            text-align: center !important;
+          }
+
+          .total-row td:nth-child(5),
+          .total-row td:nth-child(6),
+          .total-row td:nth-child(7),
+          .total-row td:nth-child(8),
+          .total-row td:nth-child(9),
+          .total-row td:nth-child(10),
+          .total-row td:nth-child(11) {
+            text-align: right !important;
+            padding-right: 3px !important;
           }
 
           .financial-table th:nth-child(1),
@@ -664,17 +827,16 @@ export class ExtratoPdfService {
       <body>
         <!-- Cabeçalho -->
         <div class="header">
-          <div class="logo">bradesco corporate</div>
-          <div class="subtitle">global solutions</div>
-          <div class="report-details">
-            <div><strong>Saldo e extrato</strong></div>
-            <div>
-              <strong>Data da transação:</strong> 
-              <span>${config.dataTransacao} - ${new Date().toLocaleTimeString('pt-BR')}</span>
-            </div>
-            <div>
-              <strong>Número de controle:</strong> 
-              <span>${config.numeroControle}</span>
+          <div class="header-left">
+            <div class="logo">bradesco</div>
+            <div class="subtitle">corporate</div>
+            <div class="global-solutions">global solutions</div>
+          </div>
+          <div class="header-right">
+            <div class="report-title">Saldo e extrato</div>
+            <div class="transaction-details">
+              <div>Data da transação: ${config.dataTransacao} - ${new Date().toLocaleTimeString('pt-BR')}</div>
+              <div>Número de controle: ${config.numeroControle}</div>
             </div>
           </div>
         </div>
@@ -710,25 +872,25 @@ export class ExtratoPdfService {
         <div class="table-container">
           <table class="financial-table">
             <thead>
-              <tr style="background-color: #ddd; padding: 12px 0;">
-                <th style="text-align: left; padding-left: 20px;">Data aplic.</th>
-                <th style="text-align: left; padding-left: 3px;">Data vencto.</th>
-                <th style="text-align: left; padding-left: 3px;">Resgate/Carência</th>
-                <th style="text-align: center;">Taxa (%)</th>
-                <th style="text-align: right; padding-right: 3px;">Valor princ. (BRL)</th>
-                <th style="text-align: right; padding-right: 3px;">Valor Bruto (BRL)</th> 
-                <th style="text-align: right; padding-right: 3px;">Renda total (BRL)</th>
-                <th style="text-align: right; padding-right: 3px;">IOF (BRL)</th>
-                <th style="text-align: right; padding-right: 3px;">IRRF (BRL)</th>
-                <th style="text-align: right; padding-right: 3px;">Valor Líquido (BRL)</th>
-                <th style="text-align: right; padding-right: 10px;">Renda bruta per</th>
+              <tr class="table-header">
+                <th>Data aplic.</th>
+                <th>Data vencto.</th>
+                <th>Resgate/Carência</th>
+                <th>Taxa (%)</th>
+                <th>Valor princ. (BRL)</th>
+                <th>Valor Bruto (BRL)</th> 
+                <th>Renda total (BRL)</th>
+                <th>IOF (BRL)</th>
+                <th>IRRF (BRL)</th>
+                <th>Valor Líquido (BRL)</th>
+                <th>Renda bruta per</th>
               </tr>
             </thead>
             <tbody>
-              ${this.gerarHTMLSecao('SALDO ANTERIOR', dados.saldoAnterior)}
-              ${this.gerarHTMLSecao('APLICAÇÕES', dados.aplicacoes)}
-              ${this.gerarHTMLSecaoComThead('RESGATES/VENCIMENTOS', dados.resgates)}
-              ${this.gerarHTMLSecao('SALDO FINAL', dados.saldoFinal)}
+                              ${this.gerarHTMLSecao('SALDO ANTERIOR', dados.saldoAnterior)}
+                ${this.gerarHTMLSecao('APLICAÇÕES', dados.aplicacoes)}
+                ${this.gerarHTMLSecao('RESGATES/VENCIMENTOS', dados.resgates)}
+                ${this.gerarHTMLSecao('SALDO FINAL', dados.saldoFinal)}
             </tbody>
           </table>
         </div>
@@ -782,62 +944,10 @@ export class ExtratoPdfService {
   }
 
   /**
-   * Gera HTML para uma seção do extrato com thead duplicado (como no template padrão)
+   * Gera HTML para uma seção do extrato (método unificado)
    */
   private gerarHTMLSecaoComThead(titulo: string, secao: ExtratoSecao | null): string {
-    if (!secao?.itens || secao.itens.length === 0) return '';
-
-    const tituloCompleto = secao.dataSaldo ? `${titulo} em ${secao.dataSaldo}` : titulo;
-
-    return `
-      <!-- ${titulo} -->
-      <thead>
-        <tr class="table-header">
-          <th>Data aplic.</th>
-          <th>Data vencto.</th>
-          <th>Resgate/Carência</th>
-          <th>Taxa (%)</th>
-          <th>Valor princ. (BRL)</th>
-          <th>Valor Bruto (BRL)</th> 
-          <th>Renda total (BRL)</th>
-          <th>IOF (BRL)</th>
-          <th>IRRF (BRL)</th>
-          <th>Valor Líquido (BRL)</th>
-          <th>Renda bruta per</th>
-        </tr>
-      </thead>
-      <tr class="section-title">
-        <th colspan="11">${tituloCompleto}</th>
-      </tr>
-      ${secao.itens.map(item => `
-        <tr class="data-row">
-          <td>${this.formatarData(item.dataAplicacao)}</td>
-          <td>${this.formatarData(item.dataVencimento)}</td>
-          <td>${this.formatarData(item.dataResgate) || ''}</td>
-          <td>${item.taxa || ''}</td>
-          <td class="currency">${this.formatarMoeda(item.valorPrincipal)}</td>
-          <td class="currency">${this.formatarMoeda(item.valorBruto)}</td>
-          <td class="currency">${this.formatarMoeda(item.rendaTotal)}</td>
-          <td class="currency">${this.formatarMoeda(item.iof)}</td>
-          <td class="currency">${this.formatarMoeda(item.irrf)}</td>
-          <td class="currency">${this.formatarMoeda(item.valorLiquido)}</td>
-          <td class="currency">${this.formatarMoeda(item.rendaBrutaPer)}</td>
-        </tr>
-      `).join('')}
-      <tr class="total-row">
-        <td><strong>Total</strong></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao.totalValorPrincipal)}</strong></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao.totalValorBruto)}</strong></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao.totalRendaTotal)}</strong></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao.totalIof)}</strong></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao.totalIrrf)}</strong></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao.totalValorLiquido)}</strong></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao.totalRendaBrutaPer)}</strong></td>
-      </tr>
-    `;
+    return this.gerarHTMLSecao(titulo, secao);
   }
 
   /**
@@ -894,89 +1004,47 @@ export class ExtratoPdfService {
   }
 
   /**
-   * Converte dados para formato CSV corporativo
+   * Converte dados para formato CSV seguindo padrão da imagem
    */
   private converterParaCSV(dados: ExtratoDados): string {
-    let csv = `${this.BRAND_NAME}\n`;
-    csv += `${this.BRAND_SUBTITLE}\n`;
-    csv += `${this.DOCUMENT_TITLE}\n`;
-    csv += '='.repeat(80) + '\n\n';
-    
-    // Informações do relatório
-    csv += 'INFORMAÇÕES DO RELATÓRIO\n';
-    csv += '-'.repeat(40) + '\n';
-    csv += `Data da transação: ${dados.dataBusca}\n`;
-    csv += `Número de controle: ${dados.dataBusca.replace(/\//g, '')}001\n`;
-    csv += `Data de geração: ${new Date().toLocaleDateString('pt-BR')}\n`;
-    csv += `Hora de geração: ${new Date().toLocaleTimeString('pt-BR')}\n\n`;
-    
-    // Detalhes da empresa
-    csv += 'DETALHES DA PESQUISA\n';
-    csv += '-'.repeat(40) + '\n';
-    csv += `Empresa: ${dados.empresa}\n`;
-    csv += `Agência/Conta: ${dados.agencia}\n`;
-    csv += `Tipo de investimento: ${dados.tipoInvestimento}\n`;
-    csv += `Tipo de produto: ${dados.tipoProduto}\n\n`;
-    
-    // Cabeçalho da tabela principal
-    csv += 'DADOS DO EXTRATO\n';
-    csv += '-'.repeat(40) + '\n';
-    csv += 'Seção,Data Aplicação,Data Vencimento,Data Resgate,Taxa (%),Valor Principal (R$),Valor Bruto (R$),Renda Total (R$),IOF (R$),IRRF (R$),Valor Líquido (R$),Renda Bruta Per (R$)\n';
+    // Cabeçalho da tabela principal (exatamente como na imagem)
+    let csv = 'Seção,Data Aplica,Data Vencir,Data Resgal,Taxa (%),Valor Princi,Valor Bruto,Renda Tota,IOF (BRL),IRRF (BRL),Valor Líquic,Renda Bruta Per (BRL)\n';
 
-    // Saldo Anterior
+    // Saldo Anterior (exatamente como na imagem)
     if (dados.saldoAnterior?.itens) {
-      csv += `\nSALDO ANTERIOR em ${dados.saldoAnterior.dataSaldo}\n`;
-      csv += '-'.repeat(40) + '\n';
+      csv += `Saldo anterior em ${dados.saldoAnterior.dataSaldo}\n`;
       dados.saldoAnterior.itens.forEach(item => {
-        csv += this.itemParaCSV('Saldo Anterior', item);
+        csv += this.itemParaCSVSimples('Saldo Anter', item);
       });
-      csv += this.totaisParaCSV('Saldo Anterior', dados.saldoAnterior);
+      csv += this.totaisParaCSVSimples('Saldo Anterior - TOTAL', dados.saldoAnterior);
     }
 
-    // Aplicações
+    // Aplicações (exatamente como na imagem)
     if (dados.aplicacoes?.itens) {
-      csv += '\nAPLICAÇÕES\n';
-      csv += '-'.repeat(40) + '\n';
+      csv += 'Aplicações\n';
       dados.aplicacoes.itens.forEach(item => {
-        csv += this.itemParaCSV('Aplicações', item);
+        csv += this.itemParaCSVSimples('Aplicações', item);
       });
-      csv += this.totaisParaCSV('Aplicações', dados.aplicacoes);
+      csv += this.totaisParaCSVSimples('Aplicações - TOTAL', dados.aplicacoes);
     }
 
-    // Resgates
+    // Resgates/Vencimentos (exatamente como na imagem)
     if (dados.resgates?.itens) {
-      csv += '\nRESGATES/VENCIMENTOS\n';
-      csv += '-'.repeat(40) + '\n';
+      csv += 'Resgates/Vencimentos\n';
       dados.resgates.itens.forEach(item => {
-        csv += this.itemParaCSV('Resgates', item);
+        csv += this.itemParaCSVSimples('Resgates', item);
       });
-      csv += this.totaisParaCSV('Resgates', dados.resgates);
+      csv += this.totaisParaCSVSimples('Resgates - TOTAL', dados.resgates);
     }
 
-    // Saldo Final
+    // Saldo Final (exatamente como na imagem)
     if (dados.saldoFinal?.itens) {
-      csv += `\nSALDO FINAL em ${dados.saldoFinal.dataSaldo}\n`;
-      csv += '-'.repeat(40) + '\n';
+      csv += `Saldo final em ${dados.saldoFinal.dataSaldo}\n`;
       dados.saldoFinal.itens.forEach(item => {
-        csv += this.itemParaCSV('Saldo Final', item);
+        csv += this.itemParaCSVSimples('Saldo Final', item);
       });
-      csv += this.totaisParaCSV('Saldo Final', dados.saldoFinal);
+      csv += this.totaisParaCSVSimples('Saldo Final - TOTAL', dados.saldoFinal);
     }
-
-    // Resumo executivo
-    csv += '\nRESUMO EXECUTIVO\n';
-    csv += '='.repeat(80) + '\n';
-    csv += this.gerarResumoExecutivoCSV(dados);
-    
-    // Rodapé corporativo
-    csv += '\nRODAPÉ CORPORATIVO\n';
-    csv += '='.repeat(80) + '\n';
-    csv += 'Documento gerado automaticamente pelo sistema Bradesco Corporate\n';
-    csv += 'Este documento é confidencial e de uso interno da empresa\n';
-    csv += 'Para dúvidas, entre em contato com seu gerente de relacionamento\n';
-    csv += 'Bradesco Corporate - Global Solutions\n';
-    csv += `Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}\n`;
-    csv += '='.repeat(80) + '\n';
 
     return csv;
   }
@@ -1005,6 +1073,20 @@ export class ExtratoPdfService {
     resumo += `Percentual de Variação: ${percentualVariacao.toFixed(2).replace('.', ',')}%\n`;
     
     return resumo;
+  }
+
+  /**
+   * Converte item para CSV seguindo padrão da imagem
+   */
+  private itemParaCSVSimples(secao: string, item: any): string {
+    return `${secao},########,########,########,${item.taxa || ''},${this.formatarMoeda(item.valorPrincipal)},${this.formatarMoeda(item.valorBruto)},${this.formatarMoeda(item.rendaTotal)},${this.formatarMoeda(item.iof)},${this.formatarMoeda(item.irrf)},${this.formatarMoeda(item.valorLiquido)},${this.formatarMoeda(item.rendaBrutaPer)}\n`;
+  }
+
+  /**
+   * Converte totais para CSV seguindo padrão da imagem
+   */
+  private totaisParaCSVSimples(secao: string, dados: any): string {
+    return `${secao},,,,,${this.formatarMoeda(dados.totalValorPrincipal)},${this.formatarMoeda(dados.totalValorBruto)},${this.formatarMoeda(dados.totalRendaTotal)},${this.formatarMoeda(dados.totalIof)},${this.formatarMoeda(dados.totalIrrf)},${this.formatarMoeda(dados.totalValorLiquido)},${this.formatarMoeda(dados.totalRendaBrutaPer)}\n`;
   }
 
   /**
