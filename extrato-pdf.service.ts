@@ -68,93 +68,56 @@ export class ExtratoPdfService {
   }
 
   private converterParaCSV(dados: ExtratoDados): string {
-    // Cabeçalho corporativo profissional
-    let csv = `${this.BRAND_NAME}\n`;
-    csv += `${this.BRAND_SUBTITLE}\n`;
-    csv += 'SALDO E EXTRATO\n';
-    csv += '='.repeat(80) + '\n\n';
-    
-    // Informações do relatório
-    csv += 'INFORMAÇÕES DO RELATÓRIO\n';
-    csv += '-'.repeat(40) + '\n';
-    csv += `Data da transação: ${dados.dataBusca}\n`;
-    csv += `Número de controle: ${dados.dataBusca.replace(/\//g, '')}001\n`;
-    csv += `Data de geração: ${new Date().toLocaleDateString('pt-BR')}\n`;
-    csv += `Hora de geração: ${new Date().toLocaleTimeString('pt-BR')}\n\n`;
-    
-    // Detalhes da empresa
-    csv += 'DETALHES DA PESQUISA\n';
-    csv += '-'.repeat(40) + '\n';
-    csv += `Empresa: ${dados.empresa}\n`;
-    csv += `Agência/Conta: ${dados.agencia}\n`;
-    csv += `Tipo de investimento: ${dados.tipoInvestimento}\n`;
-    csv += `Tipo de produto: ${dados.tipoProduto}\n\n`;
-    
-    // Cabeçalho da tabela principal
-    csv += 'DADOS DO EXTRATO\n';
-    csv += '-'.repeat(40) + '\n';
-    csv += 'Seção,Data Aplica,Data Vencir,Data Resgal,Taxa (%),Valor Princi,Valor Bruto,Renda Tota,IOF (BRL),IRRF (BRL),Valor Líquic,Renda Bruta Per (BRL)\n';
+    // Cabeçalho simples igual à imagem
+    let csv = 'Seção,Data Aplica,Data Vencir,Data Resgal,Taxa (%),Valor Princi,Valor Bruto,Renda Tota,IOF (BRL),IRRF (BRL),Valor Líquic,Renda Bruta Per (BRL)\n';
 
+    // Saldo anterior
     if (dados.saldoAnterior?.itens) {
-      csv += `\nSALDO ANTERIOR em ${dados.saldoAnterior.dataSaldo}\n`;
-      csv += '-'.repeat(40) + '\n';
+      csv += `Saldo anterior em ${dados.saldoAnterior.dataSaldo}\n`;
       dados.saldoAnterior.itens.forEach(item => {
-        csv += this.itemParaCSVProfissional('Saldo Anterior', item);
+        csv += this.itemParaCSVSimples('Saldo Anter', item);
       });
-      csv += this.totaisParaCSVProfissional('Saldo Anterior', dados.saldoAnterior);
+      csv += this.totaisParaCSVSimples('Saldo Anterior - TOTAL', dados.saldoAnterior);
     }
 
+    // Aplicações
     if (dados.aplicacoes?.itens) {
-      csv += '\nAPLICAÇÕES\n';
-      csv += '-'.repeat(40) + '\n';
+      csv += 'Aplicações\n';
       dados.aplicacoes.itens.forEach(item => {
-        csv += this.itemParaCSVProfissional('Aplicações', item);
+        csv += this.itemParaCSVSimples('Aplicações', item);
       });
-      csv += this.totaisParaCSVProfissional('Aplicações', dados.aplicacoes);
+      csv += this.totaisParaCSVSimples('Aplicações - TOTAL', dados.aplicacoes);
     }
 
+    // Resgates/Vencimentos
     if (dados.resgates?.itens) {
-      csv += '\nRESGATES/VENCIMENTOS\n';
-      csv += '-'.repeat(40) + '\n';
+      csv += 'Resgates/Vencimentos\n';
       dados.resgates.itens.forEach(item => {
-        csv += this.itemParaCSVProfissional('Resgates', item);
+        csv += this.itemParaCSVSimples('Resgates', item);
       });
-      csv += this.totaisParaCSVProfissional('Resgates', dados.resgates);
+      csv += this.totaisParaCSVSimples('Resgates - TOTAL', dados.resgates);
     }
 
+    // Saldo final
     if (dados.saldoFinal?.itens) {
-      csv += `\nSALDO FINAL em ${dados.saldoFinal.dataSaldo}\n`;
-      csv += '-'.repeat(40) + '\n';
+      csv += `Saldo final em ${dados.saldoFinal.dataSaldo}\n`;
       dados.saldoFinal.itens.forEach(item => {
-        csv += this.itemParaCSVProfissional('Saldo Final', item);
+        csv += this.itemParaCSVSimples('Saldo Final', item);
       });
-      csv += this.totaisParaCSVProfissional('Saldo Final', dados.saldoFinal);
+      csv += this.totaisParaCSVSimples('Saldo Final - TOTAL', dados.saldoFinal);
     }
-
-    // Resumo executivo
-    csv += '\nRESUMO EXECUTIVO\n';
-    csv += '='.repeat(80) + '\n';
-    csv += this.gerarResumoExecutivoCSV(dados);
-    
-    // Rodapé corporativo
-    csv += '\nRODAPÉ CORPORATIVO\n';
-    csv += '='.repeat(80) + '\n';
-    csv += 'Documento gerado automaticamente pelo sistema Bradesco Corporate\n';
-    csv += 'Este documento é confidencial e de uso interno da empresa\n';
-    csv += 'Para dúvidas, entre em contato com seu gerente de relacionamento\n';
-    csv += 'Bradesco Corporate - Global Solutions\n';
-    csv += `Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}\n`;
-    csv += '='.repeat(80) + '\n';
 
     return csv;
   }
 
   private itemParaCSVSimples(secao: string, item: ExtratoItem): string {
-    return `${secao},########,########,########,${item.taxa || ''},${this.formatarMoeda(item.valorPrincipal || 0)},${this.formatarMoeda(item.valorBruto || 0)},${this.formatarMoeda(item.rendaTotal || 0)},${this.formatarMoeda(item.iof || 0)},${this.formatarMoeda(item.irrf || 0)},${this.formatarMoeda(item.valorLiquido || 0)},${this.formatarMoeda(item.rendaBrutaPer || 0)}\n`;
+    const formatarNumero = (valor: number | undefined) => valor ? valor.toFixed(2) : '';
+    return `${secao},########,########,########,${item.taxa ? item.taxa.toFixed(2) : ''},${formatarNumero(item.valorPrincipal)},${formatarNumero(item.valorBruto)},${formatarNumero(item.rendaTotal)},${formatarNumero(item.iof)},${formatarNumero(item.irrf)},${formatarNumero(item.valorLiquido)},${formatarNumero(item.rendaBrutaPer)}\n`;
   }
 
   private totaisParaCSVSimples(secao: string, dados: ExtratoSecao): string {
-    return `${secao},,,,,${this.formatarMoeda(dados.totalValorPrincipal)},${this.formatarMoeda(dados.totalValorBruto)},${this.formatarMoeda(dados.totalRendaTotal)},${this.formatarMoeda(dados.totalIof)},${this.formatarMoeda(dados.totalIrrf)},${this.formatarMoeda(dados.totalValorLiquido)},${this.formatarMoeda(dados.totalRendaBrutaPer || 0)}\n`;
+    const formatarNumero = (valor: number | undefined) => valor ? valor.toFixed(2) : '';
+    return `${secao},,,,,${formatarNumero(dados.totalValorPrincipal)},${formatarNumero(dados.totalValorBruto)},${formatarNumero(dados.totalRendaTotal)},${formatarNumero(dados.totalIof)},${formatarNumero(dados.totalIrrf)},${formatarNumero(dados.totalValorLiquido)},${formatarNumero(dados.totalRendaBrutaPer)}\n`;
   }
 
   private itemParaCSVProfissional(secao: string, item: ExtratoItem): string {
