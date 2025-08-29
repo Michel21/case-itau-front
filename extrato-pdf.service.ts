@@ -561,17 +561,17 @@ export class ExtratoPdfService {
       </tr>
       ${secao.itens.map((item: any) => `
         <tr class="data-row">
-          <td>${this.formatarData(item.dataAplicacao)}</td>
-          <td>${this.formatarData(item.dataVencimento)}</td>
-          <td>${this.formatarData(item.dataResgate) || ''}</td>
-          <td>${item.taxa || ''}</td>
-          <td class="currency">${this.formatarMoeda(item.valorPrincipal)}</td>
-          <td class="currency">${this.formatarMoeda(item.valorBruto)}</td>
-          <td class="currency">${this.formatarMoeda(item.rendaTotal)}</td>
-          <td class="currency">${this.formatarMoeda(item.iof)}</td>
-          <td class="currency">${this.formatarMoeda(item.irrf)}</td>
-          <td class="currency">${this.formatarMoeda(item.valorLiquido)}</td>
-          <td class="currency">${this.formatarMoeda(item.rendaBrutaPer)}</td>
+          <td>${this.formatarData(item?.dataAplicacao || '')}</td>
+          <td>${this.formatarData(item?.dataVencimento || '')}</td>
+          <td>${this.formatarData(item?.dataResgate || '') || ''}</td>
+          <td>${item?.taxa || ''}</td>
+          <td class="currency">${this.formatarMoeda(item?.valorPrincipal || 0)}</td>
+          <td class="currency">${this.formatarMoeda(item?.valorBruto || 0)}</td>
+          <td class="currency">${this.formatarMoeda(item?.rendaTotal || 0)}</td>
+          <td class="currency">${this.formatarMoeda(item?.iof || 0)}</td>
+          <td class="currency">${this.formatarMoeda(item?.irrf || 0)}</td>
+          <td class="currency">${this.formatarMoeda(item?.valorLiquido || 0)}</td>
+          <td class="currency">${this.formatarMoeda(item?.rendaBrutaPer || 0)}</td>
         </tr>
       `).join('')}
       <tr class="total-row">
@@ -579,19 +579,19 @@ export class ExtratoPdfService {
         <td></td>
         <td></td>
         <td></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao.totalValorPrincipal)}</strong></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao.totalValorBruto)}</strong></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao.totalRendaTotal)}</strong></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao.totalIof)}</strong></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao.totalIrrf)}</strong></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao.totalValorLiquido)}</strong></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao.totalRendaBrutaPer)}</strong></td>
+        <td class="currency"><strong>${this.formatarMoeda(secao?.totalValorPrincipal || 0)}</strong></td>
+        <td class="currency"><strong>${this.formatarMoeda(secao?.totalValorBruto || 0)}</strong></td>
+        <td class="currency"><strong>${this.formatarMoeda(secao?.totalRendaTotal || 0)}</strong></td>
+        <td class="currency"><strong>${this.formatarMoeda(secao?.totalIof || 0)}</strong></td>
+        <td class="currency"><strong>${this.formatarMoeda(secao?.totalIrrf || 0)}</strong></td>
+        <td class="currency"><strong>${this.formatarMoeda(secao?.totalValorLiquido || 0)}</strong></td>
+        <td class="currency"><strong>${this.formatarMoeda(secao?.totalRendaBrutaPer || 0)}</strong></td>
       </tr>
     `;
   }
 
-  private formatarData(data: string): string {
-    return data;
+  private formatarData(data: string | undefined | null): string {
+    return data || '';
   }
 
   private formatarMoeda(valor: number): string {
