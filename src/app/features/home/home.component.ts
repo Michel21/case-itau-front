@@ -134,16 +134,10 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // Helper methods for display
   getBreedName(item: ICatsTypes): string {
-    if (item?.breeds && item.breeds.length > 0) {
-      return item.breeds[0].name;
-    }
-    return 'Raça não disponível';
+    return item?.name || 'Raça não disponível';
   }
 
   getDescription(item: ICatsTypes): string {
-    if (item?.breeds && item.breeds.length > 0 && item.breeds[0].description) {
-      return item.breeds[0].description;
-    }
-    return 'Descrição não disponível';
+    return item?.description || 'Descrição não disponível';
   }
 }

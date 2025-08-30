@@ -1,34 +1,51 @@
 export interface ICatsTypes {
+  weight: {
+    imperial: string;
+    metric: string;
+  };
   id: string;
-  url: string;
   name: string;
-  width: string;
-  height: string;
-  mime_type: string;
-  entities: [];
+  cfa_url?: string;
+  vetstreet_url?: string;
+  vcahospitals_url?: string;
+  temperament: string;
   origin: string;
-  breeds: Breed[];
-  animals: [];
-  categories: [];
-  temperament?: string;
-  description?: string;
-  intelligence?: number;
-  adaptability?: number;
-  life_span?: string;
-  image?: {
-    url: string;
+  country_codes: string;
+  country_code: string;
+  description: string;
+  life_span: string;
+  indoor: number;
+  lap?: number;
+  alt_names?: string;
+  adaptability: number;
+  affection_level: number;
+  child_friendly: number;
+  cat_friendly?: number;
+  dog_friendly: number;
+  energy_level: number;
+  grooming: number;
+  health_issues: number;
+  intelligence: number;
+  shedding_level: number;
+  social_needs: number;
+  stranger_friendly: number;
+  vocalisation: number;
+  bidability?: number;
+  experimental: number;
+  hairless: number;
+  natural: number;
+  rare: number;
+  rex: number;
+  suppressed_tail: number;
+  short_legs: number;
+  wikipedia_url: string;
+  hypoallergenic: number;
+  reference_image_id: string;
+  image: {
+    id: string;
     width: number;
     height: number;
+    url: string;
   };
 }
 
-export interface Breed {
-  id: number;
-  name: string;
-  wikipedia_url: string;
-  temperament?: string;
-  description?: string;
-  intelligence?: number;
-  adaptability?: number;
-  life_span?: string;
-}
