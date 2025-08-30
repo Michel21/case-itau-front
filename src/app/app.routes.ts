@@ -8,7 +8,7 @@ import { catDetailResolver } from './resolvers/cat-detail.resolver';
 export const routes: Routes = [
   {
     path: 'auth',
-    loadChildren: () => import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES)
+    loadChildren: () => import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES) as any
   },
   {
     path: 'home',

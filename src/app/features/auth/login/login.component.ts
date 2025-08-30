@@ -45,7 +45,7 @@ export class LoginComponent {
     this.buttonState.set('normal');
   }
 
-  async onSubmit(): Promise<void> {
+  onSubmit(): void {
     if (!this.email() || !this.password()) {
       this.errorMessage.set('Por favor, preencha todos os campos');
       return;
@@ -54,20 +54,21 @@ export class LoginComponent {
     this.isLoading.set(true);
     this.errorMessage.set('');
 
-    try {
-      const success = await this.authService.login(this.email(), this.password()).toPromise();
-      
-      if (success) {
-        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/home';
-        this.router.navigate([returnUrl]);
-      } else {
-        this.errorMessage.set('Credenciais inválidas');
+    this.authService.login(this.email(), this.password()).subscribe({
+      next: (success) => {
+        if (success) {
+          const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/home';
+          this.router.navigate([returnUrl]);
+        } else {
+          this.errorMessage.set('Credenciais inválidas');
+        }
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        this.errorMessage.set('Erro ao fazer login');
+        this.isLoading.set(false);
       }
-    } catch (error) {
-      this.errorMessage.set('Erro ao fazer login');
-    } finally {
-      this.isLoading.set(false);
-    }
+    });
   }
 
   // Credenciais de teste
