@@ -1,198 +1,249 @@
 <div class="extrato-container">
-    <!-- Cabeçalho -->
-    <div class="header">
-        <div class="header-left">
-            <div class="logo">bradesco</div>
-            <div class="subtitle">corporate</div>
-            <div class="global-solutions">global solutions</div>
+  <!-- Header do Extrato -->
+  <header class="extrato-header">
+    <div class="header-content">
+      <div class="header-title">
+        <h1 class="main-title">Extrato Bancário</h1>
+        <div class="transaction-details">
+          <div class="detail-item">
+            <span class="detail-label">Data da transação:</span>
+            <span class="detail-value">{{ getDataGeracao() }} - {{ getHoraGeracao() }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Número de controle:</span>
+            <span class="detail-value">{{ getNumeroControle() }}</span>
+          </div>
         </div>
-        <div class="header-right">
-            <div class="report-title">Saldo e extrato</div>
-            <div class="transaction-details">
-                <div>Data da transação: {{ getDataGeracao() }} - {{ getHoraGeracao() }}</div>
-                <div>Número de controle: {{ getNumeroControle() }}</div>
-            </div>
-        </div>
+      </div>
     </div>
+  </header>
 
-    <!-- Detalhes da Pesquisa -->
-    <div class="search-details">
-        <h3>Detalhes da Pesquisa</h3>
-        <div class="detail-grid">
-            <div class="detail-item">
-                <span class="detail-label">Empresa | CNPJ: </span>
-                <span class="detail-value">{{ dadosAtuais.empresa }} | 49.320.901/0001-50</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">Agência | Conta: </span>
-                <span class="detail-value">{{ dadosAtuais.agencia }}</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">Data da busca: </span>
-                <span class="detail-value">{{ dadosAtuais.dataBusca }}</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">Tipo de investimento: </span>
-                <span class="detail-value">{{ dadosAtuais.tipoInvestimento }}</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">Tipo de Produto: </span>
-                <span class="detail-value">{{ dadosAtuais.tipoProduto }}</span>
-            </div>
-        </div>
+  <!-- Detalhes da Pesquisa -->
+  <section class="search-details">
+    <h2 class="section-title">Detalhes da Pesquisa</h2>
+    <div class="details-grid">
+      <div class="detail-card">
+        <span class="detail-label">Empresa | CNPJ:</span>
+                 <span class="detail-value">{{ dadosAtuais?.empresa }}</span>
+      </div>
+      <div class="detail-card">
+        <span class="detail-label">Agência | Conta:</span>
+                 <span class="detail-value">{{ dadosAtuais?.agencia }}</span>
+      </div>
+      <div class="detail-card">
+        <span class="detail-label">Data da busca:</span>
+                 <span class="detail-value">{{ dadosAtuais?.dataBusca }}</span>
+      </div>
+      <div class="detail-card">
+        <span class="detail-label">Tipo de investimento:</span>
+                 <span class="detail-value">{{ dadosAtuais?.tipoInvestimento }}</span>
+      </div>
+      <div class="detail-card">
+        <span class="detail-label">Tipo de Produto:</span>
+                 <span class="detail-value">{{ dadosAtuais?.tipoProduto }}</span>
+      </div>
     </div>
+  </section>
 
-    <!-- Tabela Principal com Dados Dinâmicos -->
+  <!-- Tabela Principal -->
+  <section class="table-section">
     <div class="table-container">
-        <table class="financial-table">
-            <thead>
-                <tr class="table-header">
-                    <th>Data aplic.</th>
-                    <th>Data vencto.</th>
-                    <th>Resgate/Carência</th>
-                    <th>Taxa (%)</th>
-                    <th>Valor princ. (BRL)</th>
-                    <th>Valor Bruto (BRL)</th> 
-                    <th>Renda total (BRL)</th>
-                    <th>IOF (BRL)</th>
-                    <th>IRRF (BRL)</th>
-                    <th>Valor Líquido (BRL)</th>
-                    <th>Renda bruta per</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Saldo Anterior -->
-                <tr *ngIf="dadosAtuais.saldoAnterior?.itens?.length" class="section-title">
-                    <th colspan="11">Saldo anterior em {{ dadosAtuais.saldoAnterior?.dataSaldo }}</th>
-                </tr>
-                <tr *ngFor="let item of dadosAtuais.saldoAnterior?.itens" class="data-row">
-                    <td>{{ item.dataAplicacao }}</td>
-                    <td>{{ item.dataVencimento }}</td>
-                    <td>{{ item.dataResgate || '' }}</td>
-                    <td>{{ item.taxa || '' }}</td>
-                    <td class="currency">{{ item.valorPrincipal | extratoFormat:'moeda' }}</td>
-                    <td class="currency">{{ item.valorBruto | extratoFormat:'moeda' }}</td>
-                    <td class="currency">{{ item.rendaTotal | extratoFormat:'moeda' }}</td>
-                    <td class="currency">{{ item.iof | extratoFormat:'moeda' }}</td>
-                    <td class="currency">{{ item.irrf | extratoFormat:'moeda' }}</td>
-                    <td class="currency">{{ item.valorLiquido | extratoFormat:'moeda' }}</td>
-                    <td class="currency">{{ item.rendaBrutaPer | extratoFormat:'moeda' }}</td>
-                </tr>
-                <tr class="total-row" *ngIf="dadosAtuais.saldoAnterior?.itens?.length">
-                    <td><strong>Total</strong></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td class="currency"><strong>{{ dadosAtuais.saldoAnterior?.totalValorPrincipal | extratoFormat:'moeda' }}</strong></td>
-                    <td class="currency"><strong>{{ dadosAtuais.saldoAnterior?.totalValorBruto | extratoFormat:'moeda' }}</strong></td>
-                    <td class="currency"><strong>{{ dadosAtuais.saldoAnterior?.totalRendaTotal | extratoFormat:'moeda' }}</strong></td>
-                    <td class="currency"><strong>{{ dadosAtuais.saldoAnterior?.totalIof | extratoFormat:'moeda' }}</strong></td>
-                    <td class="currency"><strong>{{ dadosAtuais.saldoAnterior?.totalIrrf | extratoFormat:'moeda' }}</strong></td>
-                    <td class="currency"><strong>{{ dadosAtuais.saldoAnterior?.totalValorLiquido | extratoFormat:'moeda' }}</strong></td>
-                    <td class="currency"><strong>{{ dadosAtuais.saldoAnterior?.totalRendaBrutaPer | extratoFormat:'moeda' }}</strong></td>
-                </tr>
+      <table class="financial-table">
+        <thead>
+          <tr class="table-header">
+            <th>Data aplic.</th>
+            <th>Data vencto.</th>
+            <th>Resgate/Carência</th>
+            <th>Taxa (%)</th>
+            <th>Valor princ. (BRL)</th>
+            <th>Valor Bruto (BRL)</th>
+            <th>Renda total (BRL)</th>
+            <th>IOF (BRL)</th>
+            <th>IRRF (BRL)</th>
+            <th>Valor Líquido (BRL)</th>
+            <th>Renda bruta per</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Saldo Anterior -->
+         @if (temSaldoAnterior) {
+            <tr class="section-title">
+              <th colspan="11">Saldo anterior em {{ dadosAtuais?.saldoAnterior?.dataSaldo }}</th>
+            </tr>
+            @for (item of dadosAtuais?.saldoAnterior?.itens; track $index) {
+              <tr class="data-row">
+                <td>{{ item.dataAplicacao }}</td>
+                <td>{{ item.dataVencimento }}</td>
+                <td>{{ item.dataResgate || '' }}</td>
+                <td>{{ item.taxa || '' }}</td>
+                <td class="currency">{{ formatarMoeda(item.valorPrincipal) }}</td>
+                <td class="currency">{{ formatarMoeda(item.valorBruto) }}</td>
+                <td class="currency">{{ formatarMoeda(item.rendaTotal) }}</td>
+                <td class="currency">{{ formatarMoeda(item.iof) }}</td>
+                <td class="currency">{{ formatarMoeda(item.irrf) }}</td>
+                <td class="currency">{{ formatarMoeda(item.valorLiquido) }}</td>
+                <td class="currency">{{ formatarMoeda(item.rendaBrutaPer) }}</td>
+              </tr>
+            }
+            <tr class="total-row">
+              <td><strong>Total</strong></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.saldoAnterior?.totalValorPrincipal) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.saldoAnterior?.totalValorBruto) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.saldoAnterior?.totalRendaTotal) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.saldoAnterior?.totalIof) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.saldoAnterior?.totalIrrf) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.saldoAnterior?.totalValorLiquido) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.saldoAnterior?.totalRendaBrutaPer) }}</strong></td>
+            </tr>
+          }
 
-                <!-- Aplicações -->
-                <tr *ngIf="dadosAtuais.aplicacoes?.itens?.length" class="section-title">
-                    <th colspan="11">Aplicações</th>
-                </tr>
-                <tr *ngFor="let item of dadosAtuais.aplicacoes?.itens" class="data-row">
-                    <td>{{ item.dataAplicacao }}</td>
-                    <td>{{ item.dataVencimento }}</td>
-                    <td>{{ item.dataResgate || '' }}</td>
-                    <td>{{ item.taxa || '' }}</td>
-                    <td class="currency">{{ item.valorPrincipal | extratoFormat:'moeda' }}</td>
-                    <td class="currency">{{ item.valorBruto | extratoFormat:'moeda' }}</td>
-                    <td class="currency">{{ item.rendaTotal | extratoFormat:'moeda' }}</td>
-                    <td class="currency">{{ item.iof | extratoFormat:'moeda' }}</td>
-                    <td class="currency">{{ item.irrf | extratoFormat:'moeda' }}</td>
-                    <td class="currency">{{ item.valorLiquido | extratoFormat:'moeda' }}</td>
-                    <td class="currency">{{ item.rendaBrutaPer | extratoFormat:'moeda' }}</td>
-                </tr>
-                <tr class="total-row" *ngIf="dadosAtuais.aplicacoes?.itens?.length">
-                    <td><strong>Total</strong></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td class="currency"><strong>{{ dadosAtuais.aplicacoes?.totalValorPrincipal | extratoFormat:'moeda' }}</strong></td>
-                    <td class="currency"><strong>{{ dadosAtuais.aplicacoes?.totalValorBruto | extratoFormat:'moeda' }}</strong></td>
-                    <td class="currency"><strong>{{ dadosAtuais.aplicacoes?.totalRendaTotal | extratoFormat:'moeda' }}</strong></td>
-                    <td class="currency"><strong>{{ dadosAtuais.aplicacoes?.totalIof | extratoFormat:'moeda' }}</strong></td>
-                    <td class="currency"><strong>{{ dadosAtuais.aplicacoes?.totalIrrf | extratoFormat:'moeda' }}</strong></td>
-                    <td class="currency"><strong>{{ dadosAtuais.aplicacoes?.totalValorLiquido | extratoFormat:'moeda' }}</strong></td>
-                    <td class="currency"><strong>{{ dadosAtuais.aplicacoes?.totalRendaBrutaPer | extratoFormat:'moeda' }}</strong></td>
-                </tr>
+          <!-- Aplicações -->
+        @if (temAplicacoes) {
+            <tr class="section-title">
+              <th colspan="11">Aplicações</th>
+            </tr>
+            @for (item of dadosAtuais?.aplicacoes?.itens; track $index) {
+              <tr class="data-row">
+                <td>{{ item.dataAplicacao }}</td>
+                <td>{{ item.dataVencimento }}</td>
+                <td>{{ item.dataResgate || '' }}</td>
+                <td>{{ item.taxa || '' }}</td>
+                <td class="currency">{{ formatarMoeda(item.valorPrincipal) }}</td>
+                <td class="currency">{{ formatarMoeda(item.valorBruto) }}</td>
+                <td class="currency">{{ formatarMoeda(item.rendaTotal) }}</td>
+                <td class="currency">{{ formatarMoeda(item.iof) }}</td>
+                <td class="currency">{{ formatarMoeda(item.irrf) }}</td>
+                <td class="currency">{{ formatarMoeda(item.valorLiquido) }}</td>
+                <td class="currency">{{ formatarMoeda(item.rendaBrutaPer) }}</td>
+              </tr>
+            }
+            <tr class="total-row">
+              <td><strong>Total</strong></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.aplicacoes?.totalValorPrincipal) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.aplicacoes?.totalValorBruto) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.aplicacoes?.totalRendaTotal) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.aplicacoes?.totalIof) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.aplicacoes?.totalIrrf) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.aplicacoes?.totalValorLiquido) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.aplicacoes?.totalRendaBrutaPer) }}</strong></td>
+            </tr>
+          }
 
-                <!-- Resgates/Vencimentos -->
-                <tr *ngIf="dadosAtuais.resgates?.itens?.length" class="section-title">
-                    <th colspan="11">Resgates/Vencimentos</th>
-                </tr>
-                <tr *ngFor="let item of dadosAtuais.resgates?.itens" class="data-row">
-                    <td>{{ item.dataAplicacao }}</td>
-                    <td>{{ item.dataVencimento }}</td>
-                    <td>{{ item.dataResgate || '' }}</td>
-                    <td>{{ item.taxa || '' }}</td>
-                    <td class="currency">{{ item.valorPrincipal | extratoFormat:'moeda' }}</td>
-                    <td class="currency">{{ item.valorBruto | extratoFormat:'moeda' }}</td>
-                    <td class="currency">{{ item.rendaTotal | extratoFormat:'moeda' }}</td>
-                    <td class="currency">{{ item.iof | extratoFormat:'moeda' }}</td>
-                    <td class="currency">{{ item.irrf | extratoFormat:'moeda' }}</td>
-                    <td class="currency">{{ item.valorLiquido | extratoFormat:'moeda' }}</td>
-                    <td class="currency">{{ item.rendaBrutaPer | extratoFormat:'moeda' }}</td>
-                </tr>
-                <tr class="total-row" *ngIf="dadosAtuais.resgates?.itens?.length">
-                    <td><strong>Total</strong></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td class="currency"><strong>{{ dadosAtuais.resgates?.totalValorPrincipal | extratoFormat:'moeda' }}</strong></td>
-                    <td class="currency"><strong>{{ dadosAtuais.resgates?.totalValorBruto | extratoFormat:'moeda' }}</strong></td>
-                    <td class="currency"><strong>{{ dadosAtuais.resgates?.totalRendaTotal | extratoFormat:'moeda' }}</strong></td>
-                    <td class="currency"><strong>{{ dadosAtuais.resgates?.totalIof | extratoFormat:'moeda' }}</strong></td>
-                    <td class="currency"><strong>{{ dadosAtuais.resgates?.totalIrrf | extratoFormat:'moeda' }}</strong></td>
-                    <td class="currency"><strong>{{ dadosAtuais.resgates?.totalValorLiquido | extratoFormat:'moeda' }}</strong></td>
-                    <td class="currency"><strong>{{ dadosAtuais.resgates?.totalRendaBrutaPer | extratoFormat:'moeda' }}</strong></td>
-                </tr>
+          <!-- Resgates -->
+        @if (temResgates) {
+            <tr class="section-title">
+              <th colspan="11">Resgates/Vencimentos</th>
+            </tr>
+            @for (item of dadosAtuais?.resgates?.itens; track $index) {
+              <tr class="data-row">
+                <td>{{ item.dataAplicacao }}</td>
+                <td>{{ item.dataVencimento }}</td>
+                <td>{{ item.dataResgate || '' }}</td>
+                <td>{{ item.taxa || '' }}</td>
+                <td class="currency">{{ formatarMoeda(item.valorPrincipal) }}</td>
+                <td class="currency">{{ formatarMoeda(item.valorBruto) }}</td>
+                <td class="currency">{{ formatarMoeda(item.rendaTotal) }}</td>
+                <td class="currency">{{ formatarMoeda(item.iof) }}</td>
+                <td class="currency">{{ formatarMoeda(item.irrf) }}</td>
+                <td class="currency">{{ formatarMoeda(item.valorLiquido) }}</td>
+                <td class="currency">{{ formatarMoeda(item.rendaBrutaPer) }}</td>
+              </tr>
+            }
+            <tr class="total-row">
+              <td><strong>Total</strong></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.resgates?.totalValorPrincipal) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.resgates?.totalValorBruto) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.resgates?.totalRendaTotal) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.resgates?.totalIof) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.resgates?.totalIrrf) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.resgates?.totalValorLiquido) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.resgates?.totalRendaBrutaPer) }}</strong></td>
+            </tr>
+          }
 
-                <!-- Saldo Final -->
-                <tr *ngIf="dadosAtuais.saldoFinal?.itens?.length" class="section-title">
-                    <th colspan="11">Saldo final em {{ dadosAtuais.saldoFinal?.dataSaldo }}</th>
-                </tr>
-                <tr *ngFor="let item of dadosAtuais.saldoFinal?.itens" class="data-row">
-                    <td>{{ item.dataAplicacao }}</td>
-                    <td>{{ item.dataVencimento }}</td>
-                    <td>{{ item.dataResgate || '' }}</td>
-                    <td>{{ item.taxa || '' }}</td>
-                    <td class="currency">{{ item.valorPrincipal | extratoFormat:'moeda' }}</td>
-                    <td class="currency">{{ item.valorBruto | extratoFormat:'moeda' }}</td>
-                    <td class="currency">{{ item.rendaTotal | extratoFormat:'moeda' }}</td>
-                    <td class="currency">{{ item.iof | extratoFormat:'moeda' }}</td>
-                    <td class="currency">{{ item.irrf | extratoFormat:'moeda' }}</td>
-                    <td class="currency">{{ item.valorLiquido | extratoFormat:'moeda' }}</td>
-                    <td class="currency">{{ item.rendaBrutaPer | extratoFormat:'moeda' }}</td>
-                </tr>
-                <tr class="total-row" *ngIf="dadosAtuais.saldoFinal?.itens?.length">
-                    <td><strong>Total</strong></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td class="currency"><strong>{{ dadosAtuais.saldoFinal?.totalValorPrincipal | extratoFormat:'moeda' }}</strong></td>
-                    <td class="currency"><strong>{{ dadosAtuais.saldoFinal?.totalValorBruto | extratoFormat:'moeda' }}</strong></td>
-                    <td class="currency"><strong>{{ dadosAtuais.saldoFinal?.totalRendaTotal | extratoFormat:'moeda' }}</strong></td>
-                    <td class="currency"><strong>{{ dadosAtuais.saldoFinal?.totalIof | extratoFormat:'moeda' }}</strong></td>
-                    <td class="currency"><strong>{{ dadosAtuais.saldoFinal?.totalIrrf | extratoFormat:'moeda' }}</strong></td>
-                    <td class="currency"><strong>{{ dadosAtuais.saldoFinal?.totalValorLiquido | extratoFormat:'moeda' }}</strong></td>
-                    <td class="currency"><strong>{{ dadosAtuais.saldoFinal?.totalRendaBrutaPer | extratoFormat:'moeda' }}</strong></td>
-                </tr>
-            </tbody>
-        </table>
+          <!-- Saldo Final -->
+         @if (temSaldoFinal) {
+            <tr class="section-title">
+              <th colspan="11">Saldo final em {{ dadosAtuais?.saldoFinal?.dataSaldo }}</th>
+            </tr>
+            @for (item of dadosAtuais?.saldoFinal?.itens; track $index) {
+              <tr class="data-row">
+                <td>{{ item.dataAplicacao }}</td>
+                <td>{{ item.dataVencimento }}</td>
+                <td>{{ item.dataResgate || '' }}</td>
+                <td>{{ item.taxa || '' }}</td>
+                <td class="currency">{{ formatarMoeda(item.valorPrincipal) }}</td>
+                <td class="currency">{{ formatarMoeda(item.valorBruto) }}</td>
+                <td class="currency">{{ formatarMoeda(item.rendaTotal) }}</td>
+                <td class="currency">{{ formatarMoeda(item.iof) }}</td>
+                <td class="currency">{{ formatarMoeda(item.irrf) }}</td>
+                <td class="currency">{{ formatarMoeda(item.valorLiquido) }}</td>
+                <td class="currency">{{ formatarMoeda(item.rendaBrutaPer) }}</td>
+              </tr>
+            }
+            <tr class="total-row">
+              <td><strong>Total</strong></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.saldoFinal?.totalValorPrincipal) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.saldoFinal?.totalValorBruto) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.saldoFinal?.totalRendaTotal) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.saldoFinal?.totalIof) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.saldoFinal?.totalIrrf) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.saldoFinal?.totalValorLiquido) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais?.saldoFinal?.totalRendaBrutaPer) }}</strong></td>
+            </tr>
+          }
+        </tbody>
+      </table>
     </div>
+  </section>
 
-    <!-- Botões de Ação -->
-    <div class="action-buttons">
-        <button class="btn btn-primary" (click)="gerarPDFCorporativo()">PDF Corporativo</button>
-        <button class="btn btn-secondary" (click)="gerarPDF()">Imprimir PDF</button>
-        <button class="btn btn-success" (click)="gerarCSV()">Exportar CSV</button>
-        <button class="btn btn-info" (click)="exportarHTML()">Exportar HTML</button>
+  <!-- Botões de Ação -->
+     <section class="action-buttons">
+    <div class="button-group">
+      <button class="btn btn-primary" (click)="gerarPDFCorporativo()">
+        <span class="btn-icon">📄</span>
+        <span class="btn-text">PDF Corporativo</span>
+      </button>
+      <button class="btn btn-secondary" (click)="gerarPDF()">
+        <span class="btn-icon">🖨️</span>
+        <span class="btn-text">Imprimir PDF</span>
+      </button>
+      <button class="btn btn-success" (click)="gerarCSV()">
+        <span class="btn-icon">📊</span>
+        <span class="btn-text">Exportar CSV</span>
+      </button>
+      <button class="btn btn-info" (click)="exportarHTML()">
+        <span class="btn-icon">🌐</span>
+        <span class="btn-text">Exportar HTML</span>
+      </button>
+      <button class="btn btn-outline" (click)="voltarParaHome()">
+        <span class="btn-icon">🏠</span>
+        <span class="btn-text">Voltar</span>
+      </button>
     </div>
+  </section>
+
+  <!-- Loading State -->
+  <div class="loading-overlay" style="display: none;">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">Carregando extrato...</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-message" style="display: none;">
+    <span class="error-icon">⚠️</span>
+    <span class="error-text">Erro ao carregar extrato</span>
+  </div>
 </div>

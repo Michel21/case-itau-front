@@ -1,6 +1,7 @@
-import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnInit, signal, computed, inject, ChangeDetectionStrategy, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-// import { ExtratoCsvService, CSVConfig } from './extrato-csv.service';
+import { Router } from '@angular/router';
+import { Subject } from 'rxjs';
 
 export interface ExtratoItem {
   dataAplicacao: string;
@@ -53,13 +54,16 @@ export interface ExtratoDados {
 @Component({
   selector: 'app-extrato-pdf',
   templateUrl: './extrato-pdf.component.html',
-  styleUrls: ['./extrato-pdf.component.css'],
+  styleUrls: ['./extrato-pdf.component.scss'],
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ExtratoPdfComponent implements OnInit {
+export class ExtratoPdfComponent implements OnInit, OnDestroy {
   @Input() extratoData: ExtratoDados | null = null;
+
+  private readonly router = inject(Router);
+  private readonly destroy$ = new Subject<void>();
 
   // Dados mock para teste baseados no template
   mockData: ExtratoDados = {
@@ -264,6 +268,16 @@ export class ExtratoPdfComponent implements OnInit {
     if (this.extratoData) {
       this.dadosAtuais = this.extratoData;
     }
+  }
+
+  // Utility methods
+  private temItens(secao: ExtratoSecao | undefined): boolean {
+    return secao !== undefined && secao.itens.length > 0;
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   // Método para gerar PDF usando impressão do navegador
@@ -609,10 +623,7 @@ export class ExtratoPdfComponent implements OnInit {
     `;
   }
 
-  // Método para verificar se uma seção tem itens
-  private temItens(secao: ExtratoSecao | undefined): boolean {
-    return secao !== undefined && secao.itens.length > 0;
-  }
+
 
   // Método para formatar valor monetário
   formatarMoeda(valor: number | null | undefined): string {
@@ -665,6 +676,11 @@ export class ExtratoPdfComponent implements OnInit {
   // Método para verificar se valor existe
   temValor(valor: any): boolean {
     return valor !== null && valor !== undefined && valor !== '';
+  }
+
+  // Navigation methods
+  public voltarParaHome(): void {
+    this.router.navigate(['/home']);
   }
 }
 

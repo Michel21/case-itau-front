@@ -1,0 +1,474 @@
+// Variáveis de cores
+$primary-color: #001e61;
+$primary-lighter-color: #5887da;
+$color-white: #FFFFFF;
+$color-default: #555555;
+$color-green: #36BA9B;
+$color-blue: #39AED9;
+$color-yellow: #F5B946;
+$color-red: #D94352;
+$error-color: #da1e28;
+$secundary-color-dark: #f4f4f9;
+$lightes-dark: #dbdbdb;
+$hover-color-green: #61DDBC;
+$hover-color-blue: #66D4F1;
+$hover-color-yellow: #FCD277;
+
+// Container principal
+.extrato-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  background: $color-white;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  color: $color-default;
+
+  &.print-mode {
+    .action-buttons,
+    .loading-overlay,
+    .error-message {
+      display: none !important;
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 1rem 0.5rem;
+  }
+}
+
+// Header do extrato
+.extrato-header {
+  background: linear-gradient(135deg, $primary-color 0%, $primary-lighter-color 100%);
+  color: $color-white;
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+
+  @media (max-width: 768px) {
+    padding: 1.5rem 1rem;
+  }
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
+.header-title {
+  flex: 1;
+}
+
+.main-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
+}
+
+.transaction-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+}
+
+.detail-label {
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.detail-value {
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+}
+
+// Seção de detalhes da pesquisa
+.search-details {
+  background: $secundary-color-dark;
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+
+  @media (max-width: 768px) {
+    padding: 1.5rem 1rem;
+  }
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: $primary-color;
+  margin: 0 0 1.5rem 0;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 0;
+    width: 3rem;
+    height: 2px;
+    background: $primary-color;
+    border-radius: 1px;
+  }
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+.detail-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: $color-white;
+  border-radius: 8px;
+  border-left: 4px solid $primary-color;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.detail-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: $color-default;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-value {
+  font-size: 1rem;
+  font-weight: 500;
+  color: $primary-color;
+  word-break: break-word;
+}
+
+// Seção da tabela
+.table-section {
+  margin-bottom: 2rem;
+}
+
+.table-container {
+  overflow-x: auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  background: $color-white;
+}
+
+.financial-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  min-width: 1000px;
+
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+  }
+}
+
+.table-header {
+  background: $primary-color;
+  color: $color-white;
+
+  th {
+    padding: 1rem 0.75rem;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid $primary-lighter-color;
+
+    @media (max-width: 768px) {
+      padding: 0.75rem 0.5rem;
+      font-size: 0.75rem;
+    }
+  }
+}
+
+.section-title {
+  background: $secundary-color-dark;
+  color: $primary-color;
+
+  th {
+    padding: 1rem 0.75rem;
+    text-align: left;
+    font-weight: 700;
+    font-size: 1rem;
+    border-bottom: 2px solid $primary-color;
+
+    @media (max-width: 768px) {
+      padding: 0.75rem 0.5rem;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.data-row {
+  border-bottom: 1px solid $lightes-dark;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background: $secundary-color-dark;
+  }
+
+  td {
+    padding: 0.75rem 0.5rem;
+    text-align: center;
+    vertical-align: middle;
+
+    @media (max-width: 768px) {
+      padding: 0.5rem 0.25rem;
+    }
+  }
+}
+
+.total-row {
+  background: $primary-color;
+  color: $color-white;
+  font-weight: 700;
+
+  td {
+    padding: 1rem 0.5rem;
+    text-align: center;
+    border-top: 2px solid $primary-lighter-color;
+
+    @media (max-width: 768px) {
+      padding: 0.75rem 0.25rem;
+    }
+  }
+}
+
+.currency {
+  font-family: 'Courier New', monospace;
+  font-weight: 500;
+  text-align: right;
+}
+
+// Botões de ação
+.action-buttons {
+  margin-top: 2rem;
+  padding: 2rem;
+  background: $secundary-color-dark;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+
+  @media (max-width: 768px) {
+    padding: 1.5rem 1rem;
+  }
+}
+
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  min-width: 140px;
+  justify-content: center;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: 1rem;
+  }
+}
+
+.btn-primary {
+  background: $primary-color;
+  color: $color-white;
+
+  &:hover {
+    background: $primary-lighter-color;
+  }
+}
+
+.btn-secondary {
+  background: $color-blue;
+  color: $color-white;
+
+  &:hover {
+    background: $hover-color-blue;
+  }
+}
+
+.btn-success {
+  background: $color-green;
+  color: $color-white;
+
+  &:hover {
+    background: $hover-color-green;
+  }
+}
+
+.btn-info {
+  background: $color-yellow;
+  color: $color-default;
+
+  &:hover {
+    background: $hover-color-yellow;
+  }
+}
+
+.btn-outline {
+  background: transparent;
+  color: $primary-color;
+  border: 2px solid $primary-color;
+
+  &:hover {
+    background: $primary-color;
+    color: $color-white;
+  }
+}
+
+.btn-icon {
+  font-size: 1.1rem;
+}
+
+.btn-text {
+  font-weight: 500;
+}
+
+// Estados de loading e erro
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid $lightes-dark;
+  border-top: 4px solid $primary-color;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 1rem;
+  color: $color-default;
+  font-weight: 500;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  background: $error-color;
+  color: $color-white;
+  border-radius: 8px;
+  margin: 1rem 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.error-icon {
+  font-size: 1.2rem;
+}
+
+.error-text {
+  font-weight: 500;
+}
+
+// Responsividade para impressão
+@media print {
+  .extrato-container {
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+  }
+
+  .action-buttons,
+  .loading-overlay,
+  .error-message {
+    display: none !important;
+  }
+
+  .financial-table {
+    font-size: 0.8rem;
+  }
+
+  .table-header th,
+  .data-row td,
+  .total-row td {
+    padding: 0.5rem 0.25rem;
+  }
+}
