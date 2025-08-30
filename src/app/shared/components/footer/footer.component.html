@@ -1,3 +1,75 @@
 <footer class="footer-container">
-    <p>Footer</p>
+  <div class="footer-content">
+    <!-- Main Footer Section -->
+    <div class="footer-main">
+      <div class="footer-section">
+        <h3 class="footer-title">{{ companyInfo().name }}</h3>
+        <p class="footer-description">{{ companyInfo().description }}</p>
+        <div class="footer-version">
+          <span class="version-label">Versão:</span>
+          <span class="version-number">{{ companyInfo().version }}</span>
+        </div>
+      </div>
+
+      <div class="footer-section">
+        <h4 class="footer-subtitle">Navegação</h4>
+        <nav class="footer-nav">
+          @for (link of footerLinks(); track link.path) {
+            <a 
+              class="footer-link" 
+              [class.active]="isActiveRoute(link.path)"
+              (click)="onNavigateTo(link.path)"
+              [title]="link.label"
+            >
+              <span class="footer-link-icon">{{ link.icon }}</span>
+              <span class="footer-link-text">{{ link.label }}</span>
+            </a>
+          }
+        </nav>
+      </div>
+
+      <div class="footer-section">
+        <h4 class="footer-subtitle">Redes Sociais</h4>
+        <div class="social-links">
+          @for (social of socialLinks(); track social.url) {
+            <a 
+              class="social-link" 
+              (click)="onExternalLink(social.url)"
+              [title]="social.label"
+            >
+              <span class="social-icon">{{ social.icon }}</span>
+              <span class="social-label">{{ social.label }}</span>
+            </a>
+          }
+        </div>
+      </div>
+
+      <div class="footer-section">
+        <h4 class="footer-subtitle">Informações</h4>
+        <div class="footer-info">
+          <div class="info-item">
+            <span class="info-label">Rota atual:</span>
+            <span class="info-value">{{ getCurrentRoute() }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Ano:</span>
+            <span class="info-value">{{ currentYear() }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Bottom -->
+    <div class="footer-bottom">
+      <div class="footer-divider"></div>
+      <div class="footer-copyright">
+        <p class="copyright-text">
+          © {{ currentYear() }} {{ companyInfo().name }}. Todos os direitos reservados.
+        </p>
+        <p class="copyright-subtext">
+          Desenvolvido com ❤️ usando Angular 19.2
+        </p>
+      </div>
+    </div>
+  </div>
 </footer>
