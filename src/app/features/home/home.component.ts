@@ -61,41 +61,14 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     // Effect to update cats when service data changes
     effect(() => {
       const cats = this.catsFromService();
-      console.log('Cats data received:', cats);
       if (cats && cats.length > 0) {
         this.catsSignal.set(cats);
-        console.log('First cat data:', cats[0]);
-        console.log('First cat image URL:', cats[0]?.image?.url);
-        console.log('First cat image object:', cats[0]?.image);
       }
     });
   }
 
   ngOnInit(): void {
     // Data is automatically loaded via toSignal
-    this.testApi();
-  }
-
-  private testApi(): void {
-    this.homeService.getCats().subscribe({
-      next: (data) => {
-        console.log('API Test - Raw data:', data);
-        if (data && data.length > 0) {
-          console.log('First cat from API:', data[0]);
-          console.log('Image URL:', data[0]?.image?.url);
-          console.log('Image object:', data[0]?.image);
-          
-          // Testa se a URL da imagem é válida
-          const img = new Image();
-          img.onload = () => console.log('✅ Image loads successfully:', data[0]?.image?.url);
-          img.onerror = () => console.log('❌ Image fails to load:', data[0]?.image?.url);
-          img.src = data[0]?.image?.url;
-        }
-      },
-      error: (error) => {
-        console.error('API Test - Error:', error);
-      }
-    });
   }
 
   ngAfterViewInit(): void {
