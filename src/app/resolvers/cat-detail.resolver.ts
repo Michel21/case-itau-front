@@ -15,10 +15,10 @@ export const catDetailResolver: ResolveFn<ICatsTypes | null> = (route, state) =>
     return of(null);
   }
 
-  return listDetailService.getCatById(catId).pipe(
-    map(cat => {
-      if (cat) {
-        return cat;
+  return listDetailService.getCatsId(catId).pipe(
+    map(cats => {
+      if (cats && cats.length > 0) {
+        return cats[0]; // Return first cat from array
       } else {
         router.navigate(['/home']);
         return null;

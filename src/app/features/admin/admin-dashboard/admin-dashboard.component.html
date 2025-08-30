@@ -1,0 +1,26 @@
+<div class="admin-dashboard" [@fadeInOut]>
+  <div class="admin-header">
+    <h1>🔧 Painel Administrativo</h1>
+    <div class="user-info">
+      <span>Bem-vindo, {{ authService.currentUser()?.name }}</span>
+      <button class="logout-btn" (click)="logout()">Sair</button>
+    </div>
+  </div>
+
+  <div class="admin-content">
+    <div class="admin-card">
+      <h2>📊 Estatísticas</h2>
+      <p>Área administrativa em desenvolvimento...</p>
+    </div>
+
+    <div class="admin-card">
+      <h2>👥 Gerenciamento de Usuários</h2>
+      <p>Funcionalidade em desenvolvimento...</p>
+    </div>
+
+    <div class="admin-card">
+      <h2>🐱 Gerenciamento de Gatos</h2>
+      <p>Funcionalidade em desenvolvimento...</p>
+    </div>
+  </div>
+</div>
