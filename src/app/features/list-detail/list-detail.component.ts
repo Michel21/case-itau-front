@@ -98,10 +98,10 @@ export class ListDetailComponent implements OnInit, OnDestroy {
   // Helper methods for computed values
   getCatImageUrl(): string {
     const details = this.details();
-    if (details?.url) {
-      return details.url;
+    if (details?.image?.url) {
+      return details.image.url;
     }
-    return this.state?.url || this.path;
+    return this.state?.image?.url || this.path;
   }
 
   getCatName(): string {
@@ -116,17 +116,11 @@ export class ListDetailComponent implements OnInit, OnDestroy {
 
   getCatBreedInfo(): string {
     const details = this.details();
-    if (details?.breeds && details.breeds.length > 0) {
-      return details.breeds[0].name || 'Raça não disponível';
-    }
-    return 'Raça não disponível';
+    return details?.name || this.state?.name || 'Raça não disponível';
   }
 
   getCatWikipediaUrl(): string {
     const details = this.details();
-    if (details?.breeds && details.breeds.length > 0) {
-      return details.breeds[0].wikipedia_url || '';
-    }
-    return '';
+    return details?.wikipedia_url || this.state?.wikipedia_url || '';
   }
 }
