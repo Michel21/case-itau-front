@@ -5,9 +5,10 @@ import { ListDetailService } from './services/list-detail.service';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-list-detail',
-  templateUrl: './list-detail.component.html',
-  styleUrls: ['./list-detail.component.scss']
+    selector: 'app-list-detail',
+    templateUrl: './list-detail.component.html',
+    styleUrls: ['./list-detail.component.scss'],
+    standalone: false
 })
 export class ListDetailComponent implements OnInit {
   public listDetails: unknown;
