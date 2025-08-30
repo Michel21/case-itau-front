@@ -1,24 +1,100 @@
-.main{
-  height: 100vh;
+// Layout Principal da Aplicação
+.app-main {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f8fafc;
+  overflow-x: hidden;
+}
+
+.app-container {
   display: flex;
   flex: 1;
   flex-direction: column;
-  justify-content: space-between;
-  overflow: auto;
+  max-width: 100%;
+  margin: 0 auto;
+}
 
-  .container{
-    display: flex;
-    flex-direction: row;
-    .wrapper{
-      flex: 1;
-      flex-direction: column;
-    }
+.app-wrapper {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+// Header da Aplicação
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+// Conteúdo Principal
+.app-content {
+  flex: 1;
+  margin-top: 80px; // Espaço para o header fixo
+  padding: 0;
+  background-color: #ffffff;
+  min-height: calc(100vh - 40px);
+  animation: fadeIn 0.3s ease-in-out; // Movido para antes das media queries
+  
+  // Responsividade
+  @media (max-width: 768px) {
+    margin-top: 70px;
+    min-height: calc(100vh - 70px);
   }
+}
 
-  &_content{
-    flex: 1;
-    justify-content: stretch;
-    margin-top: 77px;
-    background-color: #E7EEF1;
+// Footer da Aplicação
+.app-footer {
+  margin-top: auto;
+  background-color: #1a202c;
+  color: #ffffff;
+  padding: 2rem 0;
+  
+  // Responsividade
+  @media (max-width: 768px) {
+    padding: 1.5rem 0;
+  }
+}
+
+// Animações
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Melhorias de acessibilidade
+.app-main:focus {
+  outline: none;
+}
+
+// Scrollbar personalizada
+.app-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.app-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.app-content::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+  
+  &:hover {
+    background: #a8a8a8;
   }
 }
