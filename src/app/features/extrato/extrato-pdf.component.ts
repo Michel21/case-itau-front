@@ -2,7 +2,10 @@ import { Component, Input, OnInit, signal, computed, inject, ChangeDetectionStra
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
+// Interfaces
 export interface ExtratoItem {
   dataAplicacao: string;
   dataVencimento: string;
@@ -18,24 +21,24 @@ export interface ExtratoItem {
 }
 
 export interface ExtratoTotais {
-  valorPrincipal: number;
-  valorBruto: number;
-  rendaTotal: number;
-  iof: number;
-  irrf: number;
-  valorLiquido: number;
+  valorPrincipal?: number;
+  valorBruto?: number;
+  rendaTotal?: number;
+  iof?: number;
+  irrf?: number;
+  valorLiquido?: number;
   rendaBrutaPer?: number;
 }
 
 export interface ExtratoSecao {
   dataSaldo?: string;
   itens: ExtratoItem[];
-  totalValorPrincipal: number;
-  totalValorBruto: number;
-  totalRendaTotal: number;
-  totalIof: number;
-  totalIrrf: number;
-  totalValorLiquido: number;
+  totalValorPrincipal?: number;
+  totalValorBruto?: number;
+  totalRendaTotal?: number;
+  totalIof?: number;
+  totalIrrf?: number;
+  totalValorLiquido?: number;
   totalRendaBrutaPer?: number;
 }
 
@@ -49,6 +52,17 @@ export interface ExtratoDados {
   aplicacoes?: ExtratoSecao;
   resgates?: ExtratoSecao;
   saldoFinal?: ExtratoSecao;
+}
+
+export interface ExtratoConfig {
+  titulo: string;
+  dataTransacao: string;
+  numeroControle: string;
+  empresa: string;
+  agencia: string;
+  dataBusca: string;
+  tipoInvestimento: string;
+  tipoProduto: string;
 }
 
 @Component({
@@ -65,8 +79,21 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly destroy$ = new Subject<void>();
 
-  // Dados mock para teste baseados no template
-  mockData: ExtratoDados = {
+  // Signals
+  public readonly dadosAtuais = signal<ExtratoDados | null>(null);
+  public readonly config = signal<ExtratoConfig | null>(null);
+  public readonly isLoading = signal(false);
+  public readonly error = signal<string | null>(null);
+  public readonly isPrintMode = signal(false);
+
+  // Computed values
+  public readonly temSaldoAnterior = computed(() => this.temItens(this.dadosAtuais()?.saldoAnterior));
+  public readonly temAplicacoes = computed(() => this.temItens(this.dadosAtuais()?.aplicacoes));
+  public readonly temResgates = computed(() => this.temItens(this.dadosAtuais()?.resgates));
+  public readonly temSaldoFinal = computed(() => this.temItens(this.dadosAtuais()?.saldoFinal));
+
+  // Dados mock para teste
+  private readonly mockData: ExtratoDados = {
     empresa: '49.320.901 LUCIANO RAMOS | 49.320.901/0001-50',
     agencia: '1221 | 35394-9',
     dataBusca: 'Agosto/2025',
@@ -78,7 +105,7 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
         {
           dataAplicacao: '10/03/2025',
           dataVencimento: '01/03/2027',
-          dataResgate: "",
+          dataResgate: '',
           taxa: 0,
           valorPrincipal: 58.22,
           valorBruto: 58.37,
@@ -86,12 +113,12 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
           iof: 0.00,
           irrf: 0.03,
           valorLiquido: 58.34,
-          rendaBrutaPer: undefined
+          rendaBrutaPer: 0
         },
         {
           dataAplicacao: '31/03/2025',
           dataVencimento: '22/03/2027',
-          dataResgate: "",
+          dataResgate: '',
           taxa: 5.00,
           valorPrincipal: 90.12,
           valorBruto: 90.32,
@@ -99,12 +126,12 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
           iof: 0.00,
           irrf: 0.04,
           valorLiquido: 0,
-          rendaBrutaPer: undefined
+          rendaBrutaPer: 0
         },
         {
           dataAplicacao: '23/05/2025',
           dataVencimento: '07/05/2024',
-          dataResgate: "",
+          dataResgate: '',
           taxa: 0,
           valorPrincipal: 1005.40,
           valorBruto: 1005.48,
@@ -112,23 +139,23 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
           iof: 0.00,
           irrf: 0.29,
           valorLiquido: 1005.11,
-          rendaBrutaPer: undefined
+          rendaBrutaPer: 0
         }
       ],
-      totalValorPrincipal: 2272.84,
-      totalValorBruto: 2272.84,
-      totalRendaTotal: 2275.27,
+      totalValorPrincipal: 1153.74,
+      totalValorBruto: 1154.17,
+      totalRendaTotal: 0.43,
       totalIof: 0.00,
-      totalIrrf: 0.52,
+      totalIrrf: 0.36,
       totalValorLiquido: 0,
-      totalRendaBrutaPer: undefined
+      totalRendaBrutaPer: 0
     },
     aplicacoes: {
       itens: [
         {
           dataAplicacao: '04/08/2025',
           dataVencimento: '26/07/2027',
-          dataResgate: "",
+          dataResgate: '',
           taxa: 0,
           valorPrincipal: 0,
           valorBruto: 0,
@@ -136,12 +163,12 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
           iof: 0,
           irrf: 0,
           valorLiquido: 0,
-          rendaBrutaPer: undefined
+          rendaBrutaPer: 0
         },
         {
           dataAplicacao: '05/08/2025',
           dataVencimento: '05/08/2027',
-          dataResgate: "",
+          dataResgate: '',
           taxa: 0,
           valorPrincipal: 100.00,
           valorBruto: 0,
@@ -149,7 +176,7 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
           iof: 0,
           irrf: 0,
           valorLiquido: 0,
-          rendaBrutaPer: undefined
+          rendaBrutaPer: 0
         }
       ],
       totalValorPrincipal: 100.00,
@@ -158,7 +185,7 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
       totalIof: 0,
       totalIrrf: 0,
       totalValorLiquido: 0,
-      totalRendaBrutaPer: undefined
+      totalRendaBrutaPer: 0
     },
     resgates: {
       itens: [
@@ -176,103 +203,53 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
           rendaBrutaPer: 0.00
         },
         {
-          dataAplicacao: '23/05/2025',
-          dataVencimento: '13/05/2027',
-          dataResgate: '26/06/2025',
-          taxa: 5.00,
-          valorPrincipal: 844.81,
-          valorBruto: 845.46,
-          rendaTotal: 0.65,
-          iof: 0.00,
-          irrf: 0.14,
-          valorLiquido: 845.32,
-          rendaBrutaPer: 0.08
-        },
-        {
-          dataAplicacao: '26/06/2025',
-          dataVencimento: '16/06/2027',
-          dataResgate: '30/06/2025',
-          taxa: 5.00,
-          valorPrincipal: 29.06,
-          valorBruto: 29.08,
-          rendaTotal: 0.02,
-          iof: 0.00,
-          irrf: 0.01,
-          valorLiquido: 29.07,
-          rendaBrutaPer: 0.01
-        }
-      ],
-      totalValorPrincipal: 2036.17,
-      totalValorBruto: 2038.08,
-      totalRendaTotal: 1.91,
-      totalIof: 0.00,
-      totalIrrf: 0.41,
-      totalValorLiquido: 2037.67,
-      totalRendaBrutaPer: 0.20
-    },
-    saldoFinal: {
-      dataSaldo: '25/08/2025',
-      itens: [
-        {
           dataAplicacao: '28/08/2025',
           dataVencimento: '07/06/2027',
-          dataResgate: "",
+          dataResgate: '',
           taxa: 5.00,
           valorPrincipal: 44.56,
-          valorBruto: 44.61,
-          rendaTotal: 0.05,
+          valorBruto: 44.67,
+          rendaTotal: 0.11,
           iof: 0.00,
-          irrf: 0.01,
-          valorLiquido: 44.60,
-          rendaBrutaPer: 0.02
+          irrf: 0.13,
+          valorLiquido: 44.54,
+          rendaBrutaPer: 0.00
         }
       ],
-      totalValorPrincipal: 2272.84,
-      totalValorBruto: 2272.84,
-      totalRendaTotal: 2275.27,
+      totalValorPrincipal: 102.78,
+      totalValorBruto: 103.04,
+      totalRendaTotal: 0.26,
       totalIof: 0.00,
-      totalIrrf: 0.52,
+      totalIrrf: 0.16,
       totalValorLiquido: 0,
-      totalRendaBrutaPer: undefined
+      totalRendaBrutaPer: 0
     }
   };
 
-  dadosAtuais: ExtratoDados;
-  dataTransacao: string;
-  numeroControle: string;
-
-  // Propriedades computadas para verificar se seções têm itens
-  get temSaldoAnterior(): boolean {
-    return this.temItens(this.dadosAtuais.saldoAnterior);
-  }
-
-  get temAplicacoes(): boolean {
-    return this.temItens(this.dadosAtuais.aplicacoes);
-  }
-
-  get temResgates(): boolean {
-    return this.temItens(this.dadosAtuais.resgates);
-  }
-
-  get temSaldoFinal(): boolean {
-    return this.temItens(this.dadosAtuais.saldoFinal);
-  }
-
-  constructor() {
-    this.dadosAtuais = this.mockData;
-    this.dataTransacao = new Date().toLocaleString('pt-BR');
-    this.numeroControle = this.gerarNumeroControle();
-  }
-
   ngOnInit(): void {
-    if (this.extratoData) {
-      this.dadosAtuais = this.extratoData;
-    }
+    const data = this.extratoData || this.mockData;
+    this.dadosAtuais.set(data);
+    this.config.set({
+      titulo: 'Extrato Bancário',
+      dataTransacao: data.dataBusca,
+      numeroControle: this.gerarNumeroControle(),
+      empresa: data.empresa,
+      agencia: data.agencia,
+      dataBusca: data.dataBusca,
+      tipoInvestimento: data.tipoInvestimento,
+      tipoProduto: data.tipoProduto,
+    });
   }
 
   // Utility methods
   private temItens(secao: ExtratoSecao | undefined): boolean {
     return secao !== undefined && secao.itens.length > 0;
+  }
+
+  private gerarNumeroControle(): string {
+    const timestamp = Date.now().toString();
+    const random = Math.random().toString(36).substring(2, 8);
+    return `${timestamp}-${random}`.substring(0, 20);
   }
 
   ngOnDestroy(): void {
@@ -282,63 +259,89 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
 
   // Método para gerar PDF usando impressão do navegador
   gerarPDF(): void {
-    // Esconde os botões antes de imprimir
-    const actionButtons = document.querySelector('.action-buttons');
-    if (actionButtons) {
-      actionButtons.setAttribute('style', 'display: none !important');
-    }
+    this.isPrintMode.set(true);
     
-    window.print();
-    
-    // Restaura os botões após impressão
     setTimeout(() => {
-      if (actionButtons) {
-        actionButtons.removeAttribute('style');
-      }
-    }, 1000);
+      window.print();
+      this.isPrintMode.set(false);
+    }, 100);
   }
 
-  // Método para gerar PDF usando jsPDF (requer biblioteca)
-  gerarPDFAvancado(): void {
-    // Esta implementação requer a biblioteca jsPDF
-    // Para usar, instale: npm install jspdf html2canvas
-    console.log('Funcionalidade de PDF avançado requer jsPDF');
-    
-    // Exemplo de implementação:
-    /*
-    import jsPDF from 'jspdf';
-    import html2canvas from 'html2canvas';
-    
-    const element = document.getElementById('extrato-container');
-    html2canvas(element).then(canvas => {
+  // Método para gerar PDF corporativo usando jsPDF
+  async gerarPDFCorporativo(): Promise<void> {
+    try {
+      this.isLoading.set(true);
+      
+      const element = document.getElementById('extrato-container');
+      if (!element) {
+        throw new Error('Elemento não encontrado');
+      }
+
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff'
+      });
+
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
       const imgWidth = 210;
       const pageHeight = 295;
-      const imgHeight = canvas.height * imgWidth / canvas.width;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
       let heightLeft = imgHeight;
-      
       let position = 0;
-      
+
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
-      
+
       while (heightLeft >= 0) {
         position = heightLeft - imgHeight;
         pdf.addPage();
         pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
       }
+
+      const fileName = `extrato-bancario-${new Date().toISOString().split('T')[0]}.pdf`;
+      pdf.save(fileName);
       
-      pdf.save('extrato-bancario.pdf');
-    });
-    */
+      console.log('PDF gerado com sucesso:', fileName);
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      this.error.set('Erro ao gerar PDF. Tente novamente.');
+    } finally {
+      this.isLoading.set(false);
+    }
   }
 
-  // Método para exportar como HTML
+  // Método para gerar CSV
+  gerarCSV(): void {
+    try {
+      const csvContent = this.converterParaCSV();
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `extrato-bancario-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      
+      console.log('CSV gerado com sucesso');
+    } catch (error) {
+      console.error('Erro ao gerar CSV:', error);
+      this.error.set('Erro ao gerar CSV. Tente novamente.');
+    }
+  }
+
+  // Método para exportar HTML
   exportarHTML(): void {
-    const htmlContent = document.getElementById('extrato-container')?.innerHTML;
-    if (htmlContent) {
+    try {
+      const element = document.getElementById('extrato-container');
+      if (!element) {
+        throw new Error('Elemento não encontrado');
+      }
+
+      const htmlContent = element.outerHTML;
       const fullHtml = `
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -362,15 +365,12 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
       a.download = `extrato-bancario-${new Date().toISOString().split('T')[0]}.html`;
       a.click();
       window.URL.revokeObjectURL(url);
+      
+      console.log('HTML exportado com sucesso');
+    } catch (error) {
+      console.error('Erro ao exportar HTML:', error);
+      this.error.set('Erro ao exportar HTML. Tente novamente.');
     }
-  }
-
-  // Método para gerar CSV usando o serviço dedicado
-  gerarCSV(): void {
-    // const config: CSVConfig = this.csvService.criarConfigCSV(this.dataTransacao);
-    // this.csvService.gerarCSV(this.dadosAtuais, config);
-    console.log('Gerando CSV...');
-    // Implementação futura
   }
 
   // Método para converter dados para CSV
@@ -392,84 +392,85 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
 
     let csvContent = headers.join(';') + '\n';
 
+    const dados = this.dadosAtuais();
+    if (!dados) return csvContent;
+
     // Adicionar dados do saldo anterior
-    if (this.temSaldoAnterior) {
-      csvContent += `"Saldo anterior em ${this.dadosAtuais.saldoAnterior?.dataSaldo}"\n`;
-      this.dadosAtuais.saldoAnterior?.itens.forEach(item => {
+    if (dados.saldoAnterior && dados.saldoAnterior.itens.length > 0) {
+      csvContent += `"Saldo anterior em ${dados.saldoAnterior.dataSaldo}"\n`;
+      dados.saldoAnterior.itens.forEach(item => {
         csvContent += this.itemParaCSV(item, 'Saldo Anterior') + '\n';
       });
-      csvContent += this.totaisParaCSV(this.dadosAtuais.saldoAnterior, 'Saldo Anterior') + '\n';
+      csvContent += this.totaisParaCSV(dados.saldoAnterior, 'Saldo Anterior') + '\n';
     }
 
     // Adicionar dados das aplicações
-    if (this.temAplicacoes) {
+    if (dados.aplicacoes && dados.aplicacoes.itens.length > 0) {
       csvContent += '"Aplicações"\n';
-      this.dadosAtuais.aplicacoes?.itens.forEach(item => {
+      dados.aplicacoes.itens.forEach(item => {
         csvContent += this.itemParaCSV(item, 'Aplicações') + '\n';
       });
-      csvContent += this.totaisParaCSV(this.dadosAtuais.aplicacoes, 'Aplicações') + '\n';
+      csvContent += this.totaisParaCSV(dados.aplicacoes, 'Aplicações') + '\n';
     }
 
     // Adicionar dados dos resgates
-    if (this.temResgates) {
+    if (dados.resgates && dados.resgates.itens.length > 0) {
       csvContent += '"Resgates/Vencimentos"\n';
-      this.dadosAtuais.resgates?.itens.forEach(item => {
+      dados.resgates.itens.forEach(item => {
         csvContent += this.itemParaCSV(item, 'Resgates') + '\n';
       });
-      csvContent += this.totaisParaCSV(this.dadosAtuais.resgates, 'Resgates') + '\n';
+      csvContent += this.totaisParaCSV(dados.resgates, 'Resgates') + '\n';
     }
 
     // Adicionar dados do saldo final
-    if (this.temSaldoFinal) {
-      csvContent += `"Saldo final em ${this.dadosAtuais.saldoFinal?.dataSaldo}"\n`;
-      this.dadosAtuais.saldoFinal?.itens.forEach(item => {
+    if (dados.saldoFinal && dados.saldoFinal.itens.length > 0) {
+      csvContent += `"Saldo final em ${dados.saldoFinal.dataSaldo}"\n`;
+      dados.saldoFinal.itens.forEach(item => {
         csvContent += this.itemParaCSV(item, 'Saldo Final') + '\n';
       });
-      csvContent += this.totaisParaCSV(this.dadosAtuais.saldoFinal, 'Saldo Final') + '\n';
+      csvContent += this.totaisParaCSV(dados.saldoFinal, 'Saldo Final') + '\n';
     }
 
     return csvContent;
   }
 
-  // Método auxiliar para converter item para CSV
+  // Método para converter item para CSV
   private itemParaCSV(item: ExtratoItem, secao: string): string {
     return [
       secao,
-      item.dataAplicacao || '',
-      item.dataVencimento || '',
+      item.dataAplicacao,
+      item.dataVencimento,
       item.dataResgate || '',
-      item.taxa?.toFixed(2) || '',
-      item.valorPrincipal?.toFixed(2) || '',
-      item.valorBruto?.toFixed(2) || '',
-      item.rendaTotal?.toFixed(2) || '',
-      item.iof?.toFixed(2) || '',
-      item.irrf?.toFixed(2) || '',
-      item.valorLiquido?.toFixed(2) || '',
-      item.rendaBrutaPer?.toFixed(2) || ''
+      item.taxa?.toString() || '',
+      this.formatarMoeda(item.valorPrincipal),
+      this.formatarMoeda(item.valorBruto),
+      this.formatarMoeda(item.rendaTotal),
+      this.formatarMoeda(item.iof),
+      this.formatarMoeda(item.irrf),
+      this.formatarMoeda(item.valorLiquido),
+      this.formatarMoeda(item.rendaBrutaPer)
     ].join(';');
   }
 
-  // Método auxiliar para converter totais para CSV
-  private totaisParaCSV(secao: ExtratoSecao | undefined, nomeSecao: string): string {
-    if (!secao) return '';
-    
+  // Método para converter totais para CSV
+  private totaisParaCSV(secao: ExtratoSecao, nomeSecao: string): string {
     return [
-      `${nomeSecao} - TOTAL`,
+      `${nomeSecao} - Total`,
       '',
       '',
       '',
       '',
-      secao.totalValorPrincipal?.toFixed(2) || '',
-      secao.totalValorBruto?.toFixed(2) || '',
-      secao.totalRendaTotal?.toFixed(2) || '',
-      secao.totalIof?.toFixed(2) || '',
-      secao.totalIrrf?.toFixed(2) || '',
-      secao.totalValorLiquido?.toFixed(2) || '',
-      secao.totalRendaBrutaPer?.toFixed(2) || ''
+      this.formatarMoeda(secao.totalValorPrincipal),
+      this.formatarMoeda(secao.totalValorBruto),
+      this.formatarMoeda(secao.totalRendaTotal),
+      this.formatarMoeda(secao.totalIof),
+      this.formatarMoeda(secao.totalIrrf),
+      this.formatarMoeda(secao.totalValorLiquido),
+      this.formatarMoeda(secao.totalRendaBrutaPer)
     ].join(';');
   }
 
-  // Método para obter estilos CSS para exportação HTML
+  // Método para obter estilos CSS
   private getCSSStyles(): string {
     return `
       * {
@@ -479,202 +480,200 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
       }
 
       body {
-        font-family: Arial, sans-serif;
-        background-color: #ffffff;
-        color: #000;
-        line-height: 1.3;
-        padding: 25px;
-        margin: 0 auto;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #555555;
+        background: #ffffff;
+      }
+
+      .extrato-container {
         max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+        background: #ffffff;
+        min-height: 100vh;
       }
 
-      .header {
-        text-align: left;
-        margin-bottom: 25px;
-        padding-bottom: 15px;
-        position: relative;
-      }
-
-      .logo {
-        font-size: 22px;
-        font-weight: bold;
-        color: #000000;
-        margin-bottom: 4px;
-        text-transform: none; 
-      }
-
-      .subtitle {
-        font-size: 12px;
+      .extrato-header {
+        background: linear-gradient(135deg, #001e61 0%, #5887da 100%);
         color: #ffffff;
-        margin-bottom: 20px;
-        text-transform: none;
-        background-color: #666;
-        padding: 4px 8px;
-        display: inline-block;
-        border-radius: 4px;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
       }
 
-      .report-details {
-        display: block;
-        margin-bottom: 0;
-        font-size: 12px;
-        color: #666;
-        position: absolute;
-        top: 0px;
-        left: 30%;
+      .main-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0 0 1rem 0;
       }
 
       .search-details {
-        background-color: #fff;
-        padding: 8px 0;
-        border: none;
-        margin-bottom: 12px;
-        border-radius: 0;
+        background: #f4f4f9;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
       }
 
-      .search-details h3 {
-        color: #000;
-        margin-bottom: 6px;
-        font-size: 11px;
-        font-weight: bold;
+      .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #001e61;
+        margin: 0 0 1.5rem 0;
       }
 
-      .detail-grid {
-        display: block;
-        gap: 0;
+      .details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
       }
 
-      .detail-item {
-        display: block;
-        padding: 1px 0;
-        border-bottom: none;
-        font-size: 9px;
-        margin-bottom: 1px;
+      .detail-card {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 1rem;
+        background: #ffffff;
+        border-radius: 8px;
+        border-left: 4px solid #001e61;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
       }
 
       .detail-label {
-        font-weight: bold;
-        color: #000;
-        display: inline;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #555555;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
 
       .detail-value {
-        color: #000;
-        display: inline;
+        font-size: 1rem;
+        font-weight: 500;
+        color: #001e61;
+        word-break: break-word;
       }
 
       .table-container {
-        margin-bottom: 25px;
+        overflow-x: auto;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        background: #ffffff;
+        margin-bottom: 2rem;
       }
 
       .financial-table {
         width: 100%;
         border-collapse: collapse;
-        background-color: #fff;
-        font-size: 8px;
-        border: none;
+        font-size: 0.9rem;
+        min-width: 1000px;
       }
 
-      .financial-table th {
-        background-color: transparent;
-        color: #000;
-        padding: 6px 4px;
-        text-align: center;
-        border: none;
-        font-weight: bold;
-        font-size: 10px;
-        border-bottom: 1px solid #ccc;
+      .table-header {
+        background: #001e61;
+        color: #ffffff;
       }
 
-      .financial-table td {
-        padding: 5px 4px;
+      .table-header th {
+        padding: 1rem 0.75rem;
         text-align: center;
-        border: none;
-        color: #000;
-        font-size: 10px;
-        border-bottom: 1px solid #eee;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #5887da;
+      }
+
+      .section-title {
+        background: #f4f4f9;
+        color: #001e61;
+      }
+
+      .section-title th {
+        padding: 1rem 0.75rem;
+        text-align: left;
+        font-weight: 700;
+        font-size: 1rem;
+        border-bottom: 2px solid #001e61;
+      }
+
+      .data-row {
+        border-bottom: 1px solid #dbdbdb;
+      }
+
+      .data-row td {
+        padding: 0.75rem 0.5rem;
+        text-align: center;
+        vertical-align: middle;
       }
 
       .total-row {
-        background-color: transparent !important;
-        color: #000 !important;
-        font-weight: bold;
-        border-top: 1px solid #ddd !important;
-        padding: 8px 0 !important;
-        margin-bottom: 10px;
+        background: #001e61;
+        color: #ffffff;
+        font-weight: 700;
+      }
+
+      .total-row td {
+        padding: 1rem 0.5rem;
+        text-align: center;
+        border-top: 2px solid #5887da;
       }
 
       .currency {
         font-family: 'Courier New', monospace;
-        font-size: 10px;
-      }
-
-      .date {
-        font-size: 10px;
-      }
-
-      .percentage {
-        font-size: 10px;
+        font-weight: 500;
+        text-align: right;
       }
 
       .action-buttons {
         display: none;
       }
+
+      @media print {
+        .action-buttons {
+          display: none !important;
+        }
+      }
     `;
   }
 
-
-
-  // Método para formatar valor monetário
-  formatarMoeda(valor: number | null | undefined): string {
-    if (valor === null || valor === undefined) return '';
-    return valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  // Public methods
+  public getNumeroControle(): string {
+    return this.config()?.numeroControle || '';
   }
 
-  // Método para formatar porcentagem
-  formatarPorcentagem(valor: number | null | undefined): string {
-    if (valor === null || valor === undefined) return '';
-    return valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  public getDataGeracao(): string {
+    return new Date().toLocaleDateString('pt-BR');
   }
 
-  // Método para formatar data
-  formatarData(data: string | null | undefined): string {
+  public getHoraGeracao(): string {
+    return new Date().toLocaleTimeString('pt-BR');
+  }
+
+  // Format methods
+  public formatarMoeda(valor: number | null | undefined): string {
+    if (valor === null || valor === undefined) return '';
+    return valor.toLocaleString('pt-BR', { 
+      style: 'currency', 
+      currency: 'BRL',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+
+  public formatarPorcentagem(valor: number | null | undefined): string {
+    if (valor === null || valor === undefined) return '';
+    return `${valor.toFixed(2)}%`;
+  }
+
+  public formatarData(data: string | null | undefined): string {
     if (!data) return '';
     return data;
   }
 
-  // Método para gerar número de controle
-  private gerarNumeroControle(): string {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      const r = Math.random() * 16 | 0;
-      const v = c === 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
-  }
-
-  // Método público para obter número de controle
-  getNumeroControle(): string {
-    return this.numeroControle;
-  }
-
-  // Método para obter data de geração
-  getDataGeracao(): string {
-    return new Date().toLocaleDateString('pt-BR');
-  }
-
-  // Método para obter hora de geração
-  getHoraGeracao(): string {
-    return new Date().toLocaleTimeString('pt-BR');
-  }
-
-  // Método para gerar PDF corporativo
-  gerarPDFCorporativo(): void {
-    console.log('Gerando PDF corporativo...');
-    // Implementação futura
-  }
-
-  // Método para verificar se valor existe
-  temValor(valor: any): boolean {
+  public temValor(valor: any): boolean {
     return valor !== null && valor !== undefined && valor !== '';
   }
 

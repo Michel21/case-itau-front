@@ -24,23 +24,23 @@
     <div class="details-grid">
       <div class="detail-card">
         <span class="detail-label">Empresa | CNPJ:</span>
-                 <span class="detail-value">{{ dadosAtuais?.empresa }}</span>
+                 <span class="detail-value">{{ dadosAtuais()?.empresa }}</span>
       </div>
       <div class="detail-card">
         <span class="detail-label">Agência | Conta:</span>
-                 <span class="detail-value">{{ dadosAtuais?.agencia }}</span>
+                 <span class="detail-value">{{ dadosAtuais()?.agencia }}</span>
       </div>
       <div class="detail-card">
         <span class="detail-label">Data da busca:</span>
-                 <span class="detail-value">{{ dadosAtuais?.dataBusca }}</span>
+                 <span class="detail-value">{{ dadosAtuais()?.dataBusca }}</span>
       </div>
       <div class="detail-card">
         <span class="detail-label">Tipo de investimento:</span>
-                 <span class="detail-value">{{ dadosAtuais?.tipoInvestimento }}</span>
+                 <span class="detail-value">{{ dadosAtuais()?.tipoInvestimento }}</span>
       </div>
       <div class="detail-card">
         <span class="detail-label">Tipo de Produto:</span>
-                 <span class="detail-value">{{ dadosAtuais?.tipoProduto }}</span>
+                 <span class="detail-value">{{ dadosAtuais()?.tipoProduto }}</span>
       </div>
     </div>
   </section>
@@ -66,7 +66,7 @@
         </thead>
         <tbody>
           <!-- Saldo Anterior -->
-         @if (temSaldoAnterior) {
+                    @if (temSaldoAnterior()) {
             <tr class="section-title">
               <th colspan="11">Saldo anterior em {{ dadosAtuais?.saldoAnterior?.dataSaldo }}</th>
             </tr>
@@ -101,7 +101,7 @@
           }
 
           <!-- Aplicações -->
-        @if (temAplicacoes) {
+                   @if (temAplicacoes()) {
             <tr class="section-title">
               <th colspan="11">Aplicações</th>
             </tr>
@@ -136,7 +136,7 @@
           }
 
           <!-- Resgates -->
-        @if (temResgates) {
+                   @if (temResgates()) {
             <tr class="section-title">
               <th colspan="11">Resgates/Vencimentos</th>
             </tr>
@@ -171,7 +171,7 @@
           }
 
           <!-- Saldo Final -->
-         @if (temSaldoFinal) {
+                    @if (temSaldoFinal()) {
             <tr class="section-title">
               <th colspan="11">Saldo final em {{ dadosAtuais?.saldoFinal?.dataSaldo }}</th>
             </tr>
