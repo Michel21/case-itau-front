@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ExtratoDados, ExtratoSecao, ExtratoItem } from './types/extrato.types';
+import { ExtratoDados, ExtratoSecao, ExtratoItem } from '../../../../types/extrato.types';
 
 export interface PDFConfig {
   title: string;
@@ -74,7 +74,7 @@ export class ExtratoPdfService {
     // Saldo anterior
     if (dados.saldoAnterior?.itens) {
       csv += `Saldo anterior em ${dados.saldoAnterior.dataSaldo}\n`;
-      dados.saldoAnterior.itens.forEach(item => {
+      dados.saldoAnterior.itens.forEach((item: ExtratoItem) => {
         csv += this.itemParaCSVSimples('', item);
       });
       csv += this.totaisParaCSVSimples('Saldo Anterior - TOTAL', dados.saldoAnterior);
@@ -83,7 +83,7 @@ export class ExtratoPdfService {
     // Aplicações
     if (dados.aplicacoes?.itens) {
       csv += 'Aplicações\n';
-      dados.aplicacoes.itens.forEach(item => {
+      dados.aplicacoes.itens.forEach((item: ExtratoItem) => {
         csv += this.itemParaCSVSimples('', item);
       });
       csv += this.totaisParaCSVSimples('Aplicações - TOTAL', dados.aplicacoes);
@@ -92,7 +92,7 @@ export class ExtratoPdfService {
     // Resgates/Vencimentos
     if (dados.resgates?.itens) {
       csv += 'Resgates/Vencimentos\n';
-      dados.resgates.itens.forEach(item => {
+      dados.resgates.itens.forEach((item: ExtratoItem) => {
         csv += this.itemParaCSVSimples('Resgates', item);
       });
       csv += this.totaisParaCSVSimples('Resgates - TOTAL', dados.resgates);
@@ -101,7 +101,7 @@ export class ExtratoPdfService {
     // Saldo final
     if (dados.saldoFinal?.itens) {
       csv += `Saldo final em ${dados.saldoFinal.dataSaldo}\n`;
-      dados.saldoFinal.itens.forEach(item => {
+      dados.saldoFinal.itens.forEach((item: ExtratoItem) => {
         csv += this.itemParaCSVSimples('Saldo Final', item);
       });
       csv += this.totaisParaCSVSimples('Saldo Final - TOTAL', dados.saldoFinal);

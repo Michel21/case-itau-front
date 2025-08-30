@@ -17,24 +17,24 @@ export interface ExtratoItem {
 }
 
 export interface ExtratoTotais {
-  valorPrincipal: number;
-  valorBruto: number;
-  rendaTotal: number;
-  iof: number;
-  irrf: number;
-  valorLiquido: number;
+  valorPrincipal?: number;
+  valorBruto?: number;
+  rendaTotal?: number;
+  iof?: number;
+  irrf?: number;
+  valorLiquido?: number;
   rendaBrutaPer?: number;
 }
 
 export interface ExtratoSecao {
   dataSaldo?: string;
   itens: ExtratoItem[];
-  totalValorPrincipal: number;
-  totalValorBruto: number;
-  totalRendaTotal: number;
-  totalIof: number;
-  totalIrrf: number;
-  totalValorLiquido: number;
+  totalValorPrincipal?: number;
+  totalValorBruto?: number;
+  totalRendaTotal?: number;
+  totalIof?: number;
+  totalIrrf?: number;
+  totalValorLiquido?: number;
   totalRendaBrutaPer?: number;
 }
 

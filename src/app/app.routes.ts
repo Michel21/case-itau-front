@@ -1,9 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
 import { roleGuard } from './guards/role.guard';
-import { canDeactivateGuard } from './guards/can-deactivate.guard';
 import { catsListResolver } from './resolvers/cats-list.resolver';
-import { catDetailResolver } from './resolvers/cat-detail.resolver';
 
 export const routes: Routes = [
   {

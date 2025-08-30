@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { ExtratoCsvService, CSVConfig } from './extrato-csv.service';
+// import { ExtratoCsvService, CSVConfig } from './extrato-csv.service';
 
 export interface ExtratoItem {
   dataAplicacao: string;
@@ -70,41 +70,41 @@ export class ExtratoPdfComponent implements OnInit {
         {
           dataAplicacao: '10/03/2025',
           dataVencimento: '01/03/2027',
-          dataResgate: null,
-          taxa: null,
+          dataResgate: undefined,
+          taxa: undefined,
           valorPrincipal: 58.22,
           valorBruto: 58.37,
           rendaTotal: 0.15,
           iof: 0.00,
           irrf: 0.03,
           valorLiquido: 58.34,
-          rendaBrutaPer: null
+          rendaBrutaPer: undefined
         },
         {
           dataAplicacao: '31/03/2025',
           dataVencimento: '22/03/2027',
-          dataResgate: null,
+          dataResgate: undefined,
           taxa: 5.00,
           valorPrincipal: 90.12,
           valorBruto: 90.32,
           rendaTotal: 0.20,
           iof: 0.00,
           irrf: 0.04,
-          valorLiquido: null,
-          rendaBrutaPer: null
+          valorLiquido: undefined,
+          rendaBrutaPer: undefined
         },
         {
           dataAplicacao: '23/05/2025',
           dataVencimento: '07/05/2024',
-          dataResgate: null,
-          taxa: null,
+          dataResgate: undefined,
+          taxa: undefined,
           valorPrincipal: 1005.40,
           valorBruto: 1005.48,
           rendaTotal: 0.08,
           iof: 0.00,
           irrf: 0.29,
           valorLiquido: 1005.11,
-          rendaBrutaPer: null
+          rendaBrutaPer: undefined
         }
       ],
       totalValorPrincipal: 2272.84,
@@ -112,45 +112,45 @@ export class ExtratoPdfComponent implements OnInit {
       totalRendaTotal: 2275.27,
       totalIof: 0.00,
       totalIrrf: 0.52,
-      totalValorLiquido: null,
-      totalRendaBrutaPer: null
+      totalValorLiquido: undefined,
+      totalRendaBrutaPer: undefined
     },
     aplicacoes: {
       itens: [
         {
           dataAplicacao: '04/08/2025',
           dataVencimento: '26/07/2027',
-          dataResgate: null,
-          taxa: null,
-          valorPrincipal: null,
-          valorBruto: null,
-          rendaTotal: null,
-          iof: null,
-          irrf: null,
-          valorLiquido: null,
-          rendaBrutaPer: null
+          dataResgate: undefined,
+          taxa: undefined,
+          valorPrincipal: undefined,
+          valorBruto: undefined,
+          rendaTotal: undefined,
+          iof: undefined,
+          irrf: undefined,
+          valorLiquido: undefined,
+          rendaBrutaPer: undefined
         },
         {
           dataAplicacao: '05/08/2025',
           dataVencimento: '05/08/2027',
-          dataResgate: null,
-          taxa: null,
+          dataResgate: undefined,
+          taxa: undefined,
           valorPrincipal: 100.00,
-          valorBruto: null,
-          rendaTotal: null,
-          iof: null,
-          irrf: null,
-          valorLiquido: null,
-          rendaBrutaPer: null
+          valorBruto: undefined,
+          rendaTotal: undefined,
+          iof: undefined,
+          irrf: undefined,
+          valorLiquido: undefined,
+          rendaBrutaPer: undefined
         }
       ],
       totalValorPrincipal: 100.00,
-      totalValorBruto: null,
-      totalRendaTotal: null,
-      totalIof: null,
-      totalIrrf: null,
-      totalValorLiquido: null,
-      totalRendaBrutaPer: null
+      totalValorBruto: undefined,
+      totalRendaTotal: undefined,
+      totalIof: undefined,
+      totalIrrf: undefined,
+      totalValorLiquido: undefined,
+      totalRendaBrutaPer: undefined
     },
     resgates: {
       itens: [
@@ -208,7 +208,7 @@ export class ExtratoPdfComponent implements OnInit {
         {
           dataAplicacao: '28/08/2025',
           dataVencimento: '07/06/2027',
-          dataResgate: null,
+          dataResgate: undefined,
           taxa: 5.00,
           valorPrincipal: 44.56,
           valorBruto: 44.61,
@@ -224,8 +224,8 @@ export class ExtratoPdfComponent implements OnInit {
       totalRendaTotal: 2275.27,
       totalIof: 0.00,
       totalIrrf: 0.52,
-      totalValorLiquido: null,
-      totalRendaBrutaPer: null
+      totalValorLiquido: undefined,
+      totalRendaBrutaPer: undefined
     }
   };
 
