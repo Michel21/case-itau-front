@@ -65,6 +65,8 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
       if (cats && cats.length > 0) {
         this.catsSignal.set(cats);
         console.log('First cat data:', cats[0]);
+        console.log('First cat image URL:', cats[0]?.image?.url);
+        console.log('First cat image object:', cats[0]?.image);
       }
     });
   }
