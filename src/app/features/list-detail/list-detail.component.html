@@ -66,30 +66,26 @@
             
             <div class="stat-item">
               <span class="stat-label">📏 Dimensões:</span>
-              <span class="stat-value">{{ details()?.width }} x {{ details()?.height }}</span>
+              <span class="stat-value">{{ details()?.image?.width }} x {{ details()?.image?.height }}</span>
             </div>
             
             <div class="stat-item">
-              <span class="stat-label">📄 Tipo:</span>
-              <span class="stat-value">{{ details()?.mime_type }}</span>
+              <span class="stat-label">📄 Peso:</span>
+              <span class="stat-value">{{ details()?.weight?.metric }} kg</span>
             </div>
           </div>
           
-          @if (details()?.breeds && details()?.breeds.length > 0) {
-            <div class="breeds-section">
-              <h3>🏷️ Informações da Raça</h3>
-              <div class="breeds-list">
-                @for (breed of details()?.breeds; track breed.id) {
-                  <div class="breed-item">
-                    <h4>{{ breed.name }}</h4>
-                    @if (breed.wikipedia_url) {
-                      <a [href]="breed.wikipedia_url" target="_blank" class="breed-link">
-                        Ver na Wikipedia →
-                      </a>
-                    }
-                  </div>
-                }
-              </div>
+          @if (details()?.description) {
+            <div class="description-section">
+              <h3>📝 Descrição</h3>
+              <p class="cat-description">{{ details()?.description }}</p>
+            </div>
+          }
+          
+          @if (details()?.temperament) {
+            <div class="temperament-section">
+              <h3>😺 Temperamento</h3>
+              <p class="cat-temperament">{{ details()?.temperament }}</p>
             </div>
           }
         </div>

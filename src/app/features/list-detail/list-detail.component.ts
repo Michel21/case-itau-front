@@ -8,13 +8,15 @@ import { catchError } from 'rxjs/operators';
 import { _PATH } from '../../shared/constants/constants';
 import { ListDetailService } from './services/list-detail.service';
 import { ICatsTypes } from '../../types/cats-types';
+import { LazyLoadDirective } from '../../shared/components/image-lazy-load/lazy-load.directive';
+import { LoadingPlaceholderComponent } from '../../shared/components/loading-placeholder/loading-placeholder.component';
 
 @Component({
   selector: 'app-list-detail',
   templateUrl: './list-detail.component.html',
   styleUrls: ['./list-detail.component.scss'],
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LazyLoadDirective, LoadingPlaceholderComponent],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ListDetailComponent implements OnInit, OnDestroy {
