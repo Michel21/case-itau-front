@@ -1,45 +1,70 @@
 <section class="listContainer">
   <div class="listContainer__header">
     <div class="listContainer__header__title">
-      <h1>Lista de Gatos</h1>
+      <h1>🐱 Lista de Gatos</h1>
+      <p class="subtitle">Descubra raças incríveis de gatos</p>
     </div>
     <div class="listContainer__header__search">
-      <input placeholder="Pesquisar Origem" #input>
+      <div class="search-wrapper">
+        <input 
+          placeholder="Pesquisar por origem ou nome..." 
+          #input
+          class="search-input">
+        <span class="search-icon">🔍</span>
+      </div>
     </div>
   </div>
 
   <div class="listContainer__wrapper">
     @if (loading()) {
-      <div class="sceletonContainer">
-        <app-loading-placeholder 
-          [height]="'585px'" 
-          [border]="true">
-        </app-loading-placeholder>
+      <div class="loading-container">
+        @for (item of listScheleton; track item) {
+          <div class="skeleton-card">
+            <app-loading-placeholder 
+              [height]="'400px'" 
+              [border]="true">
+            </app-loading-placeholder>
+          </div>
+        }
       </div>
     } @else if (filteredCats().length > 0) {
-      @for (item of filteredCats(); track item.id) {
-        <div class="listContainer__wrapper__card-list">
-          <img appLazyLoad 
-            [src]="item?.image?.url" 
-            [width]="item?.image?.width" 
-            alt="imagem capa"
-            loading="lazy"
-            (error)="doSomethingOnError($event)">
-          <div class="listContainer__wrapper__content">
-            <h1>{{ item?.name }}</h1>
-            <span><strong>Origem:</strong> {{ item?.origin }}</span>
-            <span><strong>Temperamento:</strong> {{ item?.temperament }}</span>
-            <p><strong>Descrição:</strong> {{ item?.description }}</p>
+      <div class="cats-grid">
+        @for (item of filteredCats(); track trackByCatId($index, item)) {
+          <div class="cat-card">
+            <div class="cat-image">
+              <img appLazyLoad 
+                [src]="item?.image?.url" 
+                [width]="item?.image?.width" 
+                [alt]="item?.name"
+                loading="lazy"
+                (error)="doSomethingOnError($event)">
+            </div>
+            <div class="cat-content">
+              <h2 class="cat-name">{{ item?.name }}</h2>
+              <div class="cat-info">
+                <span class="info-item">
+                  <strong>🌍 Origem:</strong> {{ item?.origin }}
+                </span>
+                <span class="info-item">
+                  <strong>😺 Temperamento:</strong> {{ item?.temperament }}
+                </span>
+              </div>
+              <p class="cat-description">{{ item?.description }}</p>
+              <button class="details-button" 
+                (click)="onNavigateTo(item)">
+                Ver Detalhes →
+              </button>
+            </div>
           </div>
-          <button class="listContainer__wrapper__card-list__mais-details" 
-            (click)="onNavigateTo(item)">
-            Mais Detalhes
-          </button>
-        </div>
-      }
+        }
+      </div>
     } @else {
       <div class="no-results">
-        <p>Nenhum gato encontrado com essa origem.</p>
+        <div class="no-results-content">
+          <span class="no-results-icon">😿</span>
+          <h3>Nenhum gato encontrado</h3>
+          <p>Tente ajustar sua pesquisa ou verifique a ortografia.</p>
+        </div>
       </div>
     }
   </div>

@@ -1,54 +1,99 @@
 <section class="listDetail">
-  <div class="grid">
-    <div class="cell-4-phone cell-8-tablet cell-12-desktop">
-      @if (!loading()) {
-        <div class="listDetail_btnBack" [routerLink]="['/']">
-          <img src="../../../assets/icons8-u-turn-to-left-30.png" alt="back">Voltar
-        </div>
-        <header class="listDetail_siteHeader">
-          <span>DETALHES</span>
-        </header>
-      }
+  <div class="detail-container">
+    @if (!loading()) {
+      <div class="back-button" (click)="goBack()">
+        <span class="back-icon">←</span>
+        <span>Voltar</span>
+      </div>
       
-      @if (loading()) {
-        <div class="listDetail_box">
-          <div class="listDetail_box__scaleton-right">
-            <app-loading-placeholder [height]="'500px'" [border]="true" [width]="'100%'">
+      <header class="detail-header">
+        <h1>🐱 Detalhes do Gato</h1>
+        <p>Informações completas sobre a raça</p>
+      </header>
+    }
+    
+    @if (loading()) {
+      <div class="loading-container">
+        <div class="skeleton-image">
+          <app-loading-placeholder [height]="'400px'" [border]="true" [width]="'100%'">
+          </app-loading-placeholder>
+        </div>
+        <div class="skeleton-content">
+          @for (item of listScheleton; track item) {
+            <app-loading-placeholder [height]="'50px'" [border]="true" [width]="'100%'">
             </app-loading-placeholder>
-          </div>
-          <div class="listDetail_box__scaleton-left">
-            @for (item of listScheleton; track item) {
-              <app-loading-placeholder [height]="'40px'" [border]="true" [width]="'100%'">
-              </app-loading-placeholder>
-            }
+          }
+        </div>
+      </div>
+    } @else if (details()) {
+      <div class="detail-card">
+        <div class="detail-image">
+          <img class="cat-image" 
+            appLazyLoad 
+            (error)="doSomethingOnError($event)" 
+            [src]="state?.image?.url"
+            [alt]="details()?.name" 
+            [title]="details()?.name">
+        </div>
+        
+        <div class="detail-content">
+          <h2 class="cat-name">{{ details()?.name }}</h2>
+          
+          <div class="cat-stats">
+            <div class="stat-item">
+              <span class="stat-label">🆔 ID:</span>
+              <span class="stat-value">{{ details()?.id }}</span>
+            </div>
+            
+            <div class="stat-item">
+              <span class="stat-label">🌍 Origem:</span>
+              <span class="stat-value">{{ details()?.origin }}</span>
+            </div>
+            
+            <div class="stat-item">
+              <span class="stat-label">🧠 Inteligência:</span>
+              <span class="stat-value">{{ details()?.intelligence }}/5</span>
+            </div>
+            
+            <div class="stat-item">
+              <span class="stat-label">😺 Temperamento:</span>
+              <span class="stat-value">{{ details()?.temperament }}</span>
+            </div>
+            
+            <div class="stat-item">
+              <span class="stat-label">🔄 Adaptabilidade:</span>
+              <span class="stat-value">{{ details()?.adaptability }}/5</span>
+            </div>
+            
+            <div class="stat-item">
+              <span class="stat-label">⏰ Expectativa de Vida:</span>
+              <span class="stat-value">{{ details()?.life_span }} anos</span>
+            </div>
           </div>
         </div>
-      } @else if (details()) {
-        <div class="listDetail_box">
-          <div class="listDetail_box__thamb">
-            <img class="listDetail_logo" 
-              appLazyLoad 
-              (error)="doSomethingOnError($event)" 
-              [src]="state?.image?.url"
-              [alt]="state?.name" 
-              [title]="state?.name">
-          </div>
-          <div class="description">
-            <h2><b>Nome:</b> {{ details()?.name }}</h2>
-            <p><b>ID:</b> {{ details()?.id }}</p>
-            <p><b>Origin:</b> {{ details()?.origin }}</p>
-            <p><b>Intelligence:</b> {{ details()?.intelligence }}</p>
-            <p><b>Temperament:</b> {{ details()?.temperament }}</p>
-            <p><b>Adaptability:</b> {{ details()?.adaptability }}</p>
-            <p><b>Life span:</b> {{ details()?.life_span }}</p>
-          </div>
+      </div>
+    } @else if (hasError()) {
+      <div class="error-container">
+        <div class="error-content">
+          <span class="error-icon">😿</span>
+          <h3>Erro ao carregar detalhes</h3>
+          <p>{{ error() }}</p>
+          <button class="retry-button" (click)="goBack()">
+            Voltar para Lista
+          </button>
         </div>
-      } @else {
-        <div class="no-details">
-          <p>Nenhum detalhe encontrado.</p>
+      </div>
+    } @else {
+      <div class="no-details">
+        <div class="no-details-content">
+          <span class="no-details-icon">😿</span>
+          <h3>Nenhum detalhe encontrado</h3>
+          <p>O gato solicitado não foi encontrado.</p>
+          <button class="back-button-secondary" (click)="goBack()">
+            Voltar para Lista
+          </button>
         </div>
-      }
-    </div>
-    <div class="clear"></div>
+      </div>
+    }
   </div>
 </section>
