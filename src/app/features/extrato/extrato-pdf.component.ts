@@ -227,15 +227,8 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
   };
 
   ngOnInit(): void {
-    console.log('ngOnInit - Iniciando carregamento de dados...');
-    console.log('extratoData recebido:', this.extratoData);
-    
     const data = this.extratoData || this.mockData;
-    console.log('Dados que serão usados:', data);
-    
     this.dadosAtuais.set(data);
-    console.log('dadosAtuais signal definido:', this.dadosAtuais());
-    
     this.config.set({
       titulo: 'Extrato Bancário',
       dataTransacao: data.dataBusca,
@@ -246,9 +239,6 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
       tipoInvestimento: data.tipoInvestimento,
       tipoProduto: data.tipoProduto,
     });
-    
-    console.log('config signal definido:', this.config());
-    console.log('ngOnInit - Carregamento de dados concluído');
   }
 
   // Utility methods
@@ -267,28 +257,6 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  // Método para testar se os dados estão sendo exibidos
-  testarDados(): void {
-    console.log('=== TESTE DE DADOS ===');
-    console.log('dadosAtuais signal:', this.dadosAtuais());
-    console.log('temSaldoAnterior:', this.temSaldoAnterior());
-    console.log('temAplicacoes:', this.temAplicacoes());
-    console.log('temResgates:', this.temResgates());
-    console.log('temSaldoFinal:', this.temSaldoFinal());
-    
-    const dados = this.dadosAtuais();
-    if (dados) {
-      console.log('Empresa:', dados.empresa);
-      console.log('Agência:', dados.agencia);
-      console.log('Data Busca:', dados.dataBusca);
-      console.log('Saldo Anterior itens:', dados.saldoAnterior?.itens?.length);
-      console.log('Aplicações itens:', dados.aplicacoes?.itens?.length);
-      console.log('Resgates itens:', dados.resgates?.itens?.length);
-      console.log('Saldo Final itens:', dados.saldoFinal?.itens?.length);
-    }
-    console.log('=== FIM DO TESTE ===');
-  }
-
   // Método para gerar PDF usando impressão do navegador
   gerarPDF(): void {
     this.isPrintMode.set(true);
@@ -305,25 +273,18 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
       this.isLoading.set(true);
       this.error.set(null);
 
-      console.log('Iniciando geração do PDF...');
-
       const element = document.querySelector('.extrato-container') as HTMLElement;
       if (!element) {
         throw new Error('Elemento do extrato não encontrado');
       }
 
-      console.log('Elemento encontrado:', element);
-
       // Criar um clone do elemento para manipulação
       const clone = element.cloneNode(true) as HTMLElement;
       
-      console.log('Clone criado:', clone);
-
       // Remover botões de ação do clone
       const actionButtons = clone.querySelector('.action-buttons');
       if (actionButtons) {
         actionButtons.remove();
-        console.log('Botões de ação removidos');
       }
 
       // Remover loading e error states
@@ -352,8 +313,6 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
       clone.style.visibility = 'visible';
       clone.style.display = 'block';
 
-      console.log('Estilos aplicados ao clone');
-
       // Estilos específicos para o header
       const header = clone.querySelector('.extrato-header') as HTMLElement;
       if (header) {
@@ -364,7 +323,6 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
         header.style.paddingBottom = '10px'; // Reduzido de 15px para 10px
         header.style.position = 'relative';
         header.style.columnGap = '200px'; // Reduzido de 230px para 200px
-        console.log('Header estilizado');
       }
 
       // Estilos para header-left
@@ -384,7 +342,6 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
         logo.style.color = '#cc0000';
         logo.style.marginBottom = '1px'; // Reduzido de 2px para 1px
         logo.style.textTransform = 'none';
-        console.log('Logo estilizado:', logo.textContent);
       }
 
       // Estilos para subtitle
@@ -395,7 +352,6 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
         subtitle.style.marginBottom = '2px'; // Reduzido de 4px para 2px
         subtitle.style.textTransform = 'none';
         subtitle.style.fontWeight = 'normal';
-        console.log('Subtitle estilizado:', subtitle.textContent);
       }
 
       // Estilos para global-solutions
@@ -409,7 +365,6 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
         globalSolutions.style.borderRadius = '2px';
         globalSolutions.style.textTransform = 'none';
         globalSolutions.style.fontWeight = 'normal';
-        console.log('Global solutions estilizado:', globalSolutions.textContent);
       }
 
       // Estilos para header-right
@@ -427,7 +382,6 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
         reportTitle.style.fontWeight = '600';
         reportTitle.style.color = '#000';
         reportTitle.style.marginBottom = '3px'; // Reduzido de 5px para 3px
-        console.log('Report title estilizado:', reportTitle.textContent);
       }
 
       // Estilos para transaction-details
@@ -437,7 +391,6 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
         transactionDetails.style.color = '#000';
         transactionDetails.style.fontWeight = '600';
         transactionDetails.style.lineHeight = '1.2'; // Reduzido de 1.4 para 1.2
-        console.log('Transaction details estilizado:', transactionDetails.textContent);
       }
 
       // Estilos para search-details
@@ -448,7 +401,6 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
         searchDetails.style.border = 'none';
         searchDetails.style.marginBottom = '8px'; // Reduzido de 12px para 8px
         searchDetails.style.borderRadius = '0';
-        console.log('Search details encontrado');
       }
 
       // Estilos para h3 em search-details
@@ -458,7 +410,6 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
         searchDetailsH3.style.marginBottom = '4px'; // Reduzido de 6px para 4px
         searchDetailsH3.style.fontSize = '12px'; // Reduzido de 14px para 12px
         searchDetailsH3.style.fontWeight = 'bold';
-        console.log('H3 estilizado:', searchDetailsH3.textContent);
       }
 
       // Estilos para detail-grid
@@ -476,7 +427,6 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
         (item as HTMLElement).style.borderBottom = 'none';
         (item as HTMLElement).style.fontSize = '10px'; // Reduzido de 11px para 10px
         (item as HTMLElement).style.marginBottom = '0px'; // Reduzido de 1px para 0px
-        console.log(`Detail item ${index}:`, (item as HTMLElement).textContent);
       });
 
       // Estilos para detail-label
@@ -502,7 +452,6 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
         financialTable.style.backgroundColor = '#fff';
         financialTable.style.fontSize = '9px'; // Reduzido de 10px para 9px
         financialTable.style.border = 'none';
-        console.log('Financial table encontrado');
       }
 
       // Estilos para table-header
@@ -517,50 +466,50 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
       tableThs.forEach((th, index) => {
         (th as HTMLElement).style.backgroundColor = 'transparent';
         (th as HTMLElement).style.color = '#000';
-        (th as HTMLElement).style.padding = '6px 3px'; // Reduzido de 8px 4px para 6px 3px
+        (th as HTMLElement).style.padding = '8px 4px'; // Aumentado de 6px 3px para 8px 4px
         (th as HTMLElement).style.textAlign = 'center';
-        (th as HTMLElement).style.border = 'none';
+        (th as HTMLElement).style.border = 'none'; // Removido border
         (th as HTMLElement).style.fontWeight = 'bold';
-        (th as HTMLElement).style.fontSize = '10px'; // Reduzido de 11px para 10px
-        (th as HTMLElement).style.borderBottom = '1px solid #ccc';
+        (th as HTMLElement).style.fontSize = '10px';
+        (th as HTMLElement).style.borderBottom = 'none'; // Removido border-bottom
 
         // Alinhamentos específicos baseados na posição
         if (index === 0) {
           (th as HTMLElement).style.textAlign = 'left';
-          (th as HTMLElement).style.paddingLeft = '15px'; // Reduzido de 20px para 15px
+          (th as HTMLElement).style.paddingLeft = '15px';
         } else if (index === 1 || index === 2) {
           (th as HTMLElement).style.textAlign = 'left';
-          (th as HTMLElement).style.paddingLeft = '2px'; // Reduzido de 3px para 2px
+          (th as HTMLElement).style.paddingLeft = '2px';
         } else if (index === 3) {
           (th as HTMLElement).style.textAlign = 'center';
         } else {
           (th as HTMLElement).style.textAlign = 'right';
-          (th as HTMLElement).style.paddingRight = index === 10 ? '8px' : '2px'; // Reduzido
+          (th as HTMLElement).style.paddingRight = index === 10 ? '8px' : '2px';
         }
       });
 
       // Estilos para td em financial-table
       const tableTds = clone.querySelectorAll('.financial-table td');
       tableTds.forEach((td, index) => {
-        (td as HTMLElement).style.padding = '4px 3px'; // Reduzido de 6px 4px para 4px 3px
+        (td as HTMLElement).style.padding = '6px 4px'; // Aumentado de 4px 3px para 6px 4px
         (td as HTMLElement).style.textAlign = 'center';
-        (td as HTMLElement).style.border = 'none';
+        (td as HTMLElement).style.border = 'none'; // Removido border
         (td as HTMLElement).style.color = '#000';
-        (td as HTMLElement).style.fontSize = '9px'; // Reduzido de 11px para 9px
-        (td as HTMLElement).style.borderBottom = '1px solid #eee';
+        (td as HTMLElement).style.fontSize = '9px';
+        (td as HTMLElement).style.borderBottom = 'none'; // Removido border-bottom
 
         // Alinhamentos específicos baseados na posição
         if (index % 11 === 0) {
           (td as HTMLElement).style.textAlign = 'left';
-          (td as HTMLElement).style.paddingLeft = '15px'; // Reduzido de 20px para 15px
+          (td as HTMLElement).style.paddingLeft = '15px';
         } else if (index % 11 === 1 || index % 11 === 2) {
           (td as HTMLElement).style.textAlign = 'left';
-          (td as HTMLElement).style.paddingLeft = '2px'; // Reduzido de 3px para 2px
+          (td as HTMLElement).style.paddingLeft = '2px';
         } else if (index % 11 === 3) {
           (td as HTMLElement).style.textAlign = 'center';
         } else {
           (td as HTMLElement).style.textAlign = 'right';
-          (td as HTMLElement).style.paddingRight = (index % 11 === 10) ? '8px' : '2px'; // Reduzido
+          (td as HTMLElement).style.paddingRight = (index % 11 === 10) ? '8px' : '2px';
         }
       });
 
@@ -568,7 +517,7 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
       const sectionTitles = clone.querySelectorAll('.section-title');
       sectionTitles.forEach(title => {
         (title as HTMLElement).style.backgroundColor = '#eee';
-        (title as HTMLElement).style.padding = '8px 0'; // Reduzido de 12px 0 para 8px 0
+        (title as HTMLElement).style.padding = '8px 0';
       });
 
       // Estilos para th em section-title
@@ -576,11 +525,11 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
       sectionTitleThs.forEach(th => {
         (th as HTMLElement).style.backgroundColor = '#eee';
         (th as HTMLElement).style.color = '#000';
-        (th as HTMLElement).style.padding = '8px 25px'; // Reduzido de 12px 35px para 8px 25px
+        (th as HTMLElement).style.padding = '8px 25px';
         (th as HTMLElement).style.textAlign = 'left';
         (th as HTMLElement).style.fontWeight = 'bold';
-        (th as HTMLElement).style.fontSize = '11px'; // Reduzido de 12px para 11px
-        (th as HTMLElement).style.borderBottom = '1px solid #ddd';
+        (th as HTMLElement).style.fontSize = '11px';
+        (th as HTMLElement).style.borderBottom = 'none'; // Removido border-bottom
       });
 
       // Estilos para data-row
@@ -595,9 +544,9 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
         (row as HTMLElement).style.backgroundColor = 'transparent';
         (row as HTMLElement).style.color = '#000';
         (row as HTMLElement).style.fontWeight = 'bold';
-        (row as HTMLElement).style.borderTop = '1px solid #ddd';
-        (row as HTMLElement).style.padding = '6px 0'; // Reduzido de 8px 0 para 6px 0
-        (row as HTMLElement).style.marginBottom = '8px'; // Reduzido de 10px para 8px
+        (row as HTMLElement).style.borderTop = 'none'; // Removido border-top
+        (row as HTMLElement).style.padding = '8px 0'; // Aumentado de 6px 0 para 8px 0
+        (row as HTMLElement).style.marginBottom = '8px';
       });
 
       // Estilos para td em total-row
@@ -606,7 +555,7 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
         (td as HTMLElement).style.color = '#000';
         (td as HTMLElement).style.borderColor = 'transparent';
         (td as HTMLElement).style.borderBottom = 'none';
-        (td as HTMLElement).style.padding = '6px 3px'; // Reduzido de 8px 4px para 6px 3px
+        (td as HTMLElement).style.padding = '8px 4px'; // Aumentado de 6px 3px para 8px 4px
 
         // Alinhamentos específicos para total-row
         if (index === 0) {
@@ -616,7 +565,7 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
           (td as HTMLElement).style.textAlign = 'center';
         } else {
           (td as HTMLElement).style.textAlign = 'right';
-          (td as HTMLElement).style.paddingRight = (index === 10) ? '8px' : '2px'; // Reduzido
+          (td as HTMLElement).style.paddingRight = (index === 10) ? '8px' : '2px';
         }
       });
 
@@ -630,18 +579,8 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
       // Adicionar o clone ao DOM temporariamente
       document.body.appendChild(clone);
 
-      console.log('Clone adicionado ao DOM');
-      console.log('Dimensões do clone:', {
-        offsetWidth: clone.offsetWidth,
-        offsetHeight: clone.offsetHeight,
-        scrollWidth: clone.scrollWidth,
-        scrollHeight: clone.scrollHeight
-      });
-
       // Aguardar um momento para o DOM ser renderizado
       await new Promise(resolve => setTimeout(resolve, 500)); // Aumentado para 500ms
-
-      console.log('Iniciando captura com html2canvas...');
 
       // Capturar o elemento com html2canvas
       const canvas = await html2canvas(clone, {
@@ -660,19 +599,11 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
         logging: true // Habilitar logs do html2canvas
       });
 
-      console.log('Canvas criado:', {
-        width: canvas.width,
-        height: canvas.height
-      });
-
       // Remover o clone do DOM
       document.body.removeChild(clone);
 
-      console.log('Clone removido do DOM');
-
       // Criar PDF com jsPDF
       const imgData = canvas.toDataURL('image/png', 1.0);
-      console.log('Imagem convertida para data URL');
 
       const pdf = new jsPDF('p', 'mm', 'a4');
       
@@ -680,13 +611,6 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
       const pageHeight = 287; // Aumentado de 277 para 287 (menos margem)
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       let heightLeft = imgHeight;
-
-      console.log('Dimensões do PDF:', {
-        imgWidth,
-        imgHeight,
-        pageHeight,
-        heightLeft
-      });
 
       let position = 5; // Reduzido de 10 para 5 (menos margem superior)
 
@@ -703,8 +627,6 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
       // Salvar o PDF
       const fileName = `extrato-bradesco-${new Date().toISOString().split('T')[0]}.pdf`;
       pdf.save(fileName);
-
-      console.log('PDF salvo com sucesso:', fileName);
 
       this.isLoading.set(false);
     } catch (error) {
@@ -726,7 +648,6 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
       a.click();
       window.URL.revokeObjectURL(url);
       
-      console.log('CSV gerado com sucesso');
     } catch (error) {
       console.error('Erro ao gerar CSV:', error);
       this.error.set('Erro ao gerar CSV. Tente novamente.');
@@ -766,7 +687,6 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
       a.click();
       window.URL.revokeObjectURL(url);
       
-      console.log('HTML exportado com sucesso');
     } catch (error) {
       console.error('Erro ao exportar HTML:', error);
       this.error.set('Erro ao exportar HTML. Tente novamente.');
