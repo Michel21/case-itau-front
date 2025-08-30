@@ -111,4 +111,19 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   trackByCatId(index: number, cat: ICatsTypes): string {
     return cat.id;
   }
+
+  // Helper methods for display
+  getBreedName(item: ICatsTypes): string {
+    if (item?.breeds && item.breeds.length > 0) {
+      return item.breeds[0].name;
+    }
+    return 'Raça não disponível';
+  }
+
+  getDescription(item: ICatsTypes): string {
+    if (item?.breeds && item.breeds.length > 0 && item.breeds[0].description) {
+      return item.breeds[0].description;
+    }
+    return 'Descrição não disponível';
+  }
 }

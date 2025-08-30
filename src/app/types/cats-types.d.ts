@@ -7,18 +7,28 @@ export interface ICatsTypes {
   mime_type: string;
   entities: [];
   origin: string;
-  breeds: [
-    {
-      id: 3;
-      name: string;
-      wikipedia_url: string;
-    },
-    {
-      id: 2;
-      name: string;
-      wikipedia_url: string;
-    }
-  ];
+  breeds: Breed[];
   animals: [];
   categories: [];
+  temperament?: string;
+  description?: string;
+  intelligence?: number;
+  adaptability?: number;
+  life_span?: string;
+  image?: {
+    url: string;
+    width: number;
+    height: number;
+  };
+}
+
+export interface Breed {
+  id: number;
+  name: string;
+  wikipedia_url: string;
+  temperament?: string;
+  description?: string;
+  intelligence?: number;
+  adaptability?: number;
+  life_span?: string;
 }
