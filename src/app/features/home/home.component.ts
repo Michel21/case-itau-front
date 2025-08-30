@@ -9,14 +9,13 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { HomeService } from './services/home.service';
 import { _PATH } from '../../shared/constants/constants';
 import { ICatsTypes } from '../../types/cats-types';
-import { LazyLoadDirective } from '../../shared/components/image-lazy-load/lazy-load.directive';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, LazyLoadDirective],
+  imports: [CommonModule, FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -82,7 +81,13 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
         if (data && data.length > 0) {
           console.log('First cat from API:', data[0]);
           console.log('Image URL:', data[0]?.image?.url);
-
+          console.log('Image object:', data[0]?.image);
+          
+          // Testa se a URL da imagem é válida
+          const img = new Image();
+          img.onload = () => console.log('✅ Image loads successfully:', data[0]?.image?.url);
+          img.onerror = () => console.log('❌ Image fails to load:', data[0]?.image?.url);
+          img.src = data[0]?.image?.url;
         }
       },
       error: (error) => {
