@@ -9,13 +9,14 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { HomeService } from './services/home.service';
 import { _PATH } from '../../shared/constants/constants';
 import { ICatsTypes } from '../../types/cats-types';
+import { LazyLoadDirective } from '../../shared/components/image-lazy-load/lazy-load.directive';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LazyLoadDirective],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -61,14 +62,33 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     // Effect to update cats when service data changes
     effect(() => {
       const cats = this.catsFromService();
+      console.log('Cats data received:', cats);
       if (cats && cats.length > 0) {
         this.catsSignal.set(cats);
+        console.log('First cat data:', cats[0]);
       }
     });
   }
 
   ngOnInit(): void {
     // Data is automatically loaded via toSignal
+    this.testApi();
+  }
+
+  private testApi(): void {
+    this.homeService.getCats().subscribe({
+      next: (data) => {
+        console.log('API Test - Raw data:', data);
+        if (data && data.length > 0) {
+          console.log('First cat from API:', data[0]);
+          console.log('Image URL:', data[0]?.image?.url);
+          console.log('Direct URL:', data[0]?.url);
+        }
+      },
+      error: (error) => {
+        console.error('API Test - Error:', error);
+      }
+    });
   }
 
   ngAfterViewInit(): void {

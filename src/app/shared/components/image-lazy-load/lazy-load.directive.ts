@@ -4,7 +4,7 @@ import { _PATH } from '../../constants/constants';
 
 @Directive({
     selector: 'img[appLazyLoad]',
-    standalone: false
+    standalone: true
 })
 export class LazyLoadDirective implements AfterViewInit {
   @HostBinding('attr.src') srcAttr = `${_PATH}/circle-loading-animation.gif`;
