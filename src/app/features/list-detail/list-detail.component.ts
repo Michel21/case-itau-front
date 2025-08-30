@@ -1,14 +1,16 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { _PATH } from '../../../app/shared/constants/constants';
+import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
+
+import { _PATH } from '../../shared/constants/constants';
 import { ListDetailService } from './services/list-detail.service';
-import { Router } from '@angular/router';
 
 @Component({
-    selector: 'app-list-detail',
-    templateUrl: './list-detail.component.html',
-    styleUrls: ['./list-detail.component.scss'],
-    standalone: false
+  selector: 'app-list-detail',
+  templateUrl: './list-detail.component.html',
+  styleUrls: ['./list-detail.component.scss'],
+  standalone: true,
+  imports: [CommonModule]
 })
 export class ListDetailComponent implements OnInit {
   public listDetails: unknown;

@@ -1,17 +1,20 @@
 import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { HomeService } from './services/home.service';
-import { debounceTime, distinctUntilChanged, switchMap, catchError, filter, tap, map, delay } from 'rxjs/operators';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router, NavigationExtras } from '@angular/router';
+import { debounceTime, distinctUntilChanged, switchMap, catchError, filter, map } from 'rxjs/operators';
 import { from, fromEvent } from 'rxjs';
-import { _PATH } from '../../../app/shared/constants/constants';
-import { NavigationExtras, Router } from '@angular/router';
+
+import { HomeService } from './services/home.service';
+import { _PATH } from '../../shared/constants/constants';
 import { ICatsTypes } from '../../types/cats-types';
 
-
 @Component({
-    selector: 'app-home',
-    templateUrl: './home.component.html',
-    styleUrls: ['./home.component.scss'],
-    standalone: false
+  selector: 'app-home',
+  templateUrl: './home.component.html',
+  styleUrls: ['./home.component.scss'],
+  standalone: true,
+  imports: [CommonModule, FormsModule]
 })
 
 export class HomeComponent implements OnInit, AfterViewInit {
@@ -21,7 +24,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
     state: {}
   };
   
-  @ViewChild('input', { static: true }) input: ElementRef;
+  @ViewChild('input', { static: true }) input!: ElementRef;
   public loadding: boolean = false;
   public path = `${_PATH}/circle-loading-animation.gif`;
 
@@ -63,8 +66,8 @@ export class HomeComponent implements OnInit, AfterViewInit {
       });
   }
 
-  onNavigateTo(item){
-    this.route.navigate([`home/list-detalhe/${item.id}`], {state: item})
+  onNavigateTo(item: ICatsTypes): void {
+    this.route.navigate([`home/list-detalhe/${item.id}`], { state: item });
   }
   
   doSomethingOnError(event: any) {

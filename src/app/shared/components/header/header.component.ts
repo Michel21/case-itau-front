@@ -1,18 +1,16 @@
-import { Component, Inject } from "@angular/core";
-
-import { Router } from "@angular/router";
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
-    selector: 'app-header',
-    templateUrl: './header.component.html',
-    styleUrls: ['./header.component.scss'],
-    standalone: false
+  selector: 'app-header',
+  templateUrl: './header.component.html',
+  styleUrls: ['./header.component.scss'],
+  standalone: true
 })
-
 export class HeaderComponent {
-  constructor(private route: Router){}
+  constructor(private router: Router) {}
 
-  onNavigateTo(){
-    this.route.navigate(['/home'])
+  onNavigateTo(): void {
+    this.router.navigate(['/home']);
   }
 }
