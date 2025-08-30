@@ -22,6 +22,11 @@ export const routes: Routes = [
     loadChildren: () => import('./features/admin/admin.routes').then(m => m.ADMIN_ROUTES)
   },
   {
+    path: 'extrato',
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/extrato/extrato.routes').then(m => m.EXTRATO_ROUTES)
+  },
+  {
     path: '',
     pathMatch: 'full',
     redirectTo: 'home'

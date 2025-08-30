@@ -1,4 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
 // import { ExtratoCsvService, CSVConfig } from './extrato-csv.service';
 
 export interface ExtratoItem {
@@ -52,7 +53,10 @@ export interface ExtratoDados {
 @Component({
   selector: 'app-extrato-pdf',
   templateUrl: './extrato-pdf.component.html',
-  styleUrls: ['./extrato-pdf.component.css']
+  styleUrls: ['./extrato-pdf.component.css'],
+  standalone: true,
+  imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExtratoPdfComponent implements OnInit {
   @Input() extratoData: ExtratoDados | null = null;
@@ -70,8 +74,8 @@ export class ExtratoPdfComponent implements OnInit {
         {
           dataAplicacao: '10/03/2025',
           dataVencimento: '01/03/2027',
-          dataResgate: undefined,
-          taxa: undefined,
+          dataResgate: "",
+          taxa: 0,
           valorPrincipal: 58.22,
           valorBruto: 58.37,
           rendaTotal: 0.15,
@@ -83,21 +87,21 @@ export class ExtratoPdfComponent implements OnInit {
         {
           dataAplicacao: '31/03/2025',
           dataVencimento: '22/03/2027',
-          dataResgate: undefined,
+          dataResgate: "",
           taxa: 5.00,
           valorPrincipal: 90.12,
           valorBruto: 90.32,
           rendaTotal: 0.20,
           iof: 0.00,
           irrf: 0.04,
-          valorLiquido: undefined,
+          valorLiquido: 0,
           rendaBrutaPer: undefined
         },
         {
           dataAplicacao: '23/05/2025',
           dataVencimento: '07/05/2024',
-          dataResgate: undefined,
-          taxa: undefined,
+          dataResgate: "",
+          taxa: 0,
           valorPrincipal: 1005.40,
           valorBruto: 1005.48,
           rendaTotal: 0.08,
@@ -112,7 +116,7 @@ export class ExtratoPdfComponent implements OnInit {
       totalRendaTotal: 2275.27,
       totalIof: 0.00,
       totalIrrf: 0.52,
-      totalValorLiquido: undefined,
+      totalValorLiquido: 0,
       totalRendaBrutaPer: undefined
     },
     aplicacoes: {
@@ -120,36 +124,36 @@ export class ExtratoPdfComponent implements OnInit {
         {
           dataAplicacao: '04/08/2025',
           dataVencimento: '26/07/2027',
-          dataResgate: undefined,
-          taxa: undefined,
-          valorPrincipal: undefined,
-          valorBruto: undefined,
-          rendaTotal: undefined,
-          iof: undefined,
-          irrf: undefined,
-          valorLiquido: undefined,
+          dataResgate: "",
+          taxa: 0,
+          valorPrincipal: 0,
+          valorBruto: 0,
+          rendaTotal: 0,
+          iof: 0,
+          irrf: 0,
+          valorLiquido: 0,
           rendaBrutaPer: undefined
         },
         {
           dataAplicacao: '05/08/2025',
           dataVencimento: '05/08/2027',
-          dataResgate: undefined,
-          taxa: undefined,
+          dataResgate: "",
+          taxa: 0,
           valorPrincipal: 100.00,
-          valorBruto: undefined,
-          rendaTotal: undefined,
-          iof: undefined,
-          irrf: undefined,
-          valorLiquido: undefined,
+          valorBruto: 0,
+          rendaTotal: 0,
+          iof: 0,
+          irrf: 0,
+          valorLiquido: 0,
           rendaBrutaPer: undefined
         }
       ],
       totalValorPrincipal: 100.00,
-      totalValorBruto: undefined,
-      totalRendaTotal: undefined,
-      totalIof: undefined,
-      totalIrrf: undefined,
-      totalValorLiquido: undefined,
+      totalValorBruto: 0,
+      totalRendaTotal: 0,
+      totalIof: 0,
+      totalIrrf: 0,
+      totalValorLiquido: 0,
       totalRendaBrutaPer: undefined
     },
     resgates: {
@@ -208,7 +212,7 @@ export class ExtratoPdfComponent implements OnInit {
         {
           dataAplicacao: '28/08/2025',
           dataVencimento: '07/06/2027',
-          dataResgate: undefined,
+          dataResgate: "",
           taxa: 5.00,
           valorPrincipal: 44.56,
           valorBruto: 44.61,
@@ -224,7 +228,7 @@ export class ExtratoPdfComponent implements OnInit {
       totalRendaTotal: 2275.27,
       totalIof: 0.00,
       totalIrrf: 0.52,
-      totalValorLiquido: undefined,
+      totalValorLiquido: 0,
       totalRendaBrutaPer: undefined
     }
   };
@@ -250,7 +254,7 @@ export class ExtratoPdfComponent implements OnInit {
     return this.temItens(this.dadosAtuais.saldoFinal);
   }
 
-  constructor(private csvService: ExtratoCsvService) {
+  constructor() {
     this.dadosAtuais = this.mockData;
     this.dataTransacao = new Date().toLocaleString('pt-BR');
     this.numeroControle = this.gerarNumeroControle();
@@ -349,8 +353,10 @@ export class ExtratoPdfComponent implements OnInit {
 
   // Método para gerar CSV usando o serviço dedicado
   gerarCSV(): void {
-    const config: CSVConfig = this.csvService.criarConfigCSV(this.dataTransacao);
-    this.csvService.gerarCSV(this.dadosAtuais, config);
+    // const config: CSVConfig = this.csvService.criarConfigCSV(this.dataTransacao);
+    // this.csvService.gerarCSV(this.dadosAtuais, config);
+    console.log('Gerando CSV...');
+    // Implementação futura
   }
 
   // Método para converter dados para CSV
@@ -633,6 +639,27 @@ export class ExtratoPdfComponent implements OnInit {
       const v = c === 'x' ? r : (r & 0x3 | 0x8);
       return v.toString(16);
     });
+  }
+
+  // Método público para obter número de controle
+  getNumeroControle(): string {
+    return this.numeroControle;
+  }
+
+  // Método para obter data de geração
+  getDataGeracao(): string {
+    return new Date().toLocaleDateString('pt-BR');
+  }
+
+  // Método para obter hora de geração
+  getHoraGeracao(): string {
+    return new Date().toLocaleTimeString('pt-BR');
+  }
+
+  // Método para gerar PDF corporativo
+  gerarPDFCorporativo(): void {
+    console.log('Gerando PDF corporativo...');
+    // Implementação futura
   }
 
   // Método para verificar se valor existe

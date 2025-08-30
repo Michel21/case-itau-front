@@ -545,13 +545,13 @@ export class ExtratoPdfService {
         <td></td>
         <td></td>
         <td></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao.totalValorPrincipal)}</strong></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao.totalValorBruto)}</strong></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao.totalRendaTotal)}</strong></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao.totalIof)}</strong></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao.totalIrrf)}</strong></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao.totalValorLiquido)}</strong></td>
-        <td class="currency"><strong>${this.formatarMoeda(secao.totalRendaBrutaPer || 0)}</strong></td>
+        <td class="currency"><strong>${this.formatarMoeda(secao.totalValorPrincipal ?? 0)}</strong></td>
+        <td class="currency"><strong>${this.formatarMoeda(secao.totalValorBruto ?? 0)}</strong></td>
+        <td class="currency"><strong>${this.formatarMoeda(secao.totalRendaTotal ?? 0)}</strong></td>
+        <td class="currency"><strong>${this.formatarMoeda(secao.totalIof ?? 0)}</strong></td>
+        <td class="currency"><strong>${this.formatarMoeda(secao.totalIrrf ?? 0)}</strong></td>
+        <td class="currency"><strong>${this.formatarMoeda(secao.totalValorLiquido ?? 0)}</strong></td>
+        <td class="currency"><strong>${this.formatarMoeda(secao.totalRendaBrutaPer ?? 0)}</strong></td>
       </tr>
     `;
   }

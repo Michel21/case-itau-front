@@ -10,7 +10,7 @@
             <div class="report-title">Saldo e extrato</div>
             <div class="transaction-details">
                 <div>Data da transação: {{ getDataGeracao() }} - {{ getHoraGeracao() }}</div>
-                <div>Número de controle: {{ dadosAtuais.dataBusca.replace(/\//g, '') }}001</div>
+                <div>Número de controle: {{ getNumeroControle() }}</div>
             </div>
         </div>
     </div>
