@@ -8,42 +8,39 @@
     </div>
   </div>
 
-
   <div class="listContainer__wrapper">
-    <ng-container *ngIf="objectListaResponse.length > 0;else sceleton">
-      <ng-container *ngFor="let item of objectListaResponse">
+    @if (loading()) {
+      <div class="sceletonContainer">
+        <app-loading-placeholder 
+          [height]="'585px'" 
+          [border]="true">
+        </app-loading-placeholder>
+      </div>
+    } @else if (filteredCats().length > 0) {
+      @for (item of filteredCats(); track item.id) {
         <div class="listContainer__wrapper__card-list">
-          <img appLazyLoad [src]="item?.image?.url" 
-          [width]="item?.image?.width" 
-          alt="imagem capa"
-          loading="lazy"
-          (error)="doSomethingOnError($event)"
-          >
+          <img appLazyLoad 
+            [src]="item?.image?.url" 
+            [width]="item?.image?.width" 
+            alt="imagem capa"
+            loading="lazy"
+            (error)="doSomethingOnError($event)">
           <div class="listContainer__wrapper__content">
-            <h1>{{item?.name}}</h1>
-            <span><strong>Origem:</strong> {{item?.origin}}</span>
-            <span><strong>Temperamento:</strong> {{item?.temperament}}</span>
-            <p><strong>Descrição:</strong> {{item?.description}}</p>
+            <h1>{{ item?.name }}</h1>
+            <span><strong>Origem:</strong> {{ item?.origin }}</span>
+            <span><strong>Temperamento:</strong> {{ item?.temperament }}</span>
+            <p><strong>Descrição:</strong> {{ item?.description }}</p>
           </div>
           <button class="listContainer__wrapper__card-list__mais-details" 
-           [routerLink]="['list-detalhe', item?.id]"
-           [state]="navExtra.state"
-           (click)="onNavigateTo(item)"
-           >Mais Detalhes
+            (click)="onNavigateTo(item)">
+            Mais Detalhes
           </button>
         </div>
-      </ng-container>
-    </ng-container>
-    <ng-template #sceleton>
-      <ng-conatiner *ngFor="let item of listScheleton">
-        <div class="sceletonContainer">
-          <app-loading-placeholder 
-          [height]="'585px'" 
-          [border]="true"
-          >
-          </app-loading-placeholder>
-        </div>
-      </ng-conatiner>
-    </ng-template>
+      }
+    } @else {
+      <div class="no-results">
+        <p>Nenhum gato encontrado com essa origem.</p>
+      </div>
+    }
   </div>
 </section>

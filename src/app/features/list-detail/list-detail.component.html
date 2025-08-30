@@ -1,41 +1,53 @@
 <section class="listDetail">
   <div class="grid">
     <div class="cell-4-phone cell-8-tablet cell-12-desktop">
-      <div class="listDetail_btnBack" [routerLink]="['/']" *ngIf="!loader">
-        <img src="../../../assets/icons8-u-turn-to-left-30.png" alt="back">Voltar
-      </div>
-      <header class="listDetail_siteHeader">
-        <span *ngIf="!loader">DETALHES</span>
-      </header>
-      <div class="listDetail_box" *ngIf="listDetails; else empty">
-        <div class="listDetail_box__thamb">
-          <img class="listDetail_logo" appLazyLoad (error)="doSomethingOnError($event)" [src]="state?.image?.url"
-            alt="{{state?.name}}" title="{{state?.name}}">
+      @if (!loading()) {
+        <div class="listDetail_btnBack" [routerLink]="['/']">
+          <img src="../../../assets/icons8-u-turn-to-left-30.png" alt="back">Voltar
         </div>
-        <div class="description">
-          <h2><b>Nome:</b> {{listDetails?.name}} </h2>
-          <p><b>ID:</b> {{listDetails?.id}}</p>
-          <p><b>Origin:</b> {{listDetails?.origin}}</p>
-          <p><b>Intelligence:</b> {{listDetails?.intelligence}}</p>
-          <p><b>Temperament:</b> {{listDetails?.temperament}}</p>
-          <p><b>Adaptability:</b> {{listDetails?.adaptability}}</p>
-          <p><b>Life span:</b> {{listDetails?.life_span}}</p>
-        </div>
-      </div>
-      <ng-template #empty>
+        <header class="listDetail_siteHeader">
+          <span>DETALHES</span>
+        </header>
+      }
+      
+      @if (loading()) {
         <div class="listDetail_box">
           <div class="listDetail_box__scaleton-right">
             <app-loading-placeholder [height]="'500px'" [border]="true" [width]="'100%'">
             </app-loading-placeholder>
           </div>
           <div class="listDetail_box__scaleton-left">
-            <ng-container *ngFor="let item of listScheleton">
+            @for (item of listScheleton; track item) {
               <app-loading-placeholder [height]="'40px'" [border]="true" [width]="'100%'">
               </app-loading-placeholder>
-            </ng-container>
+            }
           </div>
         </div>
-      </ng-template>
+      } @else if (details()) {
+        <div class="listDetail_box">
+          <div class="listDetail_box__thamb">
+            <img class="listDetail_logo" 
+              appLazyLoad 
+              (error)="doSomethingOnError($event)" 
+              [src]="state?.image?.url"
+              [alt]="state?.name" 
+              [title]="state?.name">
+          </div>
+          <div class="description">
+            <h2><b>Nome:</b> {{ details()?.name }}</h2>
+            <p><b>ID:</b> {{ details()?.id }}</p>
+            <p><b>Origin:</b> {{ details()?.origin }}</p>
+            <p><b>Intelligence:</b> {{ details()?.intelligence }}</p>
+            <p><b>Temperament:</b> {{ details()?.temperament }}</p>
+            <p><b>Adaptability:</b> {{ details()?.adaptability }}</p>
+            <p><b>Life span:</b> {{ details()?.life_span }}</p>
+          </div>
+        </div>
+      } @else {
+        <div class="no-details">
+          <p>Nenhum detalhe encontrado.</p>
+        </div>
+      }
     </div>
     <div class="clear"></div>
   </div>
