@@ -68,14 +68,14 @@ export class ExtratoPdfService {
   }
 
   private converterParaCSV(dados: ExtratoDados): string {
-    // Cabeçalho simples igual à imagem
+    // Cabeçalho das colunas
     let csv = 'Seção,Data Aplica,Data Vencir,Data Resgal,Taxa (%),Valor Princi,Valor Bruto,Renda Tota,IOF (BRL),IRRF (BRL),Valor Líquic,Renda Bruta Per (BRL)\n';
 
     // Saldo anterior
     if (dados.saldoAnterior?.itens) {
       csv += `Saldo anterior em ${dados.saldoAnterior.dataSaldo}\n`;
       dados.saldoAnterior.itens.forEach(item => {
-        csv += this.itemParaCSVSimples('Saldo Anter', item);
+        csv += this.itemParaCSVSimples('', item);
       });
       csv += this.totaisParaCSVSimples('Saldo Anterior - TOTAL', dados.saldoAnterior);
     }
@@ -84,7 +84,7 @@ export class ExtratoPdfService {
     if (dados.aplicacoes?.itens) {
       csv += 'Aplicações\n';
       dados.aplicacoes.itens.forEach(item => {
-        csv += this.itemParaCSVSimples('Aplicações', item);
+        csv += this.itemParaCSVSimples('', item);
       });
       csv += this.totaisParaCSVSimples('Aplicações - TOTAL', dados.aplicacoes);
     }
@@ -112,11 +112,14 @@ export class ExtratoPdfService {
 
   private itemParaCSVSimples(secao: string, item: ExtratoItem): string {
     const formatarNumero = (valor: number | undefined) => valor ? valor.toFixed(2) : '';
-    return `${secao},########,########,########,${item.taxa ? item.taxa.toFixed(2) : ''},${formatarNumero(item.valorPrincipal)},${formatarNumero(item.valorBruto)},${formatarNumero(item.rendaTotal)},${formatarNumero(item.iof)},${formatarNumero(item.irrf)},${formatarNumero(item.valorLiquido)},${formatarNumero(item.rendaBrutaPer)}\n`;
+    const formatarTaxa = (taxa: number | undefined) => taxa ? taxa.toFixed(2) : '';
+    
+    return `${secao},########,########,########,${formatarTaxa(item.taxa)},${formatarNumero(item.valorPrincipal)},${formatarNumero(item.valorBruto)},${formatarNumero(item.rendaTotal)},${formatarNumero(item.iof)},${formatarNumero(item.irrf)},${formatarNumero(item.valorLiquido)},${formatarNumero(item.rendaBrutaPer)}\n`;
   }
 
   private totaisParaCSVSimples(secao: string, dados: ExtratoSecao): string {
     const formatarNumero = (valor: number | undefined) => valor ? valor.toFixed(2) : '';
+    
     return `${secao},,,,,${formatarNumero(dados.totalValorPrincipal)},${formatarNumero(dados.totalValorBruto)},${formatarNumero(dados.totalRendaTotal)},${formatarNumero(dados.totalIof)},${formatarNumero(dados.totalIrrf)},${formatarNumero(dados.totalValorLiquido)},${formatarNumero(dados.totalRendaBrutaPer)}\n`;
   }
 
