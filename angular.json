@@ -79,18 +79,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "case-itau-front:build"
+            "buildTarget": "case-itau-front:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "case-itau-front:build:production"
+              "buildTarget": "case-itau-front:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "case-itau-front:build"
+            "buildTarget": "case-itau-front:build"
           }
         },
         "e2e": {
