@@ -18,281 +18,316 @@ $hover-color-yellow: #FCD277;
 .extrato-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 25px;
   background: $color-white;
   min-height: 100vh;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  line-height: 1.6;
-  color: $color-default;
-
-  &.print-mode {
-    .action-buttons,
-    .loading-overlay,
-    .error-message {
-      display: none !important;
-    }
-  }
-
-  @media (max-width: 768px) {
-    padding: 1rem 0.5rem;
-  }
+  font-family: Arial, sans-serif;
+  line-height: 1.3;
+  color: #000;
 }
 
 // Header do extrato
 .extrato-header {
-  background: linear-gradient(135deg, $primary-color 0%, $primary-lighter-color 100%);
-  color: $color-white;
-  padding: 2rem;
-  border-radius: 12px;
-  margin-bottom: 2rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-
-  @media (max-width: 768px) {
-    padding: 1.5rem 1rem;
-  }
-}
-
-.header-content {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 2rem;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    gap: 1rem;
-  }
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  position: relative;
 }
 
-.header-title {
-  flex: 1;
+.header-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
-.main-title {
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0 0 1rem 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+.logo {
+  font-size: 28px;
+  font-weight: bold;
+  color: #cc0000;
+  margin-bottom: 2px;
+  text-transform: none;
+}
 
-  @media (max-width: 768px) {
-    font-size: 1.5rem;
-  }
+.subtitle {
+  font-size: 16px;
+  color: #000;
+  margin-bottom: 4px;
+  text-transform: none;
+  font-weight: normal;
+}
+
+.global-solutions {
+  font-size: 12px;
+  color: #ffffff;
+  background-color: #000;
+  padding: 4px 8px;
+  display: inline-block;
+  border-radius: 2px;
+  text-transform: none;
+  font-weight: normal;
+}
+
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.report-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #000;
+  margin-bottom: 8px;
 }
 
 .transaction-details {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  font-size: 12px;
+  color: #000;
+  line-height: 1.4;
 }
 
-.detail-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.25rem;
-  }
-}
-
-.detail-label {
-  font-weight: 600;
-  opacity: 0.9;
-}
-
-.detail-value {
-  font-weight: 500;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-family: 'Courier New', monospace;
+.transaction-details div {
+  margin-bottom: 2px;
 }
 
 // Seção de detalhes da pesquisa
 .search-details {
-  background: $secundary-color-dark;
-  padding: 2rem;
-  border-radius: 12px;
-  margin-bottom: 2rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-
-  @media (max-width: 768px) {
-    padding: 1.5rem 1rem;
-  }
+  background-color: #fff;
+  padding: 8px 0;
+  border: none;
+  margin-bottom: 12px;
+  border-radius: 0;
 }
 
-.section-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: $primary-color;
-  margin: 0 0 1.5rem 0;
-  position: relative;
-
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -0.5rem;
-    left: 0;
-    width: 3rem;
-    height: 2px;
-    background: $primary-color;
-    border-radius: 1px;
-  }
+.search-details h3 {
+  color: #000;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: bold;
 }
 
-.details-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
+.detail-grid {
+  display: block;
+  gap: 0;
 }
 
-.detail-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 1rem;
-  background: $color-white;
-  border-radius: 8px;
-  border-left: 4px solid $primary-color;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+.detail-item {
+  display: block;
+  padding: 1px 0;
+  border-bottom: none;
+  font-size: 11px;
+  margin-bottom: 1px;
 }
 
 .detail-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: $color-default;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-weight: bold;
+  color: #000;
+  display: inline;
 }
 
 .detail-value {
-  font-size: 1rem;
-  font-weight: 500;
-  color: $primary-color;
-  word-break: break-word;
+  color: #000;
+  display: inline;
 }
 
 // Seção da tabela
 .table-section {
-  margin-bottom: 2rem;
+  margin-bottom: 25px;
 }
 
 .table-container {
-  overflow-x: auto;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  background: $color-white;
+  margin-bottom: 25px;
 }
 
 .financial-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
-  min-width: 1000px;
-
-  @media (max-width: 768px) {
-    font-size: 0.8rem;
-  }
+  background-color: #fff;
+  font-size: 10px;
+  border: none;
 }
 
 .table-header {
-  background: $primary-color;
-  color: $color-white;
-
-  th {
-    padding: 1rem 0.75rem;
-    text-align: center;
-    font-weight: 600;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-bottom: 2px solid $primary-lighter-color;
-
-    @media (max-width: 768px) {
-      padding: 0.75rem 0.5rem;
-      font-size: 0.75rem;
-    }
-  }
+  background-color: #ddd;
+  padding: 12px 0;
 }
 
+.financial-table th {
+  background-color: transparent;
+  color: #000;
+  padding: 8px 4px;
+  text-align: center;
+  border: none;
+  font-weight: bold;
+  font-size: 11px;
+  border-bottom: 1px solid #ccc;
+}
+
+// Alinhamento específico baseado na imagem
+.financial-table th:nth-child(1),
+.financial-table td:nth-child(1) {
+  text-align: left !important;
+  padding-left: 20px !important;
+}
+
+.financial-table th:nth-child(2),
+.financial-table td:nth-child(2) {
+  text-align: left !important;
+  padding-left: 3px !important;
+}
+
+.financial-table th:nth-child(3),
+.financial-table td:nth-child(3) {
+  text-align: left !important;
+  padding-left: 3px !important;
+}
+
+.financial-table th:nth-child(4),
+.financial-table td:nth-child(4) {
+  text-align: center !important;
+}
+
+.financial-table th:nth-child(5),
+.financial-table td:nth-child(5) {
+  text-align: right !important;
+  padding-right: 3px !important;
+}
+
+.financial-table th:nth-child(6),
+.financial-table td:nth-child(6) {
+  text-align: right !important;
+  padding-right: 3px !important;
+}
+
+.financial-table th:nth-child(7),
+.financial-table td:nth-child(7) {
+  text-align: right !important;
+  padding-right: 3px !important;
+}
+
+.financial-table th:nth-child(8),
+.financial-table td:nth-child(8) {
+  text-align: right !important;
+  padding-right: 3px !important;
+}
+
+.financial-table th:nth-child(9),
+.financial-table td:nth-child(9) {
+  text-align: right !important;
+  padding-right: 3px !important;
+}
+
+.financial-table th:nth-child(10),
+.financial-table td:nth-child(10) {
+  text-align: right !important;
+  padding-right: 3px !important;
+}
+
+.financial-table th:nth-child(11),
+.financial-table td:nth-child(11) {
+  text-align: right !important;
+  padding-right: 10px !important;
+}
+
+// Células da tabela
+.financial-table td {
+  padding: 6px 4px;
+  text-align: center;
+  border: none;
+  color: #000;
+  font-size: 11px;
+  border-bottom: 1px solid #eee;
+}
+
+// Títulos das seções
 .section-title {
-  background: $secundary-color-dark;
-  color: $primary-color;
-
-  th {
-    padding: 1rem 0.75rem;
-    text-align: left;
-    font-weight: 700;
-    font-size: 1rem;
-    border-bottom: 2px solid $primary-color;
-
-    @media (max-width: 768px) {
-      padding: 0.75rem 0.5rem;
-      font-size: 0.9rem;
-    }
-  }
+  background-color: #eee;
+  padding: 12px 0;
 }
 
+.section-title th {
+  background-color: #eee;
+  color: #000;
+  padding: 12px 35px;
+  text-align: left;
+  font-weight: bold;
+  font-size: 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+// Linhas de dados
 .data-row {
-  border-bottom: 1px solid $lightes-dark;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background: $secundary-color-dark;
-  }
-
-  td {
-    padding: 0.75rem 0.5rem;
-    text-align: center;
-    vertical-align: middle;
-
-    @media (max-width: 768px) {
-      padding: 0.5rem 0.25rem;
-    }
-  }
+  background-color: transparent;
 }
 
+.data-row:nth-child(even) {
+  background-color: transparent;
+}
+
+// Linhas de total
 .total-row {
-  background: $primary-color;
-  color: $color-white;
-  font-weight: 700;
-
-  td {
-    padding: 1rem 0.5rem;
-    text-align: center;
-    border-top: 2px solid $primary-lighter-color;
-
-    @media (max-width: 768px) {
-      padding: 0.75rem 0.25rem;
-    }
-  }
+  background-color: transparent !important;
+  color: #000 !important;
+  font-weight: bold;
+  border-top: 1px solid #ddd !important;
+  padding: 8px 0 !important;
+  margin-bottom: 10px;
 }
 
+.total-row td {
+  color: #000 !important;
+  border-color: transparent !important;
+  border-bottom: none !important;
+  padding: 8px 4px;
+}
+
+// Alinhamento específico para total-row
+.total-row td:first-child {
+  text-align: left !important;
+  padding-left: 20px !important;
+}
+
+.total-row td:nth-child(2),
+.total-row td:nth-child(3),
+.total-row td:nth-child(4) {
+  text-align: center !important;
+}
+
+.total-row td:nth-child(5),
+.total-row td:nth-child(6),
+.total-row td:nth-child(7),
+.total-row td:nth-child(8),
+.total-row td:nth-child(9),
+.total-row td:nth-child(10),
+.total-row td:nth-child(11) {
+  text-align: right !important;
+  padding-right: 3px !important;
+}
+
+// Classes de formatação
 .currency {
   font-family: 'Courier New', monospace;
-  font-weight: 500;
-  text-align: right;
+  font-size: 11px;
+}
+
+.date {
+  font-size: 11px;
+}
+
+.percentage {
+  font-size: 11px;
 }
 
 // Botões de ação
 .action-buttons {
-  margin-top: 2rem;
-  padding: 2rem;
-  background: $secundary-color-dark;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-
-  @media (max-width: 768px) {
-    padding: 1.5rem 1rem;
-  }
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+  flex-wrap: wrap;
 }
 
 .button-group {
@@ -300,11 +335,6 @@ $hover-color-yellow: #FCD277;
   flex-wrap: wrap;
   gap: 1rem;
   justify-content: center;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    gap: 0.75rem;
-  }
 }
 
 .btn {
@@ -329,11 +359,6 @@ $hover-color-yellow: #FCD277;
 
   &:active {
     transform: translateY(0);
-  }
-
-  @media (max-width: 768px) {
-    width: 100%;
-    padding: 1rem;
   }
 }
 
@@ -448,27 +473,70 @@ $hover-color-yellow: #FCD277;
   font-weight: 500;
 }
 
-// Responsividade para impressão
-@media print {
+// Media queries para responsividade
+@media (max-width: 768px) {
   .extrato-container {
-    padding: 0;
-    margin: 0;
-    box-shadow: none;
+    padding: 15px;
   }
 
-  .action-buttons,
-  .loading-overlay,
-  .error-message {
-    display: none !important;
+  .extrato-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .header-right {
+    align-items: flex-start;
+    text-align: left;
   }
 
   .financial-table {
-    font-size: 0.8rem;
+    font-size: 8px;
+    min-width: 600px;
+    overflow-x: auto;
   }
 
-  .table-header th,
-  .data-row td,
-  .total-row td {
-    padding: 0.5rem 0.25rem;
+  .financial-table th,
+  .financial-table td {
+    font-size: 8px;
+    padding: 4px 2px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .btn {
+    width: 100%;
+    max-width: 200px;
+  }
+}
+
+// Estilos para impressão
+@media print {
+  .extrato-container {
+    background-color: white;
+    color: black;
+    padding: 6px;
+  }
+  
+  .extrato-header, .search-details, .table-container {
+    break-inside: avoid;
+  }
+  
+  .financial-table {
+    page-break-inside: avoid;
+    font-size: 8px;
+  }
+  
+  .financial-table th,
+  .financial-table td {
+    font-size: 8px;
+    padding: 2px 1px;
+  }
+
+  .action-buttons {
+    display: none !important;
   }
 }
