@@ -33,11 +33,15 @@
           <div class="cat-card">
             <div class="cat-image">
               <img 
+                appLazyLoad
                 [src]="item?.image?.url" 
-                [width]="item?.image?.width" 
                 [alt]="item?.name"
-                loading="lazy"
-                (error)="doSomethingOnError($event)"
+                [config]="{
+                  rootMargin: '100px 0px',
+                  threshold: 0.1,
+                  useBlur: true,
+                  timeout: 8000
+                }"
                 style="width: 100%; height: 200px; object-fit: cover;">
             </div>
             <div class="cat-content">

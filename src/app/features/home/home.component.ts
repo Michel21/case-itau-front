@@ -9,13 +9,14 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { HomeService } from './services/home.service';
 import { _PATH } from '../../shared/constants/constants';
 import { ICatsTypes } from '../../types/cats-types';
+import { LazyLoadDirective } from '../../shared/components/image-lazy-load/lazy-load.directive';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LazyLoadDirective],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
