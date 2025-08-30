@@ -1,4 +1,4 @@
-@import 'responsive-media.scss';
+@use 'responsive-media.scss' as *;
 
 @mixin grid($cols) {
   display: grid;

@@ -1,8 +1,9 @@
-@import "../../../../assets/scss/global";
+@use "../../../../assets/scss/colors" as colors;
+@use "../../../../assets/scss/grid" as grid;
 
 .main-header {
-  background: $nutral-lighter-color;
-  border-top: 5px solid $color-white;
+  background: colors.$nutral-lighter-color;
+  border-top: 5px solid colors.$color-white;
   box-shadow: 0 2px 8px -2px rgb(34 34 34 / 40%);
   position: fixed;
   top: 0;
@@ -10,12 +11,12 @@
   right: 0;
   max-width: 100%;
   width: 100%;
-  background: $color-white;
+  background: colors.$color-white;
   z-index: 100;
 
   .grid {
     grid-gap: 10px;
-    @include grid(2);
+    @include grid.grid(2);
     padding: 0;
   }
 
@@ -34,18 +35,18 @@
     }
   }
 
-  .logo {
-    display: flex;
-    align-items: center;
-    margin-left: 24px;
-    background-color: $nutral-lighter-color;
+      .logo {
+      display: flex;
+      align-items: center;
+      margin-left: 24px;
+      background-color: colors.$nutral-lighter-color;
 
-    a {
-      position: relative;
-      width: 100px;
-      height: 67px;
-      font-size: 20px;
-      color: $color-white;
+          a {
+        position: relative;
+        width: 100px;
+        height: 67px;
+        font-size: 20px;
+        color: colors.$color-white;
 
       img {
         width: 100%;

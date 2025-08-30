@@ -1,4 +1,4 @@
-@import "../../../../assets/scss/global";
+@use "../../../../assets/scss/colors" as colors;
 
 .footer-container{
   display: flex;
@@ -7,22 +7,22 @@
   align-items: center;
   width: 100%;
   max-width: 100%;
-  background: $color-white;
+  background: colors.$color-white;
   
   .btn-left{
     border: none;
     height: 48px;
     width: 218px;
-    background: $primary-blue-color;
+    background: colors.$primary-blue-color;
     margin-left: 25px;
-    color: $color-white;
+    color: colors.$color-white;
   }
   .btn-right{
     width: 224px;
     height: 48px;
     border: 1px solid #165C7D;
-    background-color: $nutral-lighter-color;
+    background-color: colors.$nutral-lighter-color;
     margin-left: 20px;
-    color: $primary-blue-color;
+    color: colors.$primary-blue-color;
   }
 }

@@ -2,7 +2,8 @@ import { Component, OnInit, signal, computed, inject, effect, OnDestroy, ChangeD
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Subject } from 'rxjs';
+import { Subject, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 import { _PATH } from '../../shared/constants/constants';
 import { ListDetailService } from './services/list-detail.service';
@@ -44,28 +45,40 @@ export class ListDetailComponent implements OnInit, OnDestroy {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 
-    // Convert observable to signal with error handling
-    const details$ = this.listDetailService.getCatsId(catId);
-    const detailsFromService = toSignal(details$, { 
-      initialValue: null,
-      requireSync: false 
-    });
-
-    // Effect to update details signal when service data changes
-    effect(() => {
-      const details = detailsFromService();
-      if (details && Array.isArray(details) && details.length > 0) {
-        this.detailsSignal.set(details[0]);
-        this.errorSignal.set(null);
-      } else if (details === null) {
-        this.detailsSignal.set(null);
-        this.errorSignal.set('Erro ao carregar detalhes do gato');
-      } else {
-        this.detailsSignal.set(null);
-        this.errorSignal.set('Gato não encontrado');
-      }
+    // Use state data if available, otherwise fetch from API
+    if (this.state) {
+      this.detailsSignal.set(this.state);
       this.loadingSignal.set(false);
-    });
+    } else {
+      // Convert observable to signal with error handling
+      const details$ = this.listDetailService.getCatsId(catId).pipe(
+        catchError(error => {
+          console.error('Error fetching cat details:', error);
+          return of(null);
+        })
+      );
+      
+      const detailsFromService = toSignal(details$, { 
+        initialValue: null,
+        requireSync: false 
+      });
+
+      // Effect to update details signal when service data changes
+      effect(() => {
+        const details = detailsFromService();
+        if (details && Array.isArray(details) && details.length > 0) {
+          this.detailsSignal.set(details[0]);
+          this.errorSignal.set(null);
+        } else if (details === null) {
+          this.detailsSignal.set(null);
+          this.errorSignal.set('Erro ao carregar detalhes do gato');
+        } else {
+          this.detailsSignal.set(null);
+          this.errorSignal.set('Gato não encontrado');
+        }
+        this.loadingSignal.set(false);
+      });
+    }
   }
 
   ngOnDestroy(): void {
@@ -80,5 +93,40 @@ export class ListDetailComponent implements OnInit, OnDestroy {
 
   goBack(): void {
     this.router.navigate(['/home']);
+  }
+
+  // Helper methods for computed values
+  getCatImageUrl(): string {
+    const details = this.details();
+    if (details?.url) {
+      return details.url;
+    }
+    return this.state?.url || this.path;
+  }
+
+  getCatName(): string {
+    const details = this.details();
+    return details?.name || this.state?.name || 'Nome não disponível';
+  }
+
+  getCatOrigin(): string {
+    const details = this.details();
+    return details?.origin || this.state?.origin || 'Origem não disponível';
+  }
+
+  getCatBreedInfo(): string {
+    const details = this.details();
+    if (details?.breeds && details.breeds.length > 0) {
+      return details.breeds[0].name || 'Raça não disponível';
+    }
+    return 'Raça não disponível';
+  }
+
+  getCatWikipediaUrl(): string {
+    const details = this.details();
+    if (details?.breeds && details.breeds.length > 0) {
+      return details.breeds[0].wikipedia_url || '';
+    }
+    return '';
   }
 }

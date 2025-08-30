@@ -3,7 +3,7 @@
     @if (!loading()) {
       <div class="back-button" (click)="goBack()">
         <span class="back-icon">←</span>
-        <span>Voltar</span>
+        <span>Voltar para Lista</span>
       </div>
       
       <header class="detail-header">
@@ -31,13 +31,13 @@
           <img class="cat-image" 
             appLazyLoad 
             (error)="doSomethingOnError($event)" 
-            [src]="state?.image?.url"
-            [alt]="details()?.name" 
-            [title]="details()?.name">
+            [src]="getCatImageUrl()"
+            [alt]="getCatName()" 
+            [title]="getCatName()">
         </div>
         
         <div class="detail-content">
-          <h2 class="cat-name">{{ details()?.name }}</h2>
+          <h2 class="cat-name">{{ getCatName() }}</h2>
           
           <div class="cat-stats">
             <div class="stat-item">
@@ -47,29 +47,51 @@
             
             <div class="stat-item">
               <span class="stat-label">🌍 Origem:</span>
-              <span class="stat-value">{{ details()?.origin }}</span>
+              <span class="stat-value">{{ getCatOrigin() }}</span>
             </div>
             
             <div class="stat-item">
-              <span class="stat-label">🧠 Inteligência:</span>
-              <span class="stat-value">{{ details()?.intelligence }}/5</span>
+              <span class="stat-label">🐾 Raça:</span>
+              <span class="stat-value">{{ getCatBreedInfo() }}</span>
+            </div>
+            
+            @if (getCatWikipediaUrl()) {
+              <div class="stat-item">
+                <span class="stat-label">📚 Wikipedia:</span>
+                <a [href]="getCatWikipediaUrl()" target="_blank" class="stat-link">
+                  Ver mais informações →
+                </a>
+              </div>
+            }
+            
+            <div class="stat-item">
+              <span class="stat-label">📏 Dimensões:</span>
+              <span class="stat-value">{{ details()?.width }} x {{ details()?.height }}</span>
             </div>
             
             <div class="stat-item">
-              <span class="stat-label">😺 Temperamento:</span>
-              <span class="stat-value">{{ details()?.temperament }}</span>
-            </div>
-            
-            <div class="stat-item">
-              <span class="stat-label">🔄 Adaptabilidade:</span>
-              <span class="stat-value">{{ details()?.adaptability }}/5</span>
-            </div>
-            
-            <div class="stat-item">
-              <span class="stat-label">⏰ Expectativa de Vida:</span>
-              <span class="stat-value">{{ details()?.life_span }} anos</span>
+              <span class="stat-label">📄 Tipo:</span>
+              <span class="stat-value">{{ details()?.mime_type }}</span>
             </div>
           </div>
+          
+          @if (details()?.breeds && details()?.breeds.length > 0) {
+            <div class="breeds-section">
+              <h3>🏷️ Informações da Raça</h3>
+              <div class="breeds-list">
+                @for (breed of details()?.breeds; track breed.id) {
+                  <div class="breed-item">
+                    <h4>{{ breed.name }}</h4>
+                    @if (breed.wikipedia_url) {
+                      <a [href]="breed.wikipedia_url" target="_blank" class="breed-link">
+                        Ver na Wikipedia →
+                      </a>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
         </div>
       </div>
     } @else if (hasError()) {

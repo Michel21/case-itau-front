@@ -124,7 +124,8 @@
         .cat-stats {
           display: flex;
           flex-direction: column;
-          gap: 20px;
+          gap: 15px;
+          margin-bottom: 30px;
 
           .stat-item {
             display: flex;
@@ -132,13 +133,14 @@
             align-items: center;
             padding: 15px 20px;
             background: #f8f9fa;
-            border-radius: 10px;
+            border-radius: 12px;
             border-left: 4px solid #667eea;
             transition: all 0.3s ease;
 
             &:hover {
               background: #e3f2fd;
               transform: translateX(5px);
+              box-shadow: 0 3px 10px rgba(102, 126, 234, 0.1);
             }
 
             .stat-label {
@@ -151,6 +153,77 @@
               font-weight: 500;
               color: #34495e;
               font-size: 1rem;
+            }
+
+            .stat-link {
+              color: #667eea;
+              text-decoration: none;
+              font-weight: 500;
+              transition: all 0.3s ease;
+              padding: 5px 10px;
+              border-radius: 6px;
+
+              &:hover {
+                color: #764ba2;
+                background: rgba(102, 126, 234, 0.1);
+                text-decoration: none;
+              }
+            }
+          }
+        }
+
+        .breeds-section {
+          margin-top: 30px;
+          padding-top: 30px;
+          border-top: 2px solid #e0e6ed;
+
+          h3 {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin: 0 0 20px 0;
+            font-weight: 600;
+          }
+
+          .breeds-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+
+            .breed-item {
+              padding: 20px;
+              background: #f8f9fa;
+              border-radius: 12px;
+              border-left: 4px solid #36BA9B;
+              transition: all 0.3s ease;
+
+              &:hover {
+                background: #e8f5f2;
+                transform: translateX(5px);
+                box-shadow: 0 3px 10px rgba(54, 186, 155, 0.1);
+              }
+
+              h4 {
+                font-size: 1.2rem;
+                color: #2c3e50;
+                margin: 0 0 10px 0;
+                font-weight: 600;
+              }
+
+              .breed-link {
+                color: #36BA9B;
+                text-decoration: none;
+                font-weight: 500;
+                transition: all 0.3s ease;
+                padding: 5px 10px;
+                border-radius: 6px;
+                display: inline-block;
+
+                &:hover {
+                  color: #2c3e50;
+                  background: rgba(54, 186, 155, 0.1);
+                  text-decoration: none;
+                }
+              }
             }
           }
         }

@@ -1,4 +1,4 @@
-@import "assets/scss/global";
+@use "assets/scss/global" as *;
 
 *{
   margin:0;
