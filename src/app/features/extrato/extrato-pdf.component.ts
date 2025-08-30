@@ -271,45 +271,364 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
   async gerarPDFCorporativo(): Promise<void> {
     try {
       this.isLoading.set(true);
-      
-      const element = document.getElementById('extrato-container');
+      this.error.set(null);
+
+      const element = document.querySelector('.extrato-container') as HTMLElement;
       if (!element) {
-        throw new Error('Elemento não encontrado');
+        throw new Error('Elemento do extrato não encontrado');
       }
 
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff'
+      // Criar um clone do elemento para manipulação
+      const clone = element.cloneNode(true) as HTMLElement;
+      
+      // Remover botões de ação do clone
+      const actionButtons = clone.querySelector('.action-buttons');
+      if (actionButtons) {
+        actionButtons.remove();
+      }
+
+      // Remover loading e error states
+      const loadingOverlay = clone.querySelector('.loading-overlay');
+      if (loadingOverlay) {
+        loadingOverlay.remove();
+      }
+
+      const errorMessage = clone.querySelector('.error-message');
+      if (errorMessage) {
+        errorMessage.remove();
+      }
+
+      // Aplicar estilos específicos para PDF
+      clone.style.width = '210mm';
+      clone.style.margin = '0';
+      clone.style.padding = '10mm';
+      clone.style.backgroundColor = '#ffffff';
+      clone.style.fontFamily = 'Arial, sans-serif';
+      clone.style.fontSize = '10px';
+      clone.style.lineHeight = '1.3';
+      clone.style.color = '#000000';
+      clone.style.position = 'absolute';
+      clone.style.left = '-9999px';
+      clone.style.top = '0';
+      clone.style.visibility = 'hidden';
+
+      // Estilos específicos para o header
+      const header = clone.querySelector('.extrato-header') as HTMLElement;
+      if (header) {
+        header.style.display = 'flex';
+        header.style.justifyContent = 'space-between';
+        header.style.alignItems = 'flex-start';
+        header.style.marginBottom = '25px';
+        header.style.paddingBottom = '15px';
+        header.style.position = 'relative';
+        header.style.columnGap = '230px';
+      }
+
+      // Estilos para header-left
+      const headerLeft = clone.querySelector('.header-left') as HTMLElement;
+      if (headerLeft) {
+        headerLeft.style.display = 'flex';
+        headerLeft.style.flexDirection = 'column';
+        headerLeft.style.justifyContent = 'flex-start';
+        headerLeft.style.alignItems = 'flex-start';
+      }
+
+      // Estilos para logo
+      const logo = clone.querySelector('.logo') as HTMLElement;
+      if (logo) {
+        logo.style.fontSize = '28px';
+        logo.style.fontWeight = 'bold';
+        logo.style.color = '#cc0000';
+        logo.style.marginBottom = '2px';
+        logo.style.textTransform = 'none';
+      }
+
+      // Estilos para subtitle
+      const subtitle = clone.querySelector('.subtitle') as HTMLElement;
+      if (subtitle) {
+        subtitle.style.fontSize = '16px';
+        subtitle.style.color = '#000';
+        subtitle.style.marginBottom = '4px';
+        subtitle.style.textTransform = 'none';
+        subtitle.style.fontWeight = 'normal';
+      }
+
+      // Estilos para global-solutions
+      const globalSolutions = clone.querySelector('.global-solutions') as HTMLElement;
+      if (globalSolutions) {
+        globalSolutions.style.fontSize = '12px';
+        globalSolutions.style.color = '#ffffff';
+        globalSolutions.style.backgroundColor = '#000';
+        globalSolutions.style.padding = '4px 8px';
+        globalSolutions.style.display = 'inline-block';
+        globalSolutions.style.borderRadius = '2px';
+        globalSolutions.style.textTransform = 'none';
+        globalSolutions.style.fontWeight = 'normal';
+      }
+
+      // Estilos para header-right
+      const headerRight = clone.querySelector('.header-right') as HTMLElement;
+      if (headerRight) {
+        headerRight.style.display = 'flex';
+        headerRight.style.flexDirection = 'column';
+        headerRight.style.marginLeft = 'auto';
+      }
+
+      // Estilos para report-title
+      const reportTitle = clone.querySelector('.report-title') as HTMLElement;
+      if (reportTitle) {
+        reportTitle.style.fontSize = '12px';
+        reportTitle.style.fontWeight = '600';
+        reportTitle.style.color = '#000';
+        reportTitle.style.marginBottom = '5px';
+      }
+
+      // Estilos para transaction-details
+      const transactionDetails = clone.querySelector('.transaction-details') as HTMLElement;
+      if (transactionDetails) {
+        transactionDetails.style.fontSize = '12px';
+        transactionDetails.style.color = '#000';
+        transactionDetails.style.fontWeight = '600';
+        transactionDetails.style.lineHeight = '1.4';
+      }
+
+      // Estilos para search-details
+      const searchDetails = clone.querySelector('.search-details') as HTMLElement;
+      if (searchDetails) {
+        searchDetails.style.backgroundColor = '#fff';
+        searchDetails.style.padding = '8px 0';
+        searchDetails.style.border = 'none';
+        searchDetails.style.marginBottom = '12px';
+        searchDetails.style.borderRadius = '0';
+      }
+
+      // Estilos para h3 em search-details
+      const searchDetailsH3 = clone.querySelector('.search-details h3') as HTMLElement;
+      if (searchDetailsH3) {
+        searchDetailsH3.style.color = '#000';
+        searchDetailsH3.style.marginBottom = '6px';
+        searchDetailsH3.style.fontSize = '14px';
+        searchDetailsH3.style.fontWeight = 'bold';
+      }
+
+      // Estilos para detail-grid
+      const detailGrid = clone.querySelector('.detail-grid') as HTMLElement;
+      if (detailGrid) {
+        detailGrid.style.display = 'block';
+        detailGrid.style.gap = '0';
+      }
+
+      // Estilos para detail-item
+      const detailItems = clone.querySelectorAll('.detail-item');
+      detailItems.forEach(item => {
+        (item as HTMLElement).style.display = 'block';
+        (item as HTMLElement).style.padding = '1px 0';
+        (item as HTMLElement).style.borderBottom = 'none';
+        (item as HTMLElement).style.fontSize = '11px';
+        (item as HTMLElement).style.marginBottom = '1px';
       });
 
-      const imgData = canvas.toDataURL('image/png');
+      // Estilos para detail-label
+      const detailLabels = clone.querySelectorAll('.detail-label');
+      detailLabels.forEach(label => {
+        (label as HTMLElement).style.fontWeight = 'bold';
+        (label as HTMLElement).style.color = '#000';
+        (label as HTMLElement).style.display = 'inline';
+      });
+
+      // Estilos para detail-value
+      const detailValues = clone.querySelectorAll('.detail-value');
+      detailValues.forEach(value => {
+        (value as HTMLElement).style.color = '#000';
+        (value as HTMLElement).style.display = 'inline';
+      });
+
+      // Estilos para financial-table
+      const financialTable = clone.querySelector('.financial-table') as HTMLElement;
+      if (financialTable) {
+        financialTable.style.width = '100%';
+        financialTable.style.borderCollapse = 'collapse';
+        financialTable.style.backgroundColor = '#fff';
+        financialTable.style.fontSize = '10px';
+        financialTable.style.border = 'none';
+      }
+
+      // Estilos para table-header
+      const tableHeaders = clone.querySelectorAll('.table-header');
+      tableHeaders.forEach(header => {
+        (header as HTMLElement).style.backgroundColor = '#ddd';
+        (header as HTMLElement).style.padding = '12px 0';
+      });
+
+      // Estilos para th em financial-table
+      const tableThs = clone.querySelectorAll('.financial-table th');
+      tableThs.forEach((th, index) => {
+        (th as HTMLElement).style.backgroundColor = 'transparent';
+        (th as HTMLElement).style.color = '#000';
+        (th as HTMLElement).style.padding = '8px 4px';
+        (th as HTMLElement).style.textAlign = 'center';
+        (th as HTMLElement).style.border = 'none';
+        (th as HTMLElement).style.fontWeight = 'bold';
+        (th as HTMLElement).style.fontSize = '11px';
+        (th as HTMLElement).style.borderBottom = '1px solid #ccc';
+
+        // Alinhamentos específicos baseados na posição
+        if (index === 0) {
+          (th as HTMLElement).style.textAlign = 'left';
+          (th as HTMLElement).style.paddingLeft = '20px';
+        } else if (index === 1 || index === 2) {
+          (th as HTMLElement).style.textAlign = 'left';
+          (th as HTMLElement).style.paddingLeft = '3px';
+        } else if (index === 3) {
+          (th as HTMLElement).style.textAlign = 'center';
+        } else {
+          (th as HTMLElement).style.textAlign = 'right';
+          (th as HTMLElement).style.paddingRight = index === 10 ? '10px' : '3px';
+        }
+      });
+
+      // Estilos para td em financial-table
+      const tableTds = clone.querySelectorAll('.financial-table td');
+      tableTds.forEach((td, index) => {
+        (td as HTMLElement).style.padding = '6px 4px';
+        (td as HTMLElement).style.textAlign = 'center';
+        (td as HTMLElement).style.border = 'none';
+        (td as HTMLElement).style.color = '#000';
+        (td as HTMLElement).style.fontSize = '11px';
+        (td as HTMLElement).style.borderBottom = '1px solid #eee';
+
+        // Alinhamentos específicos baseados na posição
+        if (index % 11 === 0) {
+          (td as HTMLElement).style.textAlign = 'left';
+          (td as HTMLElement).style.paddingLeft = '20px';
+        } else if (index % 11 === 1 || index % 11 === 2) {
+          (td as HTMLElement).style.textAlign = 'left';
+          (td as HTMLElement).style.paddingLeft = '3px';
+        } else if (index % 11 === 3) {
+          (td as HTMLElement).style.textAlign = 'center';
+        } else {
+          (td as HTMLElement).style.textAlign = 'right';
+          (td as HTMLElement).style.paddingRight = (index % 11 === 10) ? '10px' : '3px';
+        }
+      });
+
+      // Estilos para section-title
+      const sectionTitles = clone.querySelectorAll('.section-title');
+      sectionTitles.forEach(title => {
+        (title as HTMLElement).style.backgroundColor = '#eee';
+        (title as HTMLElement).style.padding = '12px 0';
+      });
+
+      // Estilos para th em section-title
+      const sectionTitleThs = clone.querySelectorAll('.section-title th');
+      sectionTitleThs.forEach(th => {
+        (th as HTMLElement).style.backgroundColor = '#eee';
+        (th as HTMLElement).style.color = '#000';
+        (th as HTMLElement).style.padding = '12px 35px';
+        (th as HTMLElement).style.textAlign = 'left';
+        (th as HTMLElement).style.fontWeight = 'bold';
+        (th as HTMLElement).style.fontSize = '12px';
+        (th as HTMLElement).style.borderBottom = '1px solid #ddd';
+      });
+
+      // Estilos para data-row
+      const dataRows = clone.querySelectorAll('.data-row');
+      dataRows.forEach(row => {
+        (row as HTMLElement).style.backgroundColor = 'transparent';
+      });
+
+      // Estilos para total-row
+      const totalRows = clone.querySelectorAll('.total-row');
+      totalRows.forEach(row => {
+        (row as HTMLElement).style.backgroundColor = 'transparent';
+        (row as HTMLElement).style.color = '#000';
+        (row as HTMLElement).style.fontWeight = 'bold';
+        (row as HTMLElement).style.borderTop = '1px solid #ddd';
+        (row as HTMLElement).style.padding = '8px 0';
+        (row as HTMLElement).style.marginBottom = '10px';
+      });
+
+      // Estilos para td em total-row
+      const totalRowTds = clone.querySelectorAll('.total-row td');
+      totalRowTds.forEach((td, index) => {
+        (td as HTMLElement).style.color = '#000';
+        (td as HTMLElement).style.borderColor = 'transparent';
+        (td as HTMLElement).style.borderBottom = 'none';
+        (td as HTMLElement).style.padding = '8px 4px';
+
+        // Alinhamentos específicos para total-row
+        if (index === 0) {
+          (td as HTMLElement).style.textAlign = 'left';
+          (td as HTMLElement).style.paddingLeft = '0px';
+        } else if (index === 1 || index === 2 || index === 3) {
+          (td as HTMLElement).style.textAlign = 'center';
+        } else {
+          (td as HTMLElement).style.textAlign = 'right';
+          (td as HTMLElement).style.paddingRight = (index === 10) ? '10px' : '3px';
+        }
+      });
+
+      // Estilos para currency
+      const currencyElements = clone.querySelectorAll('.currency');
+      currencyElements.forEach(element => {
+        (element as HTMLElement).style.fontFamily = "'Courier New', monospace";
+        (element as HTMLElement).style.fontSize = '11px';
+      });
+
+      // Adicionar o clone ao DOM temporariamente
+      document.body.appendChild(clone);
+
+      // Aguardar um momento para o DOM ser renderizado
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Capturar o elemento com html2canvas
+      const canvas = await html2canvas(clone, {
+        scale: 1.2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        width: clone.offsetWidth,
+        height: clone.offsetHeight,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: clone.offsetWidth,
+        windowHeight: clone.offsetHeight,
+        foreignObjectRendering: false,
+        removeContainer: true
+      });
+
+      // Remover o clone do DOM
+      document.body.removeChild(clone);
+
+      // Criar PDF com jsPDF
+      const imgData = canvas.toDataURL('image/png', 1.0);
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210;
-      const pageHeight = 295;
+      
+      const imgWidth = 190; // Largura menor para margens
+      const pageHeight = 277; // Altura menor para margens
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       let heightLeft = imgHeight;
-      let position = 0;
 
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      let position = 10; // Margem superior
+
+      pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
 
       while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
+        position = heightLeft - imgHeight + 10; // +10 para margem superior
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
       }
 
-      const fileName = `extrato-bancario-${new Date().toISOString().split('T')[0]}.pdf`;
+      // Salvar o PDF
+      const fileName = `extrato-bradesco-${new Date().toISOString().split('T')[0]}.pdf`;
       pdf.save(fileName);
-      
-      console.log('PDF gerado com sucesso:', fileName);
+
+      this.isLoading.set(false);
     } catch (error) {
       console.error('Erro ao gerar PDF:', error);
-      this.error.set('Erro ao gerar PDF. Tente novamente.');
-    } finally {
+      this.error.set('Erro ao gerar PDF corporativo');
       this.isLoading.set(false);
     }
   }
