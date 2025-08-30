@@ -43,16 +43,22 @@ export class ListDetailComponent implements OnInit, OnDestroy {
   public readonly state = this.router.getCurrentNavigation()?.extras?.state as ICatsTypes | undefined;
 
   ngOnInit(): void {
-    const catId = this.route.snapshot.params['id'];
-    this.loadingSignal.set(true);
-    this.errorSignal.set(null);
-
-    // Use state data if available, otherwise fetch from API
-    if (this.state) {
+    // Get cat from resolver
+    const catFromResolver = this.route.snapshot.data['cat'] as ICatsTypes;
+    
+    if (catFromResolver) {
+      this.detailsSignal.set(catFromResolver);
+      this.loadingSignal.set(false);
+    } else if (this.state) {
+      // Fallback to state data if resolver didn't provide data
       this.detailsSignal.set(this.state);
       this.loadingSignal.set(false);
     } else {
-      // Convert observable to signal with error handling
+      // Fallback to API call if neither resolver nor state has data
+      const catId = this.route.snapshot.params['id'];
+      this.loadingSignal.set(true);
+      this.errorSignal.set(null);
+
       const details$ = this.listDetailService.getCatsId(catId).pipe(
         catchError(error => {
           console.error('Error fetching cat details:', error);

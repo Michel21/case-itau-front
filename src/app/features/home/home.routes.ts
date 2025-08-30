@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './home.component';
 import { ListDetailComponent } from '../list-detail/list-detail.component';
+import { catDetailResolver } from '../../resolvers/cat-detail.resolver';
 
 export const HOME_ROUTES: Routes = [
   {
@@ -9,6 +10,9 @@ export const HOME_ROUTES: Routes = [
   },
   {
     path: 'list-detalhe/:id',
-    component: ListDetailComponent
+    component: ListDetailComponent,
+    resolve: {
+      cat: catDetailResolver
+    }
   }
 ];

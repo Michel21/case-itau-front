@@ -1,0 +1,17 @@
+<div class="unauthorized-container" [@fadeInOut]>
+  <div class="unauthorized-card">
+    <div class="icon">🚫</div>
+    <h1>Acesso Negado</h1>
+    <p>Você não tem permissão para acessar esta página.</p>
+    <p>Entre em contato com o administrador se acredita que isso é um erro.</p>
+    
+    <div class="actions">
+      <button class="btn btn-primary" (click)="goBack()">
+        Voltar ao Início
+      </button>
+      <button class="btn btn-secondary" (click)="goToLogin()">
+        Fazer Login
+      </button>
+    </div>
+  </div>
+</div>

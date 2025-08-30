@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, OnInit, ViewChild, signal, computed, effect, inject, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { debounceTime, distinctUntilChanged, filter, map, takeUntil } from 'rxjs/operators';
 import { fromEvent, Subject } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -9,6 +9,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { HomeService } from './services/home.service';
 import { _PATH } from '../../shared/constants/constants';
 import { ICatsTypes } from '../../types/cats-types';
+import { catCardAnimation, catListAnimation } from '../../animations/component.animations';
 
 @Component({
   selector: 'app-home',
@@ -16,11 +17,13 @@ import { ICatsTypes } from '../../types/cats-types';
   styleUrls: ['./home.component.scss'],
   standalone: true,
   imports: [CommonModule, FormsModule],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [catCardAnimation, catListAnimation]
 })
 export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly homeService = inject(HomeService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly destroy$ = new Subject<void>();
 
   // Signals with better performance
@@ -50,21 +53,14 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   
   @ViewChild('input', { static: true }) input!: ElementRef;
 
-  // Convert RxJS observable to signal with error handling
-  private readonly cats$ = this.homeService.getCats();
-  private readonly catsFromService = toSignal(this.cats$, { 
-    initialValue: [],
-    requireSync: false 
-  });
+  // Get cats from resolver
+  private readonly catsFromResolver = this.route.snapshot.data['cats'] as ICatsTypes[];
 
   constructor() {
-    // Effect to update cats when service data changes
-    effect(() => {
-      const cats = this.catsFromService();
-      if (cats && cats.length > 0) {
-        this.catsSignal.set(cats);
-      }
-    });
+    // Initialize cats from resolver
+    if (this.catsFromResolver && this.catsFromResolver.length > 0) {
+      this.catsSignal.set(this.catsFromResolver);
+    }
   }
 
   ngOnInit(): void {

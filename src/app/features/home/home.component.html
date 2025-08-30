@@ -28,9 +28,9 @@
         }
       </div>
     } @else if (filteredCats().length > 0) {
-      <div class="cats-grid">
+      <div class="cats-grid" [@catListAnimation]="filteredCats().length">
         @for (item of filteredCats(); track trackByCatId($index, item)) {
-          <div class="cat-card">
+          <div class="cat-card" [@catCardAnimation]>
             <div class="cat-image">
               <img 
                 [src]="item?.image?.url" 
