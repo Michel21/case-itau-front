@@ -134,13 +134,7 @@ export const RENDA_FIXA_DATA = {
       }
     ],
     aplicacaoTotal: {
-      valorPrincipal: 194.56,
-      valorBruto: 194.61,
-      rendaTotal: 0.00,
-      iof: 0.00,
-      irrf: 0.01,
-      valorLiquido: 194.60,
-      rendaBruta: 0.02
+      valorPrincipal: 194.56
     },
     saldoAnterior: [
       {

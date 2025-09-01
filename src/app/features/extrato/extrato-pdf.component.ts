@@ -6,7 +6,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { WebViewDownloadService } from '../../shared/services/webview-download.service';
 import { detectWebViewType } from '../../webview.config';
-import { ExtratoDados, ExtratoItem } from '../../../../types/extrato.types';
+import { ExtratoDados } from '../../../../types/extrato.types';
 import { MOCK_EXTRATO_DATA, RENDA_FIXA_DATA } from '../../../../data/mock-extrato.data';
 
 @Component({
