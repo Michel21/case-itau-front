@@ -135,6 +135,12 @@ export const RENDA_FIXA_DATA = {
     ],
     aplicacaoTotal: {
       valorPrincipal: 194.56,
+      valorBruto: 194.61,
+      rendaTotal: 0.00,
+      iof: 0.00,
+      irrf: 0.01,
+      valorLiquido: 194.60,
+      rendaBruta: 0.02
     },
     saldoAnterior: [
       {
@@ -159,12 +165,14 @@ export const RENDA_FIXA_DATA = {
       irrf: 0.01,
     },
     dataSaldoFinal: "25/08/2025",
-    aplicacao: {
-      taxa: 5.00,
-      dataVencimento: "07/06/2027",
-      dataAplicacao: "28/08/2025",
-      valorPrincipal: 194.56,
-    },
+    aplicacao: [
+      {
+        taxa: 5.00,
+        dataVencimento: "07/06/2027",
+        dataAplicacao: "28/08/2025",
+        valorPrincipal: 194.56,
+      }
+    ],
     resgateTotal: {
       iof: 0.00,
       rendaTotal: 0.00,

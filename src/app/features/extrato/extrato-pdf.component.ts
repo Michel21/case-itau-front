@@ -40,7 +40,7 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
 
   // Computed values
   public readonly temSaldoAnterior = computed(() => this.temItens(this.rendaFixaData()?.rendaFixa?.saldoAnterior));
-  public readonly temAplicacoes = computed(() => this.rendaFixaData()?.rendaFixa?.aplicacao);
+  public readonly temAplicacoes = computed(() => this.temItens(this.rendaFixaData()?.rendaFixa?.aplicacao));
   public readonly temResgates = computed(() => this.temItens(this.rendaFixaData()?.rendaFixa?.resgate));
   public readonly temSaldoFinal = computed(() => this.temItens(this.rendaFixaData()?.rendaFixa?.saldoFinal));
 
