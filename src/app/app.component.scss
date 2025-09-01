@@ -39,7 +39,7 @@
   background-color: #ffffff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
-  height: 60px; // Altura fixa para webview
+  height: 70px; // Ajustado para nova altura do header
   display: flex;
   align-items: center;
   
@@ -50,17 +50,17 @@
   
   // Responsividade para webview
   @media (max-width: 480px) {
-    height: 50px;
+    height: 60px; // Ajustado para nova altura do header mobile
   }
 }
 
 // Conteúdo Principal - Otimizado para WebView
 .app-content {
   flex: 1;
-  margin-top: 60px; // Ajustado para altura do header
+  margin-top: 70px; // Ajustado para nova altura do header
   padding: 0;
   background-color: #ffffff;
-  min-height: calc(100vh - 60px);
+  min-height: calc(100vh - 70px); // Ajustado para nova altura do header
   animation: fadeIn 0.2s ease-in-out; // Animação mais rápida para webview
   -webkit-overflow-scrolling: touch;
   -webkit-transform: translateZ(0);
@@ -70,8 +70,8 @@
   
   // Responsividade para webview
   @media (max-width: 480px) {
-    margin-top: 50px;
-    min-height: calc(100vh - 50px);
+    margin-top: 60px; // Ajustado para nova altura do header mobile
+    min-height: calc(100vh - 60px); // Ajustado para nova altura do header mobile
   }
 }
 
