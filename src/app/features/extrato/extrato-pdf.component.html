@@ -67,21 +67,21 @@
           <!-- Saldo Anterior -->
           @if (temSaldoAnterior()) {
             <tr class="section-title">
-              <th colspan="11">Saldo anterior em {{ dadosAtuais()?.saldoAnterior?.dataSaldo }}</th>
+              <th colspan="11">Saldo anterior em {{ rendaFixaData()?.rendaFixa?.dataSaldoAnterior }}</th>
             </tr>
-            @for (item of dadosAtuais()?.saldoAnterior?.itens; track $index) {
+            @for (item of rendaFixaData()?.rendaFixa?.saldoAnterior; track $index) {
               <tr class="data-row">
                 <td>{{ item.dataAplicacao }}</td>
                 <td>{{ item.dataVencimento }}</td>
-                <td>{{ item.dataResgate || '-' }}</td>
+                <td>{{ item.datasResgate || '-' }}</td>
                 <td>{{ item.taxa ? (item.taxa + '%') : '-' }}</td>
                 <td class="currency">{{ formatarMoeda(item.valorPrincipal) }}</td>
                 <td class="currency">{{ formatarMoeda(item.valorBruto) }}</td>
                 <td class="currency">{{ formatarMoeda(item.rendaTotal) }}</td>
                 <td class="currency">{{ formatarMoeda(item.iof) }}</td>
                 <td class="currency">{{ formatarMoeda(item.irrf) }}</td>
-                <td class="currency">{{ formatarMoeda(item.valorLiquido) }}</td>
-                <td class="currency">{{ formatarMoeda(item.rendaBrutaPer) }}</td>
+                <td class="currency">{{ formatarMoeda(item.valoLiquido) }}</td>
+                <td class="currency">{{ formatarMoeda(item.rendaBruta) }}</td>
               </tr>
             }
             <tr class="total-row">
@@ -89,13 +89,13 @@
               <td></td>
               <td></td>
               <td></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.saldoAnterior?.totalValorPrincipal) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.saldoAnterior?.totalValorBruto) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.saldoAnterior?.totalRendaTotal) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.saldoAnterior?.totalIof) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.saldoAnterior?.totalIrrf) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.saldoAnterior?.totalValorLiquido) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.saldoAnterior?.totalRendaBrutaPer) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.valorPrincipal) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.valorBruto) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.rendaTotal) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.iof) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.irrf) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.valoLiquido) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.rendaBruta) }}</strong></td>
             </tr>
           }
 
@@ -104,33 +104,31 @@
             <tr class="section-title">
               <th colspan="11">Aplicações</th>
             </tr>
-            @for (item of dadosAtuais()?.aplicacoes?.itens; track $index) {
-              <tr class="data-row">
-                <td>{{ item.dataAplicacao }}</td>
-                <td>{{ item.dataVencimento }}</td>
-                <td>{{ item.dataResgate || '-' }}</td>
-                <td>{{ item.taxa ? (item.taxa + '%') : '-' }}</td>
-                <td class="currency">{{ formatarMoeda(item.valorPrincipal) }}</td>
-                <td class="currency">{{ formatarMoeda(item.valorBruto) }}</td>
-                <td class="currency">{{ formatarMoeda(item.rendaTotal) }}</td>
-                <td class="currency">{{ formatarMoeda(item.iof) }}</td>
-                <td class="currency">{{ formatarMoeda(item.irrf) }}</td>
-                <td class="currency">{{ formatarMoeda(item.valorLiquido) }}</td>
-                <td class="currency">{{ formatarMoeda(item.rendaBrutaPer) }}</td>
-              </tr>
-            }
+            <tr class="data-row">
+              <td>{{ rendaFixaData()?.rendaFixa?.aplicacao?.dataAplicacao }}</td>
+              <td>{{ rendaFixaData()?.rendaFixa?.aplicacao?.dataVencimento }}</td>
+              <td>{{ rendaFixaData()?.rendaFixa?.aplicacao?.dataResgate || '-' }}</td>
+              <td>{{ rendaFixaData()?.rendaFixa?.aplicacao?.taxa ? (rendaFixaData()?.rendaFixa?.aplicacao?.taxa + '%') : '-' }}</td>
+              <td class="currency">{{ formatarMoeda(rendaFixaData()?.rendaFixa?.aplicacao?.valorPrincipal) }}</td>
+              <td class="currency">{{ formatarMoeda(rendaFixaData()?.rendaFixa?.aplicacao?.valorBruto) }}</td>
+              <td class="currency">{{ formatarMoeda(rendaFixaData()?.rendaFixa?.aplicacao?.rendaTotal) }}</td>
+              <td class="currency">{{ formatarMoeda(rendaFixaData()?.rendaFixa?.aplicacao?.iof) }}</td>
+              <td class="currency">{{ formatarMoeda(rendaFixaData()?.rendaFixa?.aplicacao?.irrf) }}</td>
+              <td class="currency">{{ formatarMoeda(rendaFixaData()?.rendaFixa?.aplicacao?.valorLiquido) }}</td>
+              <td class="currency">{{ formatarMoeda(rendaFixaData()?.rendaFixa?.aplicacao?.rendaBruta) }}</td>
+            </tr>
             <tr class="total-row">
               <td><strong>Total</strong></td>
               <td></td>
               <td></td>
               <td></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.aplicacoes?.totalValorPrincipal) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.aplicacoes?.totalValorBruto) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.aplicacoes?.totalRendaTotal) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.aplicacoes?.totalIof) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.aplicacoes?.totalIrrf) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.aplicacoes?.totalValorLiquido) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.aplicacoes?.totalRendaBrutaPer) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.aplicacaoTotal?.valorPrincipal) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.aplicacaoTotal?.valorBruto) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.aplicacaoTotal?.rendaTotal) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.aplicacaoTotal?.iof) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.aplicacaoTotal?.irrf) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.aplicacaoTotal?.valorLiquido) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.aplicacaoTotal?.rendaBruta) }}</strong></td>
             </tr>
           }
 
@@ -139,19 +137,19 @@
             <tr class="section-title">
               <th colspan="11">Resgates/Vencimentos</th>
             </tr>
-            @for (item of dadosAtuais()?.resgates?.itens; track $index) {
+            @for (item of rendaFixaData()?.rendaFixa?.resgate; track $index) {
               <tr class="data-row">
                 <td>{{ item.dataAplicacao }}</td>
                 <td>{{ item.dataVencimento }}</td>
-                <td>{{ item.dataResgate || '-' }}</td>
+                <td>{{ item.datasResgate || '-' }}</td>
                 <td>{{ item.taxa ? (item.taxa + '%') : '-' }}</td>
                 <td class="currency">{{ formatarMoeda(item.valorPrincipal) }}</td>
                 <td class="currency">{{ formatarMoeda(item.valorBruto) }}</td>
                 <td class="currency">{{ formatarMoeda(item.rendaTotal) }}</td>
                 <td class="currency">{{ formatarMoeda(item.iof) }}</td>
                 <td class="currency">{{ formatarMoeda(item.irrf) }}</td>
-                <td class="currency">{{ formatarMoeda(item.valorLiquido) }}</td>
-                <td class="currency">{{ formatarMoeda(item.rendaBrutaPer) }}</td>
+                <td class="currency">{{ formatarMoeda(item.valoLiquido) }}</td>
+                <td class="currency">{{ formatarMoeda(item.rendaBruta) }}</td>
               </tr>
             }
             <tr class="total-row">
@@ -159,34 +157,34 @@
               <td></td>
               <td></td>
               <td></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.resgates?.totalValorPrincipal) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.resgates?.totalValorBruto) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.resgates?.totalRendaTotal) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.resgates?.totalIof) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.resgates?.totalIrrf) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.resgates?.totalValorLiquido) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.resgates?.totalRendaBrutaPer) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.resgateTotal?.valorPrincipal) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.resgateTotal?.valorBruto) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.resgateTotal?.rendaTotal) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.resgateTotal?.iof) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.resgateTotal?.irrf) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.resgateTotal?.valoLiquido) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.resgateTotal?.rendaBruta) }}</strong></td>
             </tr>
           }
 
           <!-- Saldo Final -->
           @if (temSaldoFinal()) {
             <tr class="section-title">
-              <th colspan="11">Saldo final em {{ dadosAtuais()?.saldoFinal?.dataSaldo }}</th>
+              <th colspan="11">Saldo final em {{ rendaFixaData()?.rendaFixa?.dataSaldoFinal }}</th>
             </tr>
-            @for (item of dadosAtuais()?.saldoFinal?.itens; track $index) {
+            @for (item of rendaFixaData()?.rendaFixa?.saldoFinal; track $index) {
               <tr class="data-row">
                 <td>{{ item.dataAplicacao }}</td>
                 <td>{{ item.dataVencimento }}</td>
-                <td>{{ item.dataResgate || '-' }}</td>
+                <td>{{ item.datasResgate || '-' }}</td>
                 <td>{{ item.taxa ? (item.taxa + '%') : '-' }}</td>
                 <td class="currency">{{ formatarMoeda(item.valorPrincipal) }}</td>
                 <td class="currency">{{ formatarMoeda(item.valorBruto) }}</td>
                 <td class="currency">{{ formatarMoeda(item.rendaTotal) }}</td>
                 <td class="currency">{{ formatarMoeda(item.iof) }}</td>
                 <td class="currency">{{ formatarMoeda(item.irrf) }}</td>
-                <td class="currency">{{ formatarMoeda(item.valorLiquido) }}</td>
-                <td class="currency">{{ formatarMoeda(item.rendaBrutaPer) }}</td>
+                <td class="currency">{{ formatarMoeda(item.valoLiquido) }}</td>
+                <td class="currency">{{ formatarMoeda(item.rendaBruta) }}</td>
               </tr>
             }
             <tr class="total-row">
@@ -194,13 +192,13 @@
               <td></td>
               <td></td>
               <td></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.saldoFinal?.totalValorPrincipal) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.saldoFinal?.totalValorBruto) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.saldoFinal?.totalRendaTotal) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.saldoFinal?.totalIof) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.saldoFinal?.totalIrrf) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.saldoFinal?.totalValorLiquido) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(dadosAtuais()?.saldoFinal?.totalRendaBrutaPer) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoFinalTotal?.valorPrincipal) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoFinalTotal?.valorBruto) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoFinalTotal?.rendaTotal) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoFinalTotal?.iof) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoFinalTotal?.irrf) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoFinalTotal?.valoLiquido) }}</strong></td>
+              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoFinalTotal?.rendaBruta) }}</strong></td>
             </tr>
           }
         </tbody>

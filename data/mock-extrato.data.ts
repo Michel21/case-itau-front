@@ -1,7 +1,7 @@
 import { ExtratoDados } from '../types/extrato.types';
 
 /**
- * Dados mock para teste baseados na imagem do extrato Bradesco Corporate
+ * Dados mock para teste baseados no modelo JSON fornecido
  */
 export const MOCK_EXTRATO_DATA: ExtratoDados = {
   empresa: '49.320.901 LUCIANO RAMOS | 49.320.901/0001-50',
@@ -11,208 +11,193 @@ export const MOCK_EXTRATO_DATA: ExtratoDados = {
   tipoProduto: 'Invest Facil Bradesco',
   
   saldoAnterior: {
-    dataSaldo: '31/07/2025',
+    dataSaldo: '25/08/2025',
     itens: [
       {
-        dataAplicacao: '15/01/2025',
-        dataVencimento: '15/01/2026',
+        dataAplicacao: '28/08/2025',
+        dataVencimento: '07/06/2027',
         dataResgate: undefined,
-        taxa: 13.75,
-        valorPrincipal: 100000.00,
-        valorBruto: 100000.00,
+        taxa: 5.00,
+        valorPrincipal: 194.56,
+        valorBruto: 194.61,
         rendaTotal: 0.00,
         iof: 0.00,
-        irrf: 0.00,
-        valorLiquido: 100000.00,
-        rendaBrutaPer: 0.00
-      },
-      {
-        dataAplicacao: '20/02/2025',
-        dataVencimento: '20/02/2026',
-        dataResgate: undefined,
-        taxa: 13.50,
-        valorPrincipal: 50000.00,
-        valorBruto: 50000.00,
-        rendaTotal: 0.00,
-        iof: 0.00,
-        irrf: 0.00,
-        valorLiquido: 50000.00,
-        rendaBrutaPer: 0.00
-      },
-      {
-        dataAplicacao: '10/03/2025',
-        dataVencimento: '10/03/2026',
-        dataResgate: undefined,
-        taxa: 13.25,
-        valorPrincipal: 75000.00,
-        valorBruto: 75000.00,
-        rendaTotal: 0.00,
-        iof: 0.00,
-        irrf: 0.00,
-        valorLiquido: 75000.00,
-        rendaBrutaPer: 0.00
+        irrf: 0.01,
+        valorLiquido: 194.60,
+        rendaBrutaPer: 0.02,
+        rendaBruta: 0.02
       }
     ],
-    totalValorPrincipal: 225000.00,
-    totalValorBruto: 225000.00,
+    totalValorPrincipal: 194.56,
+    totalValorBruto: 194.61,
     totalRendaTotal: 0.00,
     totalIof: 0.00,
-    totalIrrf: 0.00,
-    totalValorLiquido: 225000.00,
-    totalRendaBrutaPer: 0.00
+    totalIrrf: 0.01,
+    totalValorLiquido: 194.60,
+    totalRendaBrutaPer: 0.02
   },
   
   aplicacoes: {
     itens: [
       {
-        dataAplicacao: '05/08/2025',
-        dataVencimento: '05/08/2026',
+        dataAplicacao: '28/08/2025',
+        dataVencimento: '07/06/2027',
         dataResgate: undefined,
-        taxa: 13.00,
-        valorPrincipal: 100000.00,
-        valorBruto: 100000.00,
+        taxa: 5.00,
+        valorPrincipal: 194.56,
+        valorBruto: 194.61,
         rendaTotal: 0.00,
         iof: 0.00,
-        irrf: 0.00,
-        valorLiquido: 100000.00,
-        rendaBrutaPer: 0.00
-      },
-      {
-        dataAplicacao: '10/08/2025',
-        dataVencimento: '10/08/2026',
-        dataResgate: undefined,
-        taxa: 12.75,
-        valorPrincipal: 50000.00,
-        valorBruto: 50000.00,
-        rendaTotal: 0.00,
-        iof: 0.00,
-        irrf: 0.00,
-        valorLiquido: 50000.00,
-        rendaBrutaPer: 0.00
-      },
-      {
-        dataAplicacao: '15/08/2025',
-        dataVencimento: '15/08/2026',
-        dataResgate: undefined,
-        taxa: 12.50,
-        valorPrincipal: 75000.00,
-        valorBruto: 75000.00,
-        rendaTotal: 0.00,
-        iof: 0.00,
-        irrf: 0.00,
-        valorLiquido: 75000.00,
-        rendaBrutaPer: 0.00
+        irrf: 0.01,
+        valorLiquido: 194.60,
+        rendaBrutaPer: 0.02,
+        rendaBruta: 0.02
       }
     ],
-    totalValorPrincipal: 225000.00,
-    totalValorBruto: 225000.00,
+    totalValorPrincipal: 194.56,
+    totalValorBruto: 194.61,
     totalRendaTotal: 0.00,
     totalIof: 0.00,
-    totalIrrf: 0.00,
-    totalValorLiquido: 225000.00,
-    totalRendaBrutaPer: 0.00
+    totalIrrf: 0.01,
+    totalValorLiquido: 194.60,
+    totalRendaBrutaPer: 0.02
   },
   
   resgates: {
     itens: [
       {
-        dataAplicacao: '15/01/2025',
-        dataVencimento: '15/01/2026',
-        dataResgate: '31/07/2025',
-        taxa: 13.75,
-        valorPrincipal: 100000.00,
-        valorBruto: 100000.00,
+        dataAplicacao: '28/08/2025',
+        dataVencimento: '07/06/2027',
+        dataResgate: '07/06/2027',
+        taxa: 5.00,
+        valorPrincipal: 194.56,
+        valorBruto: 194.61,
         rendaTotal: 0.00,
         iof: 0.00,
-        irrf: 0.00,
-        valorLiquido: 100000.00,
-        rendaBrutaPer: 0.00
-      },
-      {
-        dataAplicacao: '20/02/2025',
-        dataVencimento: '20/02/2026',
-        dataResgate: '31/07/2025',
-        taxa: 13.50,
-        valorPrincipal: 50000.00,
-        valorBruto: 50000.00,
-        rendaTotal: 0.00,
-        iof: 0.00,
-        irrf: 0.00,
-        valorLiquido: 50000.00,
-        rendaBrutaPer: 0.00
+        irrf: 0.01,
+        valorLiquido: 194.60,
+        rendaBrutaPer: 0.02,
+        rendaBruta: 0.02
       }
     ],
-    totalValorPrincipal: 150000.00,
-    totalValorBruto: 150000.00,
+    totalValorPrincipal: 194.56,
+    totalValorBruto: 194.61,
     totalRendaTotal: 0.00,
     totalIof: 0.00,
-    totalIrrf: 0.00,
-    totalValorLiquido: 150000.00,
-    totalRendaBrutaPer: 0.00
+    totalIrrf: 0.01,
+    totalValorLiquido: 194.60,
+    totalRendaBrutaPer: 0.02
   },
   
   saldoFinal: {
     dataSaldo: '25/08/2025',
     itens: [
       {
-        dataAplicacao: '10/03/2025',
-        dataVencimento: '10/03/2026',
+        dataAplicacao: '28/08/2025',
+        dataVencimento: '07/06/2027',
         dataResgate: undefined,
-        taxa: 13.25,
-        valorPrincipal: 75000.00,
-        valorBruto: 75000.00,
+        taxa: 5.00,
+        valorPrincipal: 194.56,
+        valorBruto: 194.61,
         rendaTotal: 0.00,
         iof: 0.00,
-        irrf: 0.00,
-        valorLiquido: 75000.00,
-        rendaBrutaPer: 0.00
-      },
-      {
-        dataAplicacao: '05/08/2025',
-        dataVencimento: '05/08/2026',
-        dataResgate: undefined,
-        taxa: 13.00,
-        valorPrincipal: 100000.00,
-        valorBruto: 100000.00,
-        rendaTotal: 0.00,
-        iof: 0.00,
-        irrf: 0.00,
-        valorLiquido: 100000.00,
-        rendaBrutaPer: 0.00
-      },
-      {
-        dataAplicacao: '10/08/2025',
-        dataVencimento: '10/08/2026',
-        dataResgate: undefined,
-        taxa: 12.75,
-        valorPrincipal: 50000.00,
-        valorBruto: 50000.00,
-        rendaTotal: 0.00,
-        iof: 0.00,
-        irrf: 0.00,
-        valorLiquido: 50000.00,
-        rendaBrutaPer: 0.00
-      },
-      {
-        dataAplicacao: '15/08/2025',
-        dataVencimento: '15/08/2026',
-        dataResgate: undefined,
-        taxa: 12.50,
-        valorPrincipal: 75000.00,
-        valorBruto: 75000.00,
-        rendaTotal: 0.00,
-        iof: 0.00,
-        irrf: 0.00,
-        valorLiquido: 75000.00,
-        rendaBrutaPer: 0.00
+        irrf: 0.01,
+        valorLiquido: 194.60,
+        rendaBrutaPer: 0.02,
+        rendaBruta: 0.02
       }
     ],
-    totalValorPrincipal: 300000.00,
-    totalValorBruto: 300000.00,
+    totalValorPrincipal: 194.56,
+    totalValorBruto: 194.61,
     totalRendaTotal: 0.00,
     totalIof: 0.00,
-    totalIrrf: 0.00,
-    totalValorLiquido: 300000.00,
-    totalRendaBrutaPer: 0.00
+    totalIrrf: 0.01,
+    totalValorLiquido: 194.60,
+    totalRendaBrutaPer: 0.02
+  }
+};
+
+// Estrutura adicional baseada no modelo JSON fornecido
+export const RENDA_FIXA_DATA = {
+  rendaFixa: {
+    saldoFinal: [
+      {
+        taxa: 5.00,
+        iof: 0.00,
+        rendaTotal: 0.00,
+        valoLiquido: 194.60,
+        valorBruto: 194.61,
+        dataVencimento: "07/06/2027",
+        dataAplicacao: "28/08/2025",
+        rendaBruta: 0.02,
+        irrf: 0.01,
+      }
+    ],
+    aplicacaoTotal: {
+      valorPrincipal: 194.56,
+    },
+    saldoAnterior: [
+      {
+        taxa: 5.00,
+        iof: 0.00,
+        rendaTotal: 0.00,
+        valoLiquido: 194.60,
+        valorBruto: 194.61,
+        dataVencimento: "07/06/2027",
+        dataAplicacao: "28/08/2025",
+        rendaBruta: 0.02,
+        irrf: 0.01,
+      }
+    ],
+    saldoFinalTotal: {
+      iof: 0.00,
+      rendaTotal: 0.00,
+      valoLiquido: 194.60,
+      valorBruto: 194.61,
+      rendaBruta: 0.02,
+      valorPrincipal: 194.56,
+      irrf: 0.01,
+    },
+    dataSaldoFinal: "25/08/2025",
+    aplicacao: {
+      taxa: 5.00,
+      dataVencimento: "07/06/2027",
+      dataAplicacao: "28/08/2025",
+      valorPrincipal: 194.56,
+    },
+    resgateTotal: {
+      iof: 0.00,
+      rendaTotal: 0.00,
+      valoLiquido: 194.60,
+      valorBruto: 194.61,
+      rendaBruta: 0.02,
+      valorPrincipal: 194.56,
+      irrf: 0.01,
+    },
+    saldoAteriorTotal: {
+      iof: 0.00,
+      rendaTotal: 0.00,
+      valoLiquido: 194.60,
+      valorBruto: 194.61,
+      rendaBruta: 0.02,
+      valorPrincipal: 194.56,
+      irrf: 0.01,
+    },
+    dataSaldoAnterior: "25/08/2025",
+    resgate: [
+      {
+        taxa: 5.00,
+        iof: 0.00,
+        rendaTotal: 0.00,
+        valoLiquido: 194.60,
+        datasResgate: "07/06/2027",
+        valorBruto: 194.61,
+        dataVencimento: "07/06/2027",
+        dataAplicacao: "28/08/2025",
+        rendaBruta: 0.02,
+        valorPrincipal: 194.56,
+        irrf: 0.01,
+      }
+    ]
   }
 };

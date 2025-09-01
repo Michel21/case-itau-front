@@ -14,6 +14,7 @@ export interface ExtratoItem {
   irrf?: number;
   valorLiquido?: number;
   rendaBrutaPer?: number;
+  rendaBruta?: number;
 }
 
 export interface ExtratoTotais {
