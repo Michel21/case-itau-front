@@ -191,7 +191,7 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
         (title as HTMLElement).style.backgroundColor = '#e9ecef';
         (title as HTMLElement).style.fontSize = '12px';
         (title as HTMLElement).style.fontWeight = 'bold';
-        (title as HTMLElement).style.padding = '15px 8px';
+        (title as HTMLElement).style.padding = '15px 8px 15px 43px'; // 35px + 8px padrão
         (title as HTMLElement).style.borderBottom = 'none';
       });
 
