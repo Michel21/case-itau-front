@@ -1,0 +1,177 @@
+/**
+ * Estilos específicos para WebView Customizada
+ * Otimizações para iOS e Android WebViews
+ */
+
+// Variáveis específicas para WebView
+:root {
+  --webview-header-height: 60px;
+  --webview-footer-height: 80px;
+  --webview-scrollbar-width: 4px;
+  --webview-animation-duration: 200ms;
+  --webview-touch-feedback-scale: 0.95;
+}
+
+// Otimizações para WebView iOS
+.webview-ios {
+  // Melhor performance no iOS
+  -webkit-overflow-scrolling: touch;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  
+  // Prevenção de zoom
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  
+  // Scrollbar nativa do iOS
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  
+  // Feedback tátil
+  button, a, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+    transition: transform var(--webview-animation-duration) ease;
+    
+    &:active {
+      transform: scale(var(--webview-touch-feedback-scale));
+    }
+  }
+}
+
+// Otimizações para WebView Android
+.webview-android {
+  // Melhor performance no Android
+  -webkit-overflow-scrolling: touch;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  
+  // Prevenção de zoom
+  touch-action: manipulation;
+  
+  // Scrollbar personalizada para Android
+  &::-webkit-scrollbar {
+    width: var(--webview-scrollbar-width);
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: calc(var(--webview-scrollbar-width) / 2);
+    
+    &:hover {
+      background: rgba(0, 0, 0, 0.5);
+    }
+  }
+  
+  // Feedback tátil
+  button, a, [role="button"] {
+    transition: transform var(--webview-animation-duration) ease;
+    
+    &:active {
+      transform: scale(var(--webview-touch-feedback-scale));
+    }
+  }
+}
+
+// Classes utilitárias para WebView
+.webview-optimized {
+  // Performance
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  
+  // Scroll
+  -webkit-overflow-scrolling: touch;
+  overflow-scrolling: touch;
+  
+  // Touch
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+// Animações otimizadas para WebView
+@keyframes webviewFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px) translateZ(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) translateZ(0);
+  }
+}
+
+@keyframes webviewSlideIn {
+  from {
+    transform: translateX(-100%) translateZ(0);
+  }
+  to {
+    transform: translateX(0) translateZ(0);
+  }
+}
+
+// Classes de animação para WebView
+.webview-fade-in {
+  animation: webviewFadeIn var(--webview-animation-duration) ease-out;
+}
+
+.webview-slide-in {
+  animation: webviewSlideIn var(--webview-animation-duration) ease-out;
+}
+
+// Media queries específicas para WebView
+@media (max-width: 480px) {
+  :root {
+    --webview-header-height: 50px;
+    --webview-footer-height: 60px;
+    --webview-animation-duration: 150ms;
+  }
+  
+  .webview-optimized {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+}
+
+@media (max-width: 320px) {
+  :root {
+    --webview-header-height: 44px;
+    --webview-footer-height: 50px;
+  }
+}
+
+// Prevenção de zoom em WebView
+@media screen and (max-width: 480px) {
+  .webview-optimized {
+    touch-action: manipulation;
+    
+    input, textarea {
+      font-size: 16px; // Previne zoom no iOS
+    }
+  }
+}
+
+// Otimizações de performance para WebView
+.webview-performance {
+  // Hardware acceleration
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  
+  // Compositing
+  will-change: transform;
+  
+  // Rendering
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  
+  // Paint
+  contain: layout style paint;
+}

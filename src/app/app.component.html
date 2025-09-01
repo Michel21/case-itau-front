@@ -1,17 +1,17 @@
-<!-- Layout Principal da Aplicação -->
-<main class="app-main">
+<!-- Layout Principal da Aplicação - Otimizado para WebView -->
+<main class="app-main webview-optimized" [class]="'webview-' + webViewType()">
   <div class="app-container">
     <div class="app-wrapper">
       <!-- Header da Aplicação -->
-      <app-header class="app-header"></app-header>
+      <app-header class="app-header webview-performance"></app-header>
       
       <!-- Conteúdo Principal -->
-      <main class="app-content">
+      <main class="app-content webview-optimized webview-fade-in">
         <router-outlet />
       </main>
       
       <!-- Footer da Aplicação -->
-      <app-footer class="app-footer"></app-footer>
+      <app-footer class="app-footer webview-performance"></app-footer>
     </div>
   </div>
 </main>
