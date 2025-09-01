@@ -3,14 +3,30 @@
 .main-header {
   background: linear-gradient(135deg, colors.$primary-color 0%, colors.$primary-lighter-color 100%);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  position: sticky;
+  position: fixed; // Mudado para fixed para webview
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
   backdrop-filter: blur(10px);
+  height: 60px; // Altura fixa para webview
+  display: flex;
+  align-items: center;
+  
+  // Otimizações para webview
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  will-change: transform;
+  
+  // Responsividade para webview
+  @media (max-width: 480px) {
+    height: 50px;
+  }
 }
 
 .navbar {
   width: 100%;
+  height: 100%;
 }
 
 .navbar-container {
@@ -20,7 +36,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 0;
+  height: 100%; // Usar altura completa
   position: relative;
 }
 
@@ -28,6 +44,7 @@
 .navbar-brand {
   display: flex;
   align-items: center;
+  height: 100%;
 }
 
 .logo-link {
@@ -38,6 +55,8 @@
   color: colors.$color-white;
   cursor: pointer;
   transition: transform 0.2s ease;
+  height: 100%;
+  padding: 0.5rem 0;
 
   &:hover {
     transform: scale(1.05);
@@ -45,14 +64,14 @@
 }
 
 .logo-image {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
+  width: 36px; // Reduzido para caber na altura fixa
+  height: 36px;
+  border-radius: 6px;
   object-fit: cover;
 }
 
 .logo-text {
-  font-size: 1.5rem;
+  font-size: 1.3rem; // Reduzido para caber na altura fixa
   font-weight: 700;
   color: colors.$color-white;
 }
@@ -61,7 +80,8 @@
 .desktop-menu {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem; // Reduzido para caber na altura fixa
+  height: 100%;
 
   @media (max-width: 768px) {
     display: none;
@@ -72,14 +92,16 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.75rem; // Reduzido para caber na altura fixa
   color: colors.$color-white;
   text-decoration: none;
-  border-radius: 8px;
+  border-radius: 6px;
   transition: all 0.3s ease;
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  height: 100%;
+  align-items: center;
 
   &::before {
     content: '';
@@ -98,29 +120,30 @@
 
   &:hover {
     background: rgba(255, 255, 255, 0.1);
-    transform: translateY(-2px);
+    transform: translateY(-1px); // Reduzido para altura fixa
   }
 
   &.active {
     background: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   }
 }
 
 .nav-icon {
-  font-size: 1.2rem;
+  font-size: 1.1rem; // Reduzido para altura fixa
 }
 
 .nav-label {
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: 0.85rem; // Reduzido para altura fixa
 }
 
 // User Menu
 .navbar-user {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem; // Reduzido para altura fixa
+  height: 100%;
 
   @media (max-width: 768px) {
     display: none;
@@ -132,15 +155,17 @@
   flex-direction: column;
   align-items: flex-end;
   color: colors.$color-white;
+  height: 100%;
+  justify-content: center;
 }
 
 .user-name {
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.85rem; // Reduzido para altura fixa
 }
 
 .user-role {
-  font-size: 0.8rem;
+  font-size: 0.75rem; // Reduzido para altura fixa
   opacity: 0.8;
   text-transform: capitalize;
 }
@@ -149,14 +174,15 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 0.75rem; // Reduzido para altura fixa
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 6px;
   color: colors.$color-white;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 0.9rem;
+  font-size: 0.85rem; // Reduzido para altura fixa
+  height: 36px; // Altura fixa para o botão
 
   &:hover {
     background: rgba(255, 255, 255, 0.2);
@@ -165,20 +191,23 @@
 }
 
 .logout-icon {
-  font-size: 1rem;
+  font-size: 0.9rem; // Reduzido para altura fixa
 }
 
 // Mobile Menu Toggle
 .mobile-menu-toggle {
   display: none;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px; // Reduzido para altura fixa
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0.5rem;
+  padding: 0.4rem; // Reduzido para altura fixa
   border-radius: 6px;
   transition: all 0.3s ease;
+  height: 36px; // Altura fixa para o botão
+  align-items: center;
+  justify-content: center;
 
   @media (max-width: 768px) {
     display: flex;
@@ -189,7 +218,7 @@
   }
 
   &.active .hamburger-line:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 5px);
+    transform: rotate(45deg) translate(4px, 4px); // Ajustado para altura fixa
   }
 
   &.active .hamburger-line:nth-child(2) {
@@ -197,15 +226,15 @@
   }
 
   &.active .hamburger-line:nth-child(3) {
-    transform: rotate(-45deg) translate(7px, -6px);
+    transform: rotate(-45deg) translate(6px, -5px); // Ajustado para altura fixa
   }
 }
 
 .hamburger-line {
-  width: 25px;
-  height: 3px;
+  width: 22px; // Reduzido para altura fixa
+  height: 2px; // Reduzido para altura fixa
   background: colors.$color-white;
-  border-radius: 2px;
+  border-radius: 1px;
   transition: all 0.3s ease;
 }
 
@@ -303,18 +332,41 @@
   font-size: 1.2rem;
 }
 
-// Responsive adjustments
+// Responsive adjustments para webview
 @media (max-width: 480px) {
+  .main-header {
+    height: 50px;
+  }
+  
   .navbar-container {
-    padding: 0.75rem 0;
+    padding: 0 0.75rem;
   }
 
   .logo-text {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
   }
 
   .logo-image {
-    width: 32px;
+    width: 28px;
+    height: 28px;
+  }
+  
+  .nav-link {
+    padding: 0.4rem 0.6rem;
+  }
+  
+  .logout-btn {
+    padding: 0.3rem 0.6rem;
     height: 32px;
+  }
+  
+  .mobile-menu-toggle {
+    height: 32px;
+    padding: 0.3rem;
+  }
+  
+  .hamburger-line {
+    width: 20px;
+    height: 2px;
   }
 }
