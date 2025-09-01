@@ -6,7 +6,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { WebViewDownloadService } from '../../shared/services/webview-download.service';
 import { detectWebViewType } from '../../webview.config';
-import { ExtratoDados } from '../../../../types/extrato.types';
+import { ExtratoDados, RendaFixaData } from '../../../../types/extrato.types';
 import { MOCK_EXTRATO_DATA, RENDA_FIXA_DATA } from '../../../../data/mock-extrato.data';
 import { ExtratoFormatPipe } from './extrato-format.pipe';
 
@@ -27,7 +27,7 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
 
   // Signals
   public readonly dadosAtuais = signal<ExtratoDados | null>(null);
-  public readonly rendaFixaData = signal<any>(null);
+  public readonly rendaFixaData = signal<RendaFixaData | null>(null);
   public readonly config = signal<any>(null);
   public readonly isLoading = signal(false);
   public readonly error = signal<string | null>(null);

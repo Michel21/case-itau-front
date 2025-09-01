@@ -70,3 +70,43 @@ export interface ExtratoExportOptions {
   incluirCabecalho?: boolean;
   incluirRodape?: boolean;
 }
+
+// Novos tipos baseados na estrutura RENDA_FIXA_DATA
+export interface RendaFixaItem {
+  taxa: number;
+  dataVencimento: string;
+  dataAplicacao: string;
+  valorPrincipal?: number;
+  valorBruto?: number;
+  rendaTotal?: number;
+  iof?: number;
+  irrf?: number;
+  valorLiquido?: number;
+  rendaBruta?: number;
+  datasResgate?: string;
+}
+
+export interface RendaFixaTotal {
+  valorPrincipal?: number;
+  valorBruto?: number;
+  rendaTotal?: number;
+  iof?: number;
+  irrf?: number;
+  valorLiquido?: number;
+  rendaBruta?: number;
+}
+
+export interface RendaFixaData {
+  rendaFixa: {
+    saldoFinal: RendaFixaItem[];
+    aplicacaoTotal: RendaFixaTotal;
+    saldoAnterior: RendaFixaItem[];
+    saldoFinalTotal: RendaFixaTotal;
+    dataSaldoFinal: string;
+    aplicacao: RendaFixaItem[];
+    resgateTotal: RendaFixaTotal;
+    saldoAteriorTotal: RendaFixaTotal;
+    dataSaldoAnterior: string;
+    resgate: RendaFixaItem[];
+  };
+}
