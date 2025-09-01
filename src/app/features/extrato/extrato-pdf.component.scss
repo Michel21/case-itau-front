@@ -108,7 +108,7 @@ $hover-color-yellow: #FCD277;
   background-color: #000;
   padding: 4px 8px;
   display: inline-block;
-  border-radius: 2px;
+  // border-radius: 2px;
   text-transform: none;
   font-weight: normal;
   
@@ -190,12 +190,14 @@ $hover-color-yellow: #FCD277;
 }
 
 .detail-grid {
-  display: block;
+  display: flex;
+  flex-direction: column;
   gap: 0;
 }
 
 .detail-item {
-  display: block;
+  display: flex;
+  align-items: center;
   padding: 1px 0;
   border-bottom: none;
   font-size: 11px;
@@ -206,6 +208,9 @@ $hover-color-yellow: #FCD277;
   font-weight: bold;
   color: #000;
   display: inline;
+  min-width: 120px;
+  margin-right: 8px;
+  text-align: right;
 }
 
 .detail-value {
@@ -229,8 +234,8 @@ $hover-color-yellow: #FCD277;
   // Responsividade básica para mobile
   @media (max-width: 768px) {
     overflow-x: auto;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    // border-radius: 8px;
+    // box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     background: $color-white;
     padding: 0;
   }
@@ -275,7 +280,7 @@ $hover-color-yellow: #FCD277;
   border: none;
   font-weight: bold;
   font-size: 11px;
-  border-bottom: 1px solid #ccc;
+  // border-bottom: 1px solid #ccc;
   
   // Responsividade básica para mobile
   @media (max-width: 768px) {
@@ -412,7 +417,7 @@ $hover-color-yellow: #FCD277;
   border: none;
   color: #000;
   font-size: 11px;
-  border-bottom: 1px solid #eee;
+  // border-bottom: 1px solid #eee;
   
   // Responsividade básica para mobile
   @media (max-width: 768px) {
@@ -444,7 +449,7 @@ $hover-color-yellow: #FCD277;
   text-align: left;
   font-weight: bold;
   font-size: 12px;
-  border-bottom: 1px solid #ddd;
+  // border-bottom: 1px solid #ddd;
   
   // Responsividade básica para mobile
   @media (max-width: 768px) {
@@ -472,7 +477,7 @@ $hover-color-yellow: #FCD277;
   background-color: transparent !important;
   color: #000 !important;
   font-weight: bold;
-  border-top: 1px solid #ddd !important;
+  // border-top: 1px solid #ddd !important;
   padding: 8px 0 !important;
   margin-bottom: 10px;
   
