@@ -35,6 +35,15 @@ export interface WebViewConfig {
     enableKeyboardNavigation: boolean;
     enableVoiceOver: boolean;
   };
+  
+  // Configurações de download para WebView
+  download: {
+    enableFileDownload: boolean;
+    useWebViewBridge: boolean;
+    fallbackToPrint: boolean;
+    maxFileSize: number; // em bytes
+    supportedFormats: string[];
+  };
 }
 
 // Configuração padrão para WebView
@@ -47,7 +56,7 @@ export const defaultWebViewConfig: WebViewConfig = {
   },
   
   ui: {
-    headerHeight: 60,
+    headerHeight: 70,
     footerHeight: 80,
     scrollbarWidth: 4,
     animationDuration: 200,
@@ -65,6 +74,14 @@ export const defaultWebViewConfig: WebViewConfig = {
     enableKeyboardNavigation: true,
     enableVoiceOver: true,
   },
+  
+  download: {
+    enableFileDownload: true,
+    useWebViewBridge: false,
+    fallbackToPrint: true,
+    maxFileSize: 10 * 1024 * 1024, // 10MB
+    supportedFormats: ['pdf', 'csv', 'html'],
+  },
 };
 
 // Configuração para WebView iOS
@@ -77,8 +94,14 @@ export const iOSWebViewConfig: WebViewConfig = {
   },
   ui: {
     ...defaultWebViewConfig.ui,
-    headerHeight: 60,
+    headerHeight: 70,
     animationDuration: 150,
+  },
+  download: {
+    ...defaultWebViewConfig.download,
+    enableFileDownload: true,
+    useWebViewBridge: true, // iOS suporta bridge nativo
+    fallbackToPrint: true,
   },
 };
 
@@ -92,8 +115,14 @@ export const androidWebViewConfig: WebViewConfig = {
   },
   ui: {
     ...defaultWebViewConfig.ui,
-    headerHeight: 56,
+    headerHeight: 70,
     animationDuration: 250,
+  },
+  download: {
+    ...defaultWebViewConfig.download,
+    enableFileDownload: true,
+    useWebViewBridge: true, // Android suporta bridge nativo
+    fallbackToPrint: true,
   },
 };
 
@@ -172,6 +201,94 @@ export const WebViewUtils = {
       viewport.setAttribute('content', 
         'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'
       );
+    }
+  },
+  
+  // Verificar se WebView suporta download de arquivos
+  canDownloadFiles: (): boolean => {
+    const webViewType = detectWebViewType();
+    return webViewType === 'ios' || webViewType === 'android';
+  },
+  
+  // Verificar se WebView tem bridge nativo
+  hasNativeBridge: (): boolean => {
+    const webViewType = detectWebViewType();
+    return webViewType === 'ios' || webViewType === 'android';
+  },
+  
+  // Método alternativo para download em WebView
+  downloadFile: (content: string, fileName: string, mimeType: string): boolean => {
+    try {
+      // Tentar método padrão primeiro
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      a.style.display = 'none';
+      
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      
+      // Limpar URL após um tempo
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 1000);
+      
+      return true;
+    } catch (error) {
+      console.warn('Download padrão falhou, tentando método alternativo:', error);
+      
+      // Método alternativo para WebView
+      try {
+        const dataUrl = `data:${mimeType};charset=utf-8,${encodeURIComponent(content)}`;
+        const a = document.createElement('a');
+        a.href = dataUrl;
+        a.download = fileName;
+        a.style.display = 'none';
+        
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        return true;
+      } catch (fallbackError) {
+        console.error('Método alternativo também falhou:', fallbackError);
+        return false;
+      }
+    }
+  },
+  
+  // Método para abrir arquivo em nova aba (fallback)
+  openInNewTab: (content: string, mimeType: string): void => {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+    
+    // Limpar URL após um tempo
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+    }, 1000);
+  },
+  
+  // Método para compartilhar arquivo (WebView nativo)
+  shareFile: (content: string, fileName: string, mimeType: string): void => {
+    if (navigator.share) {
+      const blob = new Blob([content], { type: mimeType });
+      const file = new File([blob], fileName, { type: mimeType });
+      
+      navigator.share({
+        title: 'Extrato Bancário',
+        text: 'Compartilhando extrato bancário',
+        files: [file]
+      }).catch(error => {
+        console.warn('Compartilhamento falhou, usando download:', error);
+        WebViewUtils.downloadFile(content, fileName, mimeType);
+      });
+    } else {
+      // Fallback para download
+      WebViewUtils.downloadFile(content, fileName, mimeType);
     }
   }
 };

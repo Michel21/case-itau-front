@@ -4,6 +4,8 @@ import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { WebViewDownloadService } from '../../shared/services/webview-download.service';
+import { detectWebViewType } from '../../webview.config';
 
 // Interfaces
 export interface ExtratoItem {
@@ -77,6 +79,7 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
   @Input() extratoData: ExtratoDados | null = null;
 
   private readonly router = inject(Router);
+  private readonly webViewDownloadService = inject(WebViewDownloadService);
   private readonly destroy$ = new Subject<void>();
 
   // Signals
@@ -85,6 +88,12 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
   public readonly isLoading = signal(false);
   public readonly error = signal<string | null>(null);
   public readonly isPrintMode = signal(false);
+  
+  // WebView detection
+  public readonly isWebView = signal(false);
+  public readonly webViewType = signal<'ios' | 'android' | 'desktop'>('desktop');
+  public readonly canDownload = signal(false);
+  public readonly canShare = signal(false);
 
   // Computed values
   public readonly temSaldoAnterior = computed(() => this.temItens(this.dadosAtuais()?.saldoAnterior));
@@ -239,6 +248,17 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
       tipoInvestimento: data.tipoInvestimento,
       tipoProduto: data.tipoProduto,
     });
+    
+    // Detectar WebView e configurar capacidades
+    this.detectWebViewCapabilities();
+  }
+  
+  private detectWebViewCapabilities(): void {
+    const webViewType = detectWebViewType();
+    this.webViewType.set(webViewType);
+    this.isWebView.set(webViewType !== 'desktop');
+    this.canDownload.set(this.webViewDownloadService.canDownload());
+    this.canShare.set(this.webViewDownloadService.canShare());
   }
 
   // Utility methods
@@ -599,34 +619,41 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
         logging: true // Habilitar logs do html2canvas
       });
 
-      // Remover o clone do DOM
-      document.body.removeChild(clone);
-
-      // Criar PDF com jsPDF
-      const imgData = canvas.toDataURL('image/png', 1.0);
-
+      // Gerar PDF com jsPDF
       const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgData = canvas.toDataURL('image/png');
       
-      const imgWidth = 200; // Aumentado de 190 para 200 (menos margem)
-      const pageHeight = 287; // Aumentado de 277 para 287 (menos margem)
+      // Configurações otimizadas para WebView
+      const imgWidth = 200;
+      const pageHeight = 287;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       let heightLeft = imgHeight;
+      let position = 5;
 
-      let position = 5; // Reduzido de 10 para 5 (menos margem superior)
-
-      pdf.addImage(imgData, 'PNG', 5, position, imgWidth, imgHeight); // Margem lateral reduzida de 10 para 5
+      // Primeira página
+      pdf.addImage(imgData, 'PNG', 5, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
 
+      // Páginas adicionais se necessário
       while (heightLeft >= 0) {
-        position = heightLeft - imgHeight + 5; // +5 para margem superior reduzida
+        position = heightLeft - imgHeight;
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 5, position, imgWidth, imgHeight); // Margem lateral reduzida
+        pdf.addImage(imgData, 'PNG', 5, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
       }
 
-      // Salvar o PDF
-      const fileName = `extrato-bradesco-${new Date().toISOString().split('T')[0]}.pdf`;
-      pdf.save(fileName);
+      // Usar serviço otimizado para WebView
+      const fileName = `extrato-bancario-${new Date().toISOString().split('T')[0]}.pdf`;
+      const pdfBlob = pdf.output('blob');
+      
+      const success = await this.webViewDownloadService.downloadPDF(pdfBlob, fileName);
+      
+      if (!success) {
+        this.error.set('Erro ao gerar PDF. Tente novamente.');
+      }
+
+      // Remover o clone do DOM
+      document.body.removeChild(clone);
 
       this.isLoading.set(false);
     } catch (error) {
@@ -637,26 +664,43 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
   }
 
   // Método para gerar CSV
-  gerarCSV(): void {
+  async gerarCSV(): Promise<void> {
     try {
+      this.isLoading.set(true);
+      this.error.set(null);
+
       const csvContent = this.converterParaCSV();
-      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `extrato-bancario-${new Date().toISOString().split('T')[0]}.csv`;
-      a.click();
-      window.URL.revokeObjectURL(url);
+      if (!csvContent) {
+        throw new Error('Nenhum dado disponível para gerar CSV');
+      }
+
+      // Adicionar BOM para UTF-8
+      const bom = '\uFEFF';
+      const csvWithBom = bom + csvContent;
+      
+      const fileName = `extrato-bancario-${new Date().toISOString().split('T')[0]}.csv`;
+      
+      // Usar serviço otimizado para WebView
+      const success = await this.webViewDownloadService.downloadCSV(csvWithBom, fileName);
+      
+      if (!success) {
+        this.error.set('Erro ao gerar CSV. Tente novamente.');
+      }
       
     } catch (error) {
       console.error('Erro ao gerar CSV:', error);
       this.error.set('Erro ao gerar CSV. Tente novamente.');
+    } finally {
+      this.isLoading.set(false);
     }
   }
 
   // Método para exportar HTML
-  exportarHTML(): void {
+  async exportarHTML(): Promise<void> {
     try {
+      this.isLoading.set(true);
+      this.error.set(null);
+
       const element = document.getElementById('extrato-container');
       if (!element) {
         throw new Error('Elemento não encontrado');
@@ -679,17 +723,20 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
 </body>
 </html>`;
       
-      const blob = new Blob([fullHtml], { type: 'text/html' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `extrato-bancario-${new Date().toISOString().split('T')[0]}.html`;
-      a.click();
-      window.URL.revokeObjectURL(url);
+      const fileName = `extrato-bancario-${new Date().toISOString().split('T')[0]}.html`;
+      
+      // Usar serviço otimizado para WebView
+      const success = await this.webViewDownloadService.downloadHTML(fullHtml, fileName);
+      
+      if (!success) {
+        this.error.set('Erro ao exportar HTML. Tente novamente.');
+      }
       
     } catch (error) {
       console.error('Erro ao exportar HTML:', error);
       this.error.set('Erro ao exportar HTML. Tente novamente.');
+    } finally {
+      this.isLoading.set(false);
     }
   }
 
