@@ -67,21 +67,21 @@
           <!-- Saldo Anterior -->
           @if (temSaldoAnterior()) {
             <tr class="section-title">
-              <th colspan="11">Saldo anterior em {{ rendaFixaData()?.rendaFixa?.dataSaldoAnterior }}</th>
+              <th colspan="11" style="padding-left: 35px !important;">Saldo anterior em {{ rendaFixaData()?.rendaFixa?.dataSaldoAnterior }}</th>
             </tr>
             @for (item of rendaFixaData()?.rendaFixa?.saldoAnterior; track $index) {
               <tr class="data-row">
-                <td>{{ item.dataAplicacao }}</td>
-                <td>{{ item.dataVencimento }}</td>
-                <td>{{ item.datasResgate || '-' }}</td>
-                <td>{{ item.taxa ? (item.taxa + '%') : '-' }}</td>
-                <td class="currency">{{ formatarMoeda(item.valorPrincipal) }}</td>
-                <td class="currency">{{ formatarMoeda(item.valorBruto) }}</td>
-                <td class="currency">{{ formatarMoeda(item.rendaTotal) }}</td>
-                <td class="currency">{{ formatarMoeda(item.iof) }}</td>
-                <td class="currency">{{ formatarMoeda(item.irrf) }}</td>
-                <td class="currency">{{ formatarMoeda(item.valoLiquido) }}</td>
-                <td class="currency">{{ formatarMoeda(item.rendaBruta) }}</td>
+                <td>{{ item.dataAplicacao | extratoFormat:'data' }}</td>
+                <td>{{ item.dataVencimento | extratoFormat:'data' }}</td>
+                <td>{{ item.datasResgate | extratoFormat:'data' }}</td>
+                <td>{{ item.taxa | extratoFormat:'percentual' }}</td>
+                <td class="currency">{{ item.valorPrincipal | extratoFormat:'moeda' }}</td>
+                <td class="currency">{{ item.valorBruto | extratoFormat:'moeda' }}</td>
+                <td class="currency">{{ item.rendaTotal | extratoFormat:'moeda' }}</td>
+                <td class="currency">{{ item.iof | extratoFormat:'moeda' }}</td>
+                <td class="currency">{{ item.irrf | extratoFormat:'moeda' }}</td>
+                <td class="currency">{{ item.valorLiquido | extratoFormat:'moeda' }}</td>
+                <td class="currency">{{ item.rendaBruta | extratoFormat:'moeda' }}</td>
               </tr>
             }
             <tr class="total-row">
@@ -89,34 +89,34 @@
               <td></td>
               <td></td>
               <td></td>
-              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.valorPrincipal) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.valorBruto) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.rendaTotal) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.iof) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.irrf) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.valoLiquido) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.rendaBruta) }}</strong></td>
+              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.valorPrincipal | extratoFormat:'moeda' }}</strong></td>
+              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.valorBruto | extratoFormat:'moeda' }}</strong></td>
+              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.rendaTotal | extratoFormat:'moeda' }}</strong></td>
+              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.iof | extratoFormat:'moeda' }}</strong></td>
+              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.irrf | extratoFormat:'moeda' }}</strong></td>
+              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.valoLiquido | extratoFormat:'moeda' }}</strong></td>
+              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.rendaBruta | extratoFormat:'moeda' }}</strong></td>
             </tr>
           }
 
           <!-- Aplicações -->
           @if (temAplicacoes()) {
             <tr class="section-title">
-              <th colspan="11">Aplicações</th>
+              <th colspan="11" style="padding-left: 35px !important;">Aplicações</th>
             </tr>
             @for (item of rendaFixaData()?.rendaFixa?.aplicacao; track $index) {
               <tr class="data-row">
-                <td>{{ item.dataAplicacao }}</td>
-                <td>{{ item.dataVencimento }}</td>
+                <td>{{ item.dataAplicacao | extratoFormat:'data' }}</td>
+                <td>{{ item.dataVencimento | extratoFormat:'data' }}</td>
                 <td>-</td>
-                <td>{{ item.taxa ? (item.taxa + '%') : '-' }}</td>
-                <td class="currency">{{ formatarMoeda(item.valorPrincipal) }}</td>
-                <td class="currency">-</td>
-                <td class="currency">-</td>
-                <td class="currency">-</td>
-                <td class="currency">-</td>
-                <td class="currency">-</td>
-                <td class="currency">-</td>
+                <td>{{ item.taxa | extratoFormat:'percentual' }}</td>
+                <td class="currency">{{ item.valorPrincipal | extratoFormat:'moeda' }}</td>
+                <td class="currency"></td>
+                <td class="currency"></td>
+                <td class="currency"></td>
+                <td class="currency"></td>
+                <td class="currency"></td>
+                <td class="currency"></td>
               </tr>
             }
             <tr class="total-row">
@@ -124,34 +124,34 @@
               <td></td>
               <td></td>
               <td></td>
-              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.aplicacaoTotal?.valorPrincipal) }}</strong></td>
-              <td class="currency"><strong>-</strong></td>
-              <td class="currency"><strong>-</strong></td>
-              <td class="currency"><strong>-</strong></td>
-              <td class="currency"><strong>-</strong></td>
-              <td class="currency"><strong>-</strong></td>
-              <td class="currency"><strong>-</strong></td>
+              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.aplicacaoTotal?.valorPrincipal | extratoFormat:'moeda' }}</strong></td>
+              <td class="currency"><strong></strong></td>
+              <td class="currency"><strong></strong></td>
+              <td class="currency"><strong></strong></td>
+              <td class="currency"><strong></strong></td>
+              <td class="currency"><strong></strong></td>
+              <td class="currency"><strong></strong></td>
             </tr>
           }
 
           <!-- Resgates -->
           @if (temResgates()) {
             <tr class="section-title">
-              <th colspan="11">Resgates/Vencimentos</th>
+              <th colspan="11" style="padding-left: 35px !important;">Resgates/Vencimentos</th>
             </tr>
             @for (item of rendaFixaData()?.rendaFixa?.resgate; track $index) {
               <tr class="data-row">
-                <td>{{ item.dataAplicacao }}</td>
-                <td>{{ item.dataVencimento }}</td>
-                <td>{{ item.datasResgate || '-' }}</td>
-                <td>{{ item.taxa ? (item.taxa + '%') : '-' }}</td>
-                <td class="currency">{{ formatarMoeda(item.valorPrincipal) }}</td>
-                <td class="currency">{{ formatarMoeda(item.valorBruto) }}</td>
-                <td class="currency">{{ formatarMoeda(item.rendaTotal) }}</td>
-                <td class="currency">{{ formatarMoeda(item.iof) }}</td>
-                <td class="currency">{{ formatarMoeda(item.irrf) }}</td>
-                <td class="currency">{{ formatarMoeda(item.valoLiquido) }}</td>
-                <td class="currency">{{ formatarMoeda(item.rendaBruta) }}</td>
+                <td>{{ item.dataAplicacao | extratoFormat:'data' }}</td>
+                <td>{{ item.dataVencimento | extratoFormat:'data' }}</td>
+                <td>{{ item.datasResgate | extratoFormat:'data' }}</td>
+                <td>{{ item.taxa | extratoFormat:'percentual' }}</td>
+                <td class="currency">{{ item.valorPrincipal | extratoFormat:'moeda' }}</td>
+                <td class="currency">{{ item.valorBruto | extratoFormat:'moeda' }}</td>
+                <td class="currency">{{ item.rendaTotal | extratoFormat:'moeda' }}</td>
+                <td class="currency">{{ item.iof | extratoFormat:'moeda' }}</td>
+                <td class="currency">{{ item.irrf | extratoFormat:'moeda' }}</td>
+                <td class="currency">{{ item.valorLiquido | extratoFormat:'moeda' }}</td>
+                <td class="currency">{{ item.rendaBruta | extratoFormat:'moeda' }}</td>
               </tr>
             }
             <tr class="total-row">
@@ -159,34 +159,34 @@
               <td></td>
               <td></td>
               <td></td>
-              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.resgateTotal?.valorPrincipal) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.resgateTotal?.valorBruto) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.resgateTotal?.rendaTotal) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.resgateTotal?.iof) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.resgateTotal?.irrf) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.resgateTotal?.valoLiquido) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.resgateTotal?.rendaBruta) }}</strong></td>
+              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.resgateTotal?.valorPrincipal | extratoFormat:'moeda' }}</strong></td>
+              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.resgateTotal?.valorBruto | extratoFormat:'moeda' }}</strong></td>
+              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.resgateTotal?.rendaTotal | extratoFormat:'moeda' }}</strong></td>
+              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.resgateTotal?.iof | extratoFormat:'moeda' }}</strong></td>
+              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.resgateTotal?.irrf | extratoFormat:'moeda' }}</strong></td>
+              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.resgateTotal?.valoLiquido | extratoFormat:'moeda' }}</strong></td>
+              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.resgateTotal?.rendaBruta | extratoFormat:'moeda' }}</strong></td>
             </tr>
           }
 
           <!-- Saldo Final -->
           @if (temSaldoFinal()) {
             <tr class="section-title">
-              <th colspan="11">Saldo final em {{ rendaFixaData()?.rendaFixa?.dataSaldoFinal }}</th>
+              <th colspan="11" style="padding-left: 35px !important;">Saldo final em {{ rendaFixaData()?.rendaFixa?.dataSaldoFinal }}</th>
             </tr>
             @for (item of rendaFixaData()?.rendaFixa?.saldoFinal; track $index) {
               <tr class="data-row">
-                <td>{{ item.dataAplicacao }}</td>
-                <td>{{ item.dataVencimento }}</td>
-                <td>{{ item.datasResgate || '-' }}</td>
-                <td>{{ item.taxa ? (item.taxa + '%') : '-' }}</td>
-                <td class="currency">{{ formatarMoeda(item.valorPrincipal) }}</td>
-                <td class="currency">{{ formatarMoeda(item.valorBruto) }}</td>
-                <td class="currency">{{ formatarMoeda(item.rendaTotal) }}</td>
-                <td class="currency">{{ formatarMoeda(item.iof) }}</td>
-                <td class="currency">{{ formatarMoeda(item.irrf) }}</td>
-                <td class="currency">{{ formatarMoeda(item.valoLiquido) }}</td>
-                <td class="currency">{{ formatarMoeda(item.rendaBruta) }}</td>
+                <td>{{ item.dataAplicacao | extratoFormat:'data' }}</td>
+                <td>{{ item.dataVencimento | extratoFormat:'data' }}</td>
+                <td>{{ item.datasResgate | extratoFormat:'data' }}</td>
+                <td>{{ item.taxa | extratoFormat:'percentual' }}</td>
+                <td class="currency">{{ item.valorPrincipal | extratoFormat:'moeda' }}</td>
+                <td class="currency">{{ item.valorBruto | extratoFormat:'moeda' }}</td>
+                <td class="currency">{{ item.rendaTotal | extratoFormat:'moeda' }}</td>
+                <td class="currency">{{ item.iof | extratoFormat:'moeda' }}</td>
+                <td class="currency">{{ item.irrf | extratoFormat:'moeda' }}</td>
+                <td class="currency">{{ item.valorLiquido | extratoFormat:'moeda' }}</td>
+                <td class="currency">{{ item.rendaBruta | extratoFormat:'moeda' }}</td>
               </tr>
             }
             <tr class="total-row">
@@ -194,58 +194,55 @@
               <td></td>
               <td></td>
               <td></td>
-              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoFinalTotal?.valorPrincipal) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoFinalTotal?.valorBruto) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoFinalTotal?.rendaTotal) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoFinalTotal?.iof) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoFinalTotal?.irrf) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoFinalTotal?.valoLiquido) }}</strong></td>
-              <td class="currency"><strong>{{ formatarMoeda(rendaFixaData()?.rendaFixa?.saldoFinalTotal?.rendaBruta) }}</strong></td>
+              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoFinalTotal?.valorPrincipal | extratoFormat:'moeda' }}</strong></td>
+              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoFinalTotal?.valorBruto | extratoFormat:'moeda' }}</strong></td>
+              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoFinalTotal?.rendaTotal | extratoFormat:'moeda' }}</strong></td>
+              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoFinalTotal?.iof | extratoFormat:'moeda' }}</strong></td>
+              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoFinalTotal?.irrf | extratoFormat:'moeda' }}</strong></td>
+              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoFinalTotal?.valoLiquido | extratoFormat:'moeda' }}</strong></td>
+              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoFinalTotal?.rendaBruta | extratoFormat:'moeda' }}</strong></td>
             </tr>
           }
         </tbody>
       </table>
     </div>
   </section>
-
-  <!-- Botões de Ação -->
-  <div class="action-buttons">
-    <div class="button-group">
-      <button class="btn btn-primary" (click)="gerarPDF()" [disabled]="isLoading()">
-        <span class="btn-icon">📄</span>
-        <span class="btn-text">Gerar PDF</span>
-      </button>
-      
-      <button class="btn btn-secondary" (click)="gerarPDFCorporativo()" [disabled]="isLoading()">
-        <span class="btn-icon">🏢</span>
-        <span class="btn-text">PDF Corporativo</span>
-      </button>
-      
-      <button class="btn btn-success" (click)="gerarCSV()" [disabled]="isLoading()">
-        <span class="btn-icon">📊</span>
-        <span class="btn-text">Exportar CSV</span>
-      </button>
-      
-      <button class="btn btn-info" (click)="exportarHTML()" [disabled]="isLoading()">
-        <span class="btn-icon">🌐</span>
-        <span class="btn-text">Exportar HTML</span>
-      </button>
-    </div>
+</div>
+<!-- Botões de Ação -->
+<div class="action-buttons">
+  <div class="button-group">
+    <button class="btn btn-primary" (click)="gerarPDF()" [disabled]="isLoading()">
+      <span class="btn-icon">📄</span>
+      <span class="btn-text">Gerar PDF</span>
+    </button>
     
-    <button class="btn btn-outline" (click)="voltarParaHome()">
-      <span class="btn-icon">🏠</span>
-      <span class="btn-text">Voltar para Home</span>
+    <button class="btn btn-secondary" (click)="gerarPDFCorporativo()" [disabled]="isLoading()">
+      <span class="btn-icon">🏢</span>
+      <span class="btn-text">PDF Corporativo</span>
+    </button>
+    
+    <button type="button" class="btn btn-success" (click)="converterParaCSV()" [disabled]="isLoading()">
+      <i class="fas fa-file-csv"></i> Exportar CSV
+    </button>
+    
+    <button type="button" class="btn btn-info" (click)="gerarHTML()" [disabled]="isLoading()">
+      <i class="fas fa-file-code"></i> Exportar HTML
     </button>
   </div>
+  
+  <button class="btn btn-outline" (click)="voltarParaHome()">
+    <span class="btn-icon">🏠</span>
+    <span class="btn-text">Voltar para Home</span>
+  </button>
+</div>
 
-  <!-- Estados de Loading e Erro -->
-  <div class="loading-overlay" *ngIf="isLoading()" style="display: none;">
-    <div class="loading-spinner"></div>
-    <div class="loading-text">Gerando arquivo...</div>
-  </div>
+<!-- Estados de Loading e Erro -->
+<div class="loading-overlay" *ngIf="isLoading()" style="display: none;">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Gerando arquivo...</div>
+</div>
 
-  <div class="error-message" *ngIf="error()" style="display: none;">
-    <span class="error-icon">⚠️</span>
-    <span class="error-text">{{ error() }}</span>
-  </div>
+<div class="error-message" *ngIf="error()" style="display: none;">
+  <span class="error-icon">⚠️</span>
+  <span class="error-text">{{ error() }}</span>
 </div>

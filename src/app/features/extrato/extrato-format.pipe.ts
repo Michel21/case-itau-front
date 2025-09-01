@@ -1,6 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
+  standalone: true,
   name: 'extratoFormat'
 })
 export class ExtratoFormatPipe implements PipeTransform {
@@ -33,9 +34,10 @@ export class ExtratoFormatPipe implements PipeTransform {
   }
 
   private formatarPercentual(valor: number): string {
+    if (valor === null || valor === undefined) return '-';
     return valor.toLocaleString('pt-BR', { 
       minimumFractionDigits: 2, 
       maximumFractionDigits: 2 
-    });
+    }) + '%';
   }
 }

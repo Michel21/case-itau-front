@@ -8,13 +8,14 @@ import { WebViewDownloadService } from '../../shared/services/webview-download.s
 import { detectWebViewType } from '../../webview.config';
 import { ExtratoDados } from '../../../../types/extrato.types';
 import { MOCK_EXTRATO_DATA, RENDA_FIXA_DATA } from '../../../../data/mock-extrato.data';
+import { ExtratoFormatPipe } from './extrato-format.pipe';
 
 @Component({
   selector: 'app-extrato-pdf',
   templateUrl: './extrato-pdf.component.html',
   styleUrls: ['./extrato-pdf.component.scss'],
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ExtratoFormatPipe],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExtratoPdfComponent implements OnInit, OnDestroy {
@@ -53,12 +54,6 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
     this.dadosAtuais.set(data);
     this.rendaFixaData.set(this.rendaFixaMockData);
     
-    // Debug: verificar se os dados estão sendo carregados
-    console.log('Dados atuais:', data);
-    console.log('Renda fixa data:', this.rendaFixaMockData);
-    console.log('Aplicação:', this.rendaFixaMockData.rendaFixa.aplicacao);
-    console.log('Tem aplicações:', this.rendaFixaMockData.rendaFixa.aplicacao);
-    
     this.config.set({
       titulo: 'Extrato Bancário',
       dataTransacao: data.dataBusca,
@@ -84,7 +79,8 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
 
   // Método para verificar se há itens
   private temItens(secao: any): boolean {
-    return secao && Array.isArray(secao) && secao.length > 0;
+    const result = secao && Array.isArray(secao) && secao.length > 0;
+    return result;
   }
 
   // Método para gerar número de controle
@@ -146,48 +142,107 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
       clone.style.position = 'absolute';
       clone.style.left = '-9999px';
       clone.style.top = '0';
-      clone.style.width = '800px';
+      clone.style.width = '100%';
+      clone.style.maxWidth = '800px';
       clone.style.backgroundColor = '#ffffff';
       clone.style.color = '#000000';
       clone.style.fontFamily = 'Arial, sans-serif';
-      clone.style.fontSize = '10px';
-      clone.style.lineHeight = '1.2';
+      clone.style.fontSize = '12px';
+      clone.style.lineHeight = '1.4';
       clone.style.margin = '0';
       clone.style.padding = '10px';
       clone.style.border = 'none';
       clone.style.boxShadow = 'none';
+      clone.style.visibility = 'visible';
+      clone.style.display = 'block';
 
-      // Aplicar estilos específicos para PDF
+      // Preservar estilos originais das tabelas
       const tableElements = clone.querySelectorAll('table');
       tableElements.forEach(table => {
         (table as HTMLElement).style.width = '100%';
         (table as HTMLElement).style.borderCollapse = 'collapse';
-        (table as HTMLElement).style.fontSize = '9px';
+        (table as HTMLElement).style.fontSize = '11px';
+        (table as HTMLElement).style.marginBottom = '20px';
       });
 
+      // Preservar estilos dos cabeçalhos
       const thElements = clone.querySelectorAll('th');
       thElements.forEach(th => {
-        (th as HTMLElement).style.backgroundColor = '#f0f0f0';
-        (th as HTMLElement).style.border = '1px solid #ccc';
-        (th as HTMLElement).style.padding = '4px';
+        (th as HTMLElement).style.backgroundColor = '#f8f9fa';
+        (th as HTMLElement).style.borderBottom = 'none';
+        (th as HTMLElement).style.padding = '12px 8px';
         (th as HTMLElement).style.fontWeight = 'bold';
+        (th as HTMLElement).style.textAlign = 'left';
+        (th as HTMLElement).style.fontSize = '11px';
       });
 
+      // Preservar estilos das células
       const tdElements = clone.querySelectorAll('td');
       tdElements.forEach(td => {
-        (td as HTMLElement).style.border = '1px solid #ccc';
-        (td as HTMLElement).style.padding = '3px';
+        (td as HTMLElement).style.borderBottom = 'none';
+        (td as HTMLElement).style.padding = '10px 8px';
+        (td as HTMLElement).style.fontSize = '11px';
+        (td as HTMLElement).style.verticalAlign = 'top';
+      });
+
+      // Preservar estilos dos títulos das seções
+      const sectionTitles = clone.querySelectorAll('.section-title th');
+      sectionTitles.forEach(title => {
+        (title as HTMLElement).style.backgroundColor = '#e9ecef';
+        (title as HTMLElement).style.fontSize = '12px';
+        (title as HTMLElement).style.fontWeight = 'bold';
+        (title as HTMLElement).style.padding = '15px 8px';
+        (title as HTMLElement).style.borderBottom = 'none';
+      });
+
+      // Preservar estilos das linhas de total
+      const totalRows = clone.querySelectorAll('.total-row td');
+      totalRows.forEach(td => {
+        (td as HTMLElement).style.backgroundColor = '#f8f9fa';
+        (td as HTMLElement).style.fontWeight = 'bold';
+        (td as HTMLElement).style.borderTop = 'none';
+        (td as HTMLElement).style.fontSize = '11px';
+      });
+
+      // Preservar estilos dos campos de detalhes
+      const detailGrid = clone.querySelectorAll('.detail-grid');
+      detailGrid.forEach(grid => {
+        (grid as HTMLElement).style.marginBottom = '20px';
+        (grid as HTMLElement).style.padding = '15px';
+        (grid as HTMLElement).style.backgroundColor = '#f8f9fa';
+        (grid as HTMLElement).style.borderRadius = '5px';
+      });
+
+      const detailItems = clone.querySelectorAll('.detail-item');
+      detailItems.forEach(item => {
+        (item as HTMLElement).style.marginBottom = '10px';
+        (item as HTMLElement).style.display = 'flex';
+        (item as HTMLElement).style.alignItems = 'center';
+      });
+
+      const detailLabels = clone.querySelectorAll('.detail-label');
+      detailLabels.forEach(label => {
+        (label as HTMLElement).style.minWidth = '120px';
+        (label as HTMLElement).style.fontWeight = 'bold';
+        (label as HTMLElement).style.marginRight = '10px';
+        (label as HTMLElement).style.fontSize = '11px';
+      });
+
+      const detailValues = clone.querySelectorAll('.detail-value');
+      detailValues.forEach(value => {
+        (value as HTMLElement).style.fontSize = '11px';
+        (value as HTMLElement).style.color = '#495057';
       });
 
       // Adicionar o clone ao DOM temporariamente
       document.body.appendChild(clone);
 
       // Aguardar um momento para o DOM ser renderizado
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Capturar o elemento com html2canvas
       const canvas = await html2canvas(clone, {
-        scale: 1.2,
+        scale: 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff',
@@ -199,133 +254,138 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
         windowHeight: clone.offsetHeight,
         foreignObjectRendering: false,
         removeContainer: true,
-        logging: true
+        logging: false
       });
 
       // Gerar PDF com jsPDF
       const pdf = new jsPDF('p', 'mm', 'a4');
       const imgData = canvas.toDataURL('image/png');
 
-      // Configurações otimizadas para WebView
-      const imgWidth = 200;
-      const pageHeight = 287;
+      // Configurações otimizadas para preservar layout
+      const imgWidth = 190;
+      const pageHeight = 277;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       let heightLeft = imgHeight;
-      let position = 5;
+      let position = 10;
 
       // Primeira página
-      pdf.addImage(imgData, 'PNG', 5, position, imgWidth, imgHeight);
+      pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
 
       // Páginas adicionais se necessário
       while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
+        position = heightLeft - imgHeight + 10;
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 5, position, imgWidth, imgHeight);
+        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
-      }
-
-      // Usar serviço otimizado para WebView
-      const fileName = `extrato-bancario-${new Date().toISOString().split('T')[0]}.pdf`;
-      const pdfBlob = pdf.output('blob');
-
-      const success = await this.webViewDownloadService.downloadPDF(pdfBlob, fileName);
-
-      if (!success) {
-        this.error.set('Erro ao gerar PDF. Tente novamente.');
       }
 
       // Remover o clone do DOM
       document.body.removeChild(clone);
 
+      // Download do PDF
+      const fileName = `extrato-${this.getDataGeracao().replace(/\//g, '-')}.pdf`;
+      
+      // Usar serviço otimizado para WebView
+      const pdfBlob = pdf.output('blob');
+      const success = await this.webViewDownloadService.downloadPDF(pdfBlob, fileName);
+
+      if (!success) {
+        // Fallback para download direto
+        pdf.save(fileName);
+      }
+
       this.isLoading.set(false);
     } catch (error) {
       console.error('Erro ao gerar PDF corporativo:', error);
       this.error.set('Erro ao gerar PDF corporativo. Tente novamente.');
-    } finally {
       this.isLoading.set(false);
     }
   }
 
   // Método para gerar CSV
-  async gerarCSV(): Promise<void> {
+  async converterParaCSV(): Promise<void> {
     try {
       this.isLoading.set(true);
       this.error.set(null);
 
-      const csvContent = this.converterParaCSV();
-      if (!csvContent) {
-        throw new Error('Nenhum dado disponível para gerar CSV');
-      }
-
-      // Adicionar BOM para UTF-8
-      const bom = '\uFEFF';
-      const csvWithBom = bom + csvContent;
-
-      const fileName = `extrato-bancario-${new Date().toISOString().split('T')[0]}.csv`;
-
+      const csvContent = this.gerarConteudoCSV();
+      const fileName = `extrato-${this.getDataGeracao().replace(/\//g, '-')}.csv`;
+      
       // Usar serviço otimizado para WebView
-      const success = await this.webViewDownloadService.downloadCSV(csvWithBom, fileName);
+      const success = await this.webViewDownloadService.downloadCSV(csvContent, fileName);
 
       if (!success) {
-        this.error.set('Erro ao gerar CSV. Tente novamente.');
+        // Fallback para download direto
+        const csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(csvBlob);
+        link.download = fileName;
+        link.click();
+        URL.revokeObjectURL(link.href);
       }
 
+      this.isLoading.set(false);
     } catch (error) {
       console.error('Erro ao gerar CSV:', error);
       this.error.set('Erro ao gerar CSV. Tente novamente.');
-    } finally {
       this.isLoading.set(false);
     }
   }
 
-  // Método para exportar HTML
-  async exportarHTML(): Promise<void> {
+  // Método para gerar HTML
+  async gerarHTML(): Promise<void> {
     try {
       this.isLoading.set(true);
       this.error.set(null);
 
-      const element = document.getElementById('extrato-container');
+      const element = document.querySelector('.extrato-container') as HTMLElement;
       if (!element) {
-        throw new Error('Elemento não encontrado');
+        throw new Error('Elemento do extrato não encontrado');
       }
 
       const htmlContent = element.outerHTML;
       const fullHtml = `
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Extrato Bancário - Bradesco Corporate</title>
-    <style>
-        ${this.getCSSStyles()}
-    </style>
-</head>
-<body>
-    ${htmlContent}
-</body>
-</html>`;
+      <!DOCTYPE html>
+      <html lang="pt-BR">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Extrato Bancário - Bradesco Corporate</title>
+          <style>
+              ${this.getCSSStyles()}
+          </style>
+      </head>
+      <body>
+          ${htmlContent}
+      </body>
+      </html>`;
 
       const fileName = `extrato-bancario-${new Date().toISOString().split('T')[0]}.html`;
-
+      
       // Usar serviço otimizado para WebView
       const success = await this.webViewDownloadService.downloadHTML(fullHtml, fileName);
 
       if (!success) {
-        this.error.set('Erro ao exportar HTML. Tente novamente.');
+        // Fallback para download direto
+        const htmlBlob = new Blob([fullHtml], { type: 'text/html' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(htmlBlob);
+        link.download = fileName;
+        link.click();
+        URL.revokeObjectURL(link.href);
       }
 
+      this.isLoading.set(false);
     } catch (error) {
-      console.error('Erro ao exportar HTML:', error);
-      this.error.set('Erro ao exportar HTML. Tente novamente.');
-    } finally {
+      console.error('Erro ao gerar HTML:', error);
+      this.error.set('Erro ao gerar HTML. Tente novamente.');
       this.isLoading.set(false);
     }
   }
 
   // Método para converter dados para CSV
-  private converterParaCSV(): string {
+  private gerarConteudoCSV(): string {
     const headers = [
       'Seção',
       'Data aplic.',
