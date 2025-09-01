@@ -75,13 +75,13 @@
                 <td>{{ item.dataVencimento | extratoFormat:'data' }}</td>
                 <td>{{ item.datasResgate | extratoFormat:'data' }}</td>
                 <td>{{ item.taxa | extratoFormat:'percentual' }}</td>
-                <td class="currency">{{ item.valorPrincipal | extratoFormat:'moeda' }}</td>
-                <td class="currency">{{ item.valorBruto | extratoFormat:'moeda' }}</td>
-                <td class="currency">{{ item.rendaTotal | extratoFormat:'moeda' }}</td>
-                <td class="currency">{{ item.iof | extratoFormat:'moeda' }}</td>
-                <td class="currency">{{ item.irrf | extratoFormat:'moeda' }}</td>
-                <td class="currency">{{ item.valorLiquido | extratoFormat:'moeda' }}</td>
-                <td class="currency">{{ item.rendaBruta | extratoFormat:'moeda' }}</td>
+                <td>{{ item.valorPrincipal | extratoFormat:'moeda' }}</td>
+                <td>{{ item.valorBruto | extratoFormat:'moeda' }}</td>
+                <td>{{ item.rendaTotal | extratoFormat:'moeda' }}</td>
+                <td>{{ item.iof | extratoFormat:'moeda' }}</td>
+                <td>{{ item.irrf | extratoFormat:'moeda' }}</td>
+                <td>{{ item.valorLiquido | extratoFormat:'moeda' }}</td>
+                <td>{{ item.rendaBruta | extratoFormat:'moeda' }}</td>
               </tr>
             }
             <tr class="total-row">
@@ -89,13 +89,13 @@
               <td></td>
               <td></td>
               <td></td>
-              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.valorPrincipal | extratoFormat:'moeda' }}</strong></td>
-              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.valorBruto | extratoFormat:'moeda' }}</strong></td>
-              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.rendaTotal | extratoFormat:'moeda' }}</strong></td>
-              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.iof | extratoFormat:'moeda' }}</strong></td>
-              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.irrf | extratoFormat:'moeda' }}</strong></td>
-              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.valoLiquido | extratoFormat:'moeda' }}</strong></td>
-              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.rendaBruta | extratoFormat:'moeda' }}</strong></td>
+              <td><strong>{{ rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.valorPrincipal | extratoFormat:'moeda' }}</strong></td>
+              <td><strong>{{ rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.valorBruto | extratoFormat:'moeda' }}</strong></td>
+              <td><strong>{{ rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.rendaTotal | extratoFormat:'moeda' }}</strong></td>
+              <td><strong>{{ rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.iof | extratoFormat:'moeda' }}</strong></td>
+              <td><strong>{{ rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.irrf | extratoFormat:'moeda' }}</strong></td>
+              <td><strong>{{ rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.valoLiquido | extratoFormat:'moeda' }}</strong></td>
+              <td style="padding-right: 10px !important;"><strong>{{ rendaFixaData()?.rendaFixa?.saldoAteriorTotal?.rendaBruta | extratoFormat:'moeda' }}</strong></td>
             </tr>
           }
 
@@ -110,13 +110,13 @@
                 <td>{{ item.dataVencimento | extratoFormat:'data' }}</td>
                 <td>-</td>
                 <td>{{ item.taxa | extratoFormat:'percentual' }}</td>
-                <td class="currency">{{ item.valorPrincipal | extratoFormat:'moeda' }}</td>
-                <td class="currency"></td>
-                <td class="currency"></td>
-                <td class="currency"></td>
-                <td class="currency"></td>
-                <td class="currency"></td>
-                <td class="currency"></td>
+                <td>{{ item.valorPrincipal | extratoFormat:'moeda' }}</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
               </tr>
             }
             <tr class="total-row">
@@ -124,16 +124,28 @@
               <td></td>
               <td></td>
               <td></td>
-              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.aplicacaoTotal?.valorPrincipal | extratoFormat:'moeda' }}</strong></td>
-              <td class="currency"><strong></strong></td>
-              <td class="currency"><strong></strong></td>
-              <td class="currency"><strong></strong></td>
-              <td class="currency"><strong></strong></td>
-              <td class="currency"><strong></strong></td>
-              <td class="currency"><strong></strong></td>
+              <td><strong>{{ rendaFixaData()?.rendaFixa?.aplicacaoTotal?.valorPrincipal | extratoFormat:'moeda' }}</strong></td>
+              <td><strong></strong></td>
+              <td><strong></strong></td>
+              <td><strong></strong></td>
+              <td><strong></strong></td>
+              <td><strong></strong></td>
+              <td><strong></strong></td>
             </tr>
           }
-
+          <tr class="table-header">
+            <th>Data aplic.</th>
+            <th>Data vencto.</th>
+            <th>Resgate/Carência</th>
+            <th>Taxa (%)</th>
+            <th>Valor princ. (BRL)</th>
+            <th>Valor Bruto (BRL)</th>
+            <th>Renda total (BRL)</th>
+            <th>IOF (BRL)</th>
+            <th>IRRF (BRL)</th>
+            <th>Valor Líquido (BRL)</th>
+            <th>Renda bruta per</th>
+          </tr>
           <!-- Resgates -->
           @if (temResgates()) {
             <tr class="section-title">
@@ -145,13 +157,13 @@
                 <td>{{ item.dataVencimento | extratoFormat:'data' }}</td>
                 <td>{{ item.datasResgate | extratoFormat:'data' }}</td>
                 <td>{{ item.taxa | extratoFormat:'percentual' }}</td>
-                <td class="currency">{{ item.valorPrincipal | extratoFormat:'moeda' }}</td>
-                <td class="currency">{{ item.valorBruto | extratoFormat:'moeda' }}</td>
-                <td class="currency">{{ item.rendaTotal | extratoFormat:'moeda' }}</td>
-                <td class="currency">{{ item.iof | extratoFormat:'moeda' }}</td>
-                <td class="currency">{{ item.irrf | extratoFormat:'moeda' }}</td>
-                <td class="currency">{{ item.valorLiquido | extratoFormat:'moeda' }}</td>
-                <td class="currency">{{ item.rendaBruta | extratoFormat:'moeda' }}</td>
+                <td>{{ item.valorPrincipal | extratoFormat:'moeda' }}</td>
+                <td>{{ item.valorBruto | extratoFormat:'moeda' }}</td>
+                <td>{{ item.rendaTotal | extratoFormat:'moeda' }}</td>
+                <td>{{ item.iof | extratoFormat:'moeda' }}</td>
+                <td>{{ item.irrf | extratoFormat:'moeda' }}</td>
+                <td>{{ item.valorLiquido | extratoFormat:'moeda' }}</td>
+                <td>{{ item.rendaBruta | extratoFormat:'moeda' }}</td>
               </tr>
             }
             <tr class="total-row">
@@ -159,13 +171,13 @@
               <td></td>
               <td></td>
               <td></td>
-              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.resgateTotal?.valorPrincipal | extratoFormat:'moeda' }}</strong></td>
-              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.resgateTotal?.valorBruto | extratoFormat:'moeda' }}</strong></td>
-              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.resgateTotal?.rendaTotal | extratoFormat:'moeda' }}</strong></td>
-              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.resgateTotal?.iof | extratoFormat:'moeda' }}</strong></td>
-              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.resgateTotal?.irrf | extratoFormat:'moeda' }}</strong></td>
-              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.resgateTotal?.valoLiquido | extratoFormat:'moeda' }}</strong></td>
-              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.resgateTotal?.rendaBruta | extratoFormat:'moeda' }}</strong></td>
+              <td><strong>{{ rendaFixaData()?.rendaFixa?.resgateTotal?.valorPrincipal | extratoFormat:'moeda' }}</strong></td>
+              <td><strong>{{ rendaFixaData()?.rendaFixa?.resgateTotal?.valorBruto | extratoFormat:'moeda' }}</strong></td>
+              <td><strong>{{ rendaFixaData()?.rendaFixa?.resgateTotal?.rendaTotal | extratoFormat:'moeda' }}</strong></td>
+              <td><strong>{{ rendaFixaData()?.rendaFixa?.resgateTotal?.iof | extratoFormat:'moeda' }}</strong></td>
+              <td><strong>{{ rendaFixaData()?.rendaFixa?.resgateTotal?.irrf | extratoFormat:'moeda' }}</strong></td>
+              <td><strong>{{ rendaFixaData()?.rendaFixa?.resgateTotal?.valoLiquido | extratoFormat:'moeda' }}</strong></td>
+              <td style="padding-right: 10px !important;"><strong>{{ rendaFixaData()?.rendaFixa?.resgateTotal?.rendaBruta | extratoFormat:'moeda' }}</strong></td>
             </tr>
           }
 
@@ -180,13 +192,13 @@
                 <td>{{ item.dataVencimento | extratoFormat:'data' }}</td>
                 <td>{{ item.datasResgate | extratoFormat:'data' }}</td>
                 <td>{{ item.taxa | extratoFormat:'percentual' }}</td>
-                <td class="currency">{{ item.valorPrincipal | extratoFormat:'moeda' }}</td>
-                <td class="currency">{{ item.valorBruto | extratoFormat:'moeda' }}</td>
-                <td class="currency">{{ item.rendaTotal | extratoFormat:'moeda' }}</td>
-                <td class="currency">{{ item.iof | extratoFormat:'moeda' }}</td>
-                <td class="currency">{{ item.irrf | extratoFormat:'moeda' }}</td>
-                <td class="currency">{{ item.valorLiquido | extratoFormat:'moeda' }}</td>
-                <td class="currency">{{ item.rendaBruta | extratoFormat:'moeda' }}</td>
+                <td>{{ item.valorPrincipal | extratoFormat:'moeda' }}</td>
+                <td>{{ item.valorBruto | extratoFormat:'moeda' }}</td>
+                <td>{{ item.rendaTotal | extratoFormat:'moeda' }}</td>
+                <td>{{ item.iof | extratoFormat:'moeda' }}</td>
+                <td>{{ item.irrf | extratoFormat:'moeda' }}</td>
+                <td>{{ item.valorLiquido | extratoFormat:'moeda' }}</td>
+                <td>{{ item.rendaBruta | extratoFormat:'moeda' }}</td>
               </tr>
             }
             <tr class="total-row">
@@ -194,13 +206,13 @@
               <td></td>
               <td></td>
               <td></td>
-              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoFinalTotal?.valorPrincipal | extratoFormat:'moeda' }}</strong></td>
-              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoFinalTotal?.valorBruto | extratoFormat:'moeda' }}</strong></td>
-              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoFinalTotal?.rendaTotal | extratoFormat:'moeda' }}</strong></td>
-              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoFinalTotal?.iof | extratoFormat:'moeda' }}</strong></td>
-              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoFinalTotal?.irrf | extratoFormat:'moeda' }}</strong></td>
-              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoFinalTotal?.valoLiquido | extratoFormat:'moeda' }}</strong></td>
-              <td class="currency"><strong>{{ rendaFixaData()?.rendaFixa?.saldoFinalTotal?.rendaBruta | extratoFormat:'moeda' }}</strong></td>
+              <td><strong>{{ rendaFixaData()?.rendaFixa?.saldoFinalTotal?.valorPrincipal | extratoFormat:'moeda' }}</strong></td>
+              <td><strong>{{ rendaFixaData()?.rendaFixa?.saldoFinalTotal?.valorBruto | extratoFormat:'moeda' }}</strong></td>
+              <td><strong>{{ rendaFixaData()?.rendaFixa?.saldoFinalTotal?.rendaTotal | extratoFormat:'moeda' }}</strong></td>
+              <td><strong>{{ rendaFixaData()?.rendaFixa?.saldoFinalTotal?.iof | extratoFormat:'moeda' }}</strong></td>
+              <td><strong>{{ rendaFixaData()?.rendaFixa?.saldoFinalTotal?.irrf | extratoFormat:'moeda' }}</strong></td>
+              <td><strong>{{ rendaFixaData()?.rendaFixa?.saldoFinalTotal?.valoLiquido | extratoFormat:'moeda' }}</strong></td>
+              <td style="padding-right: 10px !important;"><strong>{{ rendaFixaData()?.rendaFixa?.saldoFinalTotal?.rendaBruta | extratoFormat:'moeda' }}</strong></td>
             </tr>
           }
         </tbody>

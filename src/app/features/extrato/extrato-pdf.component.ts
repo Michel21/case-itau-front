@@ -150,7 +150,7 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
       clone.style.fontSize = '12px';
       clone.style.lineHeight = '1.4';
       clone.style.margin = '0';
-      clone.style.padding = '10px';
+      clone.style.padding = '20px';
       clone.style.border = 'none';
       clone.style.boxShadow = 'none';
       clone.style.visibility = 'visible';
@@ -163,6 +163,7 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
         (table as HTMLElement).style.borderCollapse = 'collapse';
         (table as HTMLElement).style.fontSize = '11px';
         (table as HTMLElement).style.marginBottom = '20px';
+        (table as HTMLElement).style.border = 'none';
       });
 
       // Preservar estilos dos cabeçalhos
@@ -174,6 +175,7 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
         (th as HTMLElement).style.fontWeight = 'bold';
         (th as HTMLElement).style.textAlign = 'left';
         (th as HTMLElement).style.fontSize = '11px';
+        (th as HTMLElement).style.border = 'none';
       });
 
       // Preservar estilos das células
@@ -183,6 +185,7 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
         (td as HTMLElement).style.padding = '10px 8px';
         (td as HTMLElement).style.fontSize = '11px';
         (td as HTMLElement).style.verticalAlign = 'top';
+        (td as HTMLElement).style.border = 'none';
       });
 
       // Preservar estilos dos títulos das seções
@@ -193,6 +196,7 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
         (title as HTMLElement).style.fontWeight = 'bold';
         (title as HTMLElement).style.padding = '15px 8px 15px 43px'; // 35px + 8px padrão
         (title as HTMLElement).style.borderBottom = 'none';
+        (title as HTMLElement).style.border = 'none';
       });
 
       // Preservar estilos das linhas de total
@@ -202,6 +206,7 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
         (td as HTMLElement).style.fontWeight = 'bold';
         (td as HTMLElement).style.borderTop = 'none';
         (td as HTMLElement).style.fontSize = '11px';
+        (td as HTMLElement).style.border = 'none';
       });
 
       // Preservar estilos dos campos de detalhes
@@ -211,6 +216,7 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
         (grid as HTMLElement).style.padding = '15px';
         (grid as HTMLElement).style.backgroundColor = '#f8f9fa';
         (grid as HTMLElement).style.borderRadius = '5px';
+        (grid as HTMLElement).style.border = 'none';
       });
 
       const detailItems = clone.querySelectorAll('.detail-item');
@@ -218,6 +224,7 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
         (item as HTMLElement).style.marginBottom = '10px';
         (item as HTMLElement).style.display = 'flex';
         (item as HTMLElement).style.alignItems = 'center';
+        (item as HTMLElement).style.border = 'none';
       });
 
       const detailLabels = clone.querySelectorAll('.detail-label');
@@ -226,12 +233,35 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
         (label as HTMLElement).style.fontWeight = 'bold';
         (label as HTMLElement).style.marginRight = '10px';
         (label as HTMLElement).style.fontSize = '11px';
+        (label as HTMLElement).style.textAlign = 'right';
+        (label as HTMLElement).style.border = 'none';
       });
 
       const detailValues = clone.querySelectorAll('.detail-value');
       detailValues.forEach(value => {
         (value as HTMLElement).style.fontSize = '11px';
         (value as HTMLElement).style.color = '#495057';
+        (value as HTMLElement).style.border = 'none';
+      });
+
+      // Preservar estilos específicos do HTML
+      const currencyCells = clone.querySelectorAll('.currency');
+      currencyCells.forEach(cell => {
+        (cell as HTMLElement).style.textAlign = 'right';
+        (cell as HTMLElement).style.fontFamily = 'monospace';
+        (cell as HTMLElement).style.fontSize = '11px';
+      });
+
+      // Preservar estilos dos botões (ocultar no PDF)
+      const buttons = clone.querySelectorAll('button');
+      buttons.forEach(button => {
+        (button as HTMLElement).style.display = 'none';
+      });
+
+      // Preservar estilos dos ícones
+      const icons = clone.querySelectorAll('i');
+      icons.forEach(icon => {
+        (icon as HTMLElement).style.display = 'none';
       });
 
       // Adicionar o clone ao DOM temporariamente
