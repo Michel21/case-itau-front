@@ -1,0 +1,167 @@
+<main class="selecao-periodo" role="main" aria-label="Tela de seleção de período para visualização de extrato">
+  <!-- Header com navegação -->
+  <header class="header" role="banner">
+    <button 
+      class="btn-voltar" 
+      (click)="voltar()" 
+      (keydown)="onKeyDown($event, 'voltar')"
+      aria-label="Voltar para tela anterior"
+      tabindex="0">
+      <img src="assets/icons8-left-24.png" alt="Ícone de voltar" class="icon-voltar">
+      Voltar
+    </button>
+  </header>
+
+  <!-- Conteúdo principal -->
+  <div class="conteudo">
+    <!-- Título e subtítulo -->
+    <h1 class="titulo" tabindex="0">Seleção de Período</h1>
+    <p class="subtitulo" tabindex="0">
+      É possível consultar lançamentos dos últimos 12 meses
+    </p>
+
+    <!-- Seleção de tipo de período -->
+    <div class="tipo-selecao" role="radiogroup" aria-label="Seleção de tipo de filtro: intervalo ou mês">
+      <button 
+        class="pill-selecao" 
+        [class.ativo]="tipoSelecao() === 'mes'"
+        (click)="alterarTipoSelecao('mes')"
+        (keydown)="onKeyDown($event, 'tipo-mes')"
+        role="radio"
+        [attr.aria-pressed]="tipoSelecao() === 'mes'"
+        aria-label="Selecionar filtro por mês e ano"
+        tabindex="0">
+        Mês
+      </button>
+      
+      <button 
+        class="pill-selecao" 
+        [class.ativo]="tipoSelecao() === 'intervalo'"
+        (click)="alterarTipoSelecao('intervalo')"
+        (keydown)="onKeyDown($event, 'tipo-intervalo')"
+        role="radio"
+        [attr.aria-pressed]="tipoSelecao() === 'intervalo'"
+        aria-label="Selecionar filtro por intervalo de datas"
+        tabindex="0">
+        Intervalo
+      </button>
+    </div>
+
+    <!-- Seleção por intervalo de datas usando @if -->
+    @if (tipoSelecao() === 'intervalo') {
+      <div class="selecao-intervalo" role="group" aria-label="Seleção de intervalo de datas">
+        <div class="campo-data">
+          <label for="data-inicio" class="label-data">Data de início</label>
+          <input 
+            type="date" 
+            id="data-inicio"
+            [value]="dataInicio()"
+            (change)="atualizarDataInicio($any($event.target).value)"
+            [min]="getDataMinima()"
+            [max]="getDataMaxima()"
+            class="input-data"
+            aria-label="Data de início para o intervalo"
+            [attr.aria-invalid]="intervaloInvalido() || limiteHistoricoInvalido()"
+            [attr.aria-describedby]="(intervaloInvalido() || limiteHistoricoInvalido()) ? 'erro-intervalo' : null"
+            tabindex="0">
+        </div>
+        
+        <div class="campo-data">
+          <label for="data-fim" class="label-data">Data de fim</label>
+          <input 
+            type="date" 
+            id="data-fim"
+            [value]="dataFim()"
+            (change)="atualizarDataFim($any($event.target).value)"
+            [min]="getDataMinima()"
+            [max]="getDataMaxima()"
+            class="input-data"
+            aria-label="Data de fim para o intervalo"
+            [attr.aria-invalid]="intervaloInvalido() || limiteHistoricoInvalido()"
+            [attr.aria-describedby]="(intervaloInvalido() || limiteHistoricoInvalido()) ? 'erro-intervalo' : null"
+            tabindex="0">
+        </div>
+      </div>
+    }
+
+    <!-- Seleção por mês e ano usando @if -->
+    @if (tipoSelecao() === 'mes') {
+      <div class="selecao-mes-ano" role="group" aria-label="Seleção de mês e ano">
+        <div class="campo-select">
+          <label for="mes" class="label-select">Mês</label>
+          <select 
+            id="mes"
+            (change)="atualizarMesSelecionado($any($event.target).value)"
+            class="select"
+            aria-label="Seleção do mês para o filtro"
+            tabindex="0">
+            <option value="">Selecione o mês</option>
+            @for (mes of meses(); track mes.valor) {
+              <option 
+                [value]="mes.valor"
+                [selected]="mes.valor === mesSelecionado()">
+                {{ mes.nome }}
+              </option>
+            }
+          </select>
+        </div>
+        
+        <div class="campo-select">
+          <label for="ano" class="label-select">Ano</label>
+          <select 
+            id="ano"
+            (change)="atualizarAnoSelecionado($any($event.target).value)"
+            class="select"
+            aria-label="Seleção do ano para o filtro"
+            tabindex="0">
+            <option value="">Selecione o ano</option>
+            @for (ano of anos(); track ano) {
+              <option 
+                [value]="ano"
+                [selected]="ano === anoSelecionado()">
+                {{ ano }}
+              </option>
+            }
+          </select>
+        </div>
+      </div>
+    }
+
+    <!-- Mensagens de erro usando @if -->
+    @if (temErros()) {
+      <div class="erro-validacao" role="alert" aria-live="polite">
+        <div class="erro-geral" id="erro-intervalo">
+          <span class="sr-only">Erro de validação: </span>
+          {{ mensagemErro() }}
+        </div>
+      </div>
+    }
+
+    <!-- Botão aplicar filtro -->
+    <button 
+      class="btn-aplicar-filtro" 
+      [class.desabilitado]="botaoDesabilitado()"
+      [disabled]="botaoDesabilitado()"
+      (click)="aplicarFiltro()"
+      (keydown)="onKeyDown($event, 'aplicar')"
+      aria-label="Botão para aplicar o filtro selecionado (funcionalidade não implementada nesta versão)"
+      [attr.aria-describedby]="temErros() ? 'erro-intervalo' : null"
+      tabindex="0">
+      Aplicar Filtro
+    </button>
+
+    <!-- Informações do período selecionado usando @if -->
+    @if (periodoFormatado()) {
+      <div class="periodo-selecionado" role="status" aria-live="polite">
+        <span class="sr-only">Período selecionado: </span>
+        {{ periodoFormatado() }}
+      </div>
+    }
+  </div>
+</main>
+
+<!-- Elementos para leitores de tela -->
+<span class="sr-only" aria-live="polite">
+  Tela de seleção de período para visualização de extrato bancário. 
+  É possível consultar lançamentos dos últimos 12 meses.
+</span>
