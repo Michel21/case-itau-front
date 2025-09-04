@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { SelecaoPeriodoService, PeriodoMesAno } from './selecao-periodo.service';
+import { SelecaoPeriodoService } from './selecao-periodo.service';
+import { PeriodoMesAno } from './interfaces/periodo.interface';
 
 @Component({
   selector: 'app-selecao-periodo',
