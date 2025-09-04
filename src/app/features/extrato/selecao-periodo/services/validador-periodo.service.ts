@@ -64,17 +64,18 @@ export class ValidadorPeriodoService implements IValidadorPeriodo {
 
     const dataPeriodo = new Date(parseInt(ano), parseInt(mes) - 1, 1);
     
+    // Validar se o período de 90 dias a partir do mês selecionado é válido (primeiro)
+    const validacao90Dias = this.validarPeriodo90DiasAPartirDoMes(dataPeriodo);
+    if (!validacao90Dias.valido) {
+      return validacao90Dias;
+    }
+
+    // Validar limite histórico (segundo)
     if (!this.validarLimiteHistorico(dataPeriodo)) {
       return { 
         valido: false, 
         mensagem: `Período deve estar dentro dos últimos ${this.configuracao.limiteMesesHistorico} meses` 
       };
-    }
-
-    // Validar se o período de 90 dias a partir do mês selecionado é válido
-    const validacao90Dias = this.validarPeriodo90DiasAPartirDoMes(dataPeriodo);
-    if (!validacao90Dias.valido) {
-      return validacao90Dias;
     }
 
     return { valido: true, mensagem: '' };
@@ -103,29 +104,45 @@ export class ValidadorPeriodoService implements IValidadorPeriodo {
   }
 
   /**
-   * Valida se o período de 90 dias a partir do mês selecionado é válido
+   * Valida se o mês selecionado está dentro do período de 90 dias do mês atual
+   * Regra: O mês selecionado não pode estar a mais de 90 dias do mês atual
+   * Exemplo: Se estamos em setembro, maio está a mais de 90 dias → inválido
    */
   private validarPeriodo90DiasAPartirDoMes(dataMes: Date): { valido: boolean; mensagem: string } {
+    const dataAtual = new Date();
+    const mesAtual = dataAtual.getMonth();
+    const anoAtual = dataAtual.getFullYear();
+    
+    // Se o mês selecionado for o mês atual, não aplicar validação de 90 dias
+    if (dataMes.getMonth() === mesAtual && dataMes.getFullYear() === anoAtual) {
+      return { valido: true, mensagem: '' };
+    }
+    
+    // Calcular o primeiro dia do mês atual
+    const primeiroDiaMesAtual = new Date(anoAtual, mesAtual, 1);
+    
     // Calcular o último dia do mês selecionado
-    const ultimoDiaDoMes = new Date(dataMes.getFullYear(), dataMes.getMonth() + 1, 0);
+    const ultimoDiaMesSelecionado = new Date(dataMes.getFullYear(), dataMes.getMonth() + 1, 0);
     
-    // Calcular a data de 90 dias após o último dia do mês
-    const dataLimite90Dias = new Date(ultimoDiaDoMes.getTime() + (90 * 24 * 60 * 60 * 1000));
+    // Calcular a diferença em dias entre o último dia do mês selecionado e o primeiro dia do mês atual
+    const diferencaEmDias = Math.abs(ultimoDiaMesSelecionado.getTime() - primeiroDiaMesAtual.getTime()) / (1000 * 60 * 60 * 24);
     
-    // Verificar se a data limite de 90 dias não excede o limite histórico
-    if (!this.validarLimiteHistorico(dataLimite90Dias)) {
+    // Verificar se a diferença excede 90 dias
+    if (diferencaEmDias > 90) {
       return {
         valido: false,
-        mensagem: `O período de 90 dias a partir do mês selecionado excede o limite histórico de ${this.configuracao.limiteMesesHistorico} meses`
+        mensagem: `O mês selecionado está fora do período de 90 dias do mês atual.`
       };
     }
     
-    // Verificar se a data limite de 90 dias não é futura
-    const dataAtual = new Date();
-    if (dataLimite90Dias > dataAtual) {
+    // Verificar se o mês selecionado não é muito antigo (deve estar dentro dos últimos 12 meses)
+    const primeiroDiaDoMes = new Date(dataMes.getFullYear(), dataMes.getMonth(), 1);
+    const dataLimiteHistorico = new Date(anoAtual, mesAtual - this.configuracao.limiteMesesHistorico, 1);
+    
+    if (primeiroDiaDoMes < dataLimiteHistorico) {
       return {
         valido: false,
-        mensagem: 'O período de 90 dias a partir do mês selecionado não pode ser futuro'
+        mensagem: `O mês selecionado deve estar dentro dos últimos ${this.configuracao.limiteMesesHistorico} meses.`
       };
     }
     

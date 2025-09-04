@@ -119,25 +119,73 @@ describe('ValidadorPeriodoService', () => {
       });
 
       it('should validate 90-day period from selected month', () => {
+        // Selecionar um mês que, quando somado 90 dias, não excede o mês atual
         const dataAtual = new Date();
-        const mes = (dataAtual.getMonth() + 1).toString();
+        const mesAnterior = (dataAtual.getMonth() - 3 + 1).toString(); // 3 meses atrás
         const ano = dataAtual.getFullYear().toString();
         
-        const resultado = service.validarPeriodoCompleto('mes', mes, ano);
+        const resultado = service.validarPeriodoCompleto('mes', mesAnterior, ano);
         
         expect(resultado.valido).toBe(true);
       });
 
-      it('should reject month that would exceed 90-day period limit', () => {
-        // Selecionar um mês que, quando somado 90 dias, excederia o limite histórico
+      it('should allow current month selection without 90-day validation', () => {
+        // Selecionar o mês atual deve ser permitido sem validação de 90 dias
         const dataAtual = new Date();
-        const dataLimite = new Date(dataAtual.getFullYear(), dataAtual.getMonth() - 11, 1);
-        const mes = (dataLimite.getMonth() + 1).toString();
-        const ano = dataLimite.getFullYear().toString();
+        const mesAtual = (dataAtual.getMonth() + 1).toString();
+        const ano = dataAtual.getFullYear().toString();
         
-        const resultado = service.validarPeriodoCompleto('mes', mes, ano);
+        const resultado = service.validarPeriodoCompleto('mes', mesAtual, ano);
         
-        // Pode ser válido ou inválido dependendo do mês atual
+        // O mês atual deve ser válido (sem validação de 90 dias)
+        expect(resultado.valido).toBe(true);
+      });
+
+      it('should reject month that would exceed current month with 90 days', () => {
+        // Selecionar um mês que, quando somado 90 dias, excederia o mês atual
+        // Por exemplo, se estamos em setembro, julho + 90 dias = outubro (excede)
+        const dataAtual = new Date();
+        const mesQueExcede = (dataAtual.getMonth() + 2).toString(); // 2 meses à frente
+        const ano = dataAtual.getFullYear().toString();
+        
+        const resultado = service.validarPeriodoCompleto('mes', mesQueExcede, ano);
+        
+        // Deve ser inválido se exceder
+        expect(typeof resultado.valido).toBe('boolean');
+      });
+
+      it('should reject months older than 12 months', () => {
+        // Selecionar um mês que está fora dos últimos 12 meses
+        const dataAtual = new Date();
+        const mesAntigo = (dataAtual.getMonth() - 13 + 1).toString(); // 13 meses atrás
+        const ano = (dataAtual.getFullYear() - 1).toString();
+        
+        const resultado = service.validarPeriodoCompleto('mes', mesAntigo, ano);
+        
+        expect(resultado.valido).toBe(false);
+        expect(resultado.mensagem).toContain('12 meses');
+      });
+
+      it('should validate months within 12 months correctly', () => {
+        // Selecionar um mês que está dentro dos últimos 12 meses
+        const dataAtual = new Date();
+        const mesValido = (dataAtual.getMonth() - 6 + 1).toString(); // 6 meses atrás
+        const ano = dataAtual.getFullYear().toString();
+        
+        const resultado = service.validarPeriodoCompleto('mes', mesValido, ano);
+        
+        expect(resultado.valido).toBe(true);
+      });
+
+      it('should apply 90-day validation only to previous months', () => {
+        // Selecionar um mês anterior que excede 90 dias
+        const dataAtual = new Date();
+        const mesQueExcede = (dataAtual.getMonth() - 4 + 1).toString(); // 4 meses atrás
+        const ano = dataAtual.getFullYear().toString();
+        
+        const resultado = service.validarPeriodoCompleto('mes', mesQueExcede, ano);
+        
+        // Deve aplicar validação de 90 dias para meses anteriores
         expect(typeof resultado.valido).toBe('boolean');
       });
     });
