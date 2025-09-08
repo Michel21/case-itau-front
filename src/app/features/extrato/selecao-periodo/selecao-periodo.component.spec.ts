@@ -1,3 +1,4 @@
+
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -239,6 +240,20 @@ describe('SelecaoPeriodoComponent', () => {
 
       expect(component.getFieldError('dataInicio')).toBe('Data fora do limite de 12 meses de histórico');
     });
+
+    it('deve retornar mensagem de erro para formato inválido', () => {
+      const campo = component.periodoForm.get('dataInicio');
+      campo?.setErrors({ pattern: true });
+
+      expect(component.getFieldError('dataInicio')).toBe('Formato inválido');
+    });
+
+    it('deve retornar mensagem padrão para outros erros', () => {
+      const campo = component.periodoForm.get('dataInicio');
+      campo?.setErrors({ customError: true });
+
+      expect(component.getFieldError('dataInicio')).toBe('Campo inválido');
+    });
   });
 
   describe('navegação por teclado', () => {
@@ -267,6 +282,24 @@ describe('SelecaoPeriodoComponent', () => {
       component.onKeyDown(event, 'aplicar');
 
       expect(spy).not.toHaveBeenCalled();
+    });
+
+    it('deve alterar tipo para intervalo ao pressionar Enter', () => {
+      const spy = jest.spyOn(component, 'alterarTipoSelecao');
+      const event = new KeyboardEvent('keydown', { key: 'Enter' });
+
+      component.onKeyDown(event, 'tipo-intervalo');
+
+      expect(spy).toHaveBeenCalledWith('intervalo');
+    });
+
+    it('deve alterar tipo para intervalo ao pressionar Espaço', () => {
+      const spy = jest.spyOn(component, 'alterarTipoSelecao');
+      const event = new KeyboardEvent('keydown', { key: ' ' });
+
+      component.onKeyDown(event, 'tipo-intervalo');
+
+      expect(spy).toHaveBeenCalledWith('intervalo');
     });
   });
 
@@ -544,5 +577,6 @@ describe('SelecaoPeriodoComponent', () => {
 
       expect(component.intervaloInvalido()).toBe(false);
     });
+
   });
 });

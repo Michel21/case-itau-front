@@ -278,10 +278,6 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
       return `Mínimo de ${errors.minlength.requiredLength} caracteres`;
     }
 
-    if (errors.email) {
-      return 'Email inválido';
-    }
-
     if (errors.pattern) {
       return 'Formato inválido';
     }
