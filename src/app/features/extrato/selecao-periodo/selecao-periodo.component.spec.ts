@@ -281,10 +281,45 @@ describe('SelecaoPeriodoComponent', () => {
       expect(dataMaxima).toBe('2024-09-07'); // Timezone UTC
     });
 
+    it('deve retornar data mínima de início', () => {
+      const dataMinimaInicio = component.getDataMinimaInicio();
+      expect(dataMinimaInicio).toBe('2023-08-31');
+    });
+
+    it('deve retornar data máxima de início', () => {
+      const dataMaximaInicio = component.getDataMaximaInicio();
+      expect(dataMaximaInicio).toBe('2024-09-07');
+    });
+
+    it('deve retornar data mínima de fim baseada na data de início', () => {
+      component.dataInicio.set('2024-09-01');
+      const dataMinimaFim = component.getDataMinimaFim();
+      expect(dataMinimaFim).toBe('2024-09-01');
+    });
+
+    it('deve retornar data mínima padrão quando data início está vazia', () => {
+      component.dataInicio.set('');
+      const dataMinimaFim = component.getDataMinimaFim();
+      expect(dataMinimaFim).toBe('2023-08-31');
+    });
+
     it('deve retornar data máxima de fim baseada no limite de 90 dias', () => {
       component.dataInicio.set('2024-09-01');
       const dataMaximaFim = component.getDataMaximaFim();
       expect(dataMaximaFim).toBe('2024-09-07'); // Limitado pela data máxima
+    });
+
+    it('deve retornar data máxima padrão quando data início está vazia', () => {
+      component.dataInicio.set('');
+      const dataMaximaFim = component.getDataMaximaFim();
+      expect(dataMaximaFim).toBe('2024-09-07');
+    });
+
+    it('deve logar data selecionada', () => {
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      component.onDateChange('2024-09-01');
+      expect(consoleSpy).toHaveBeenCalledWith('Data selecionada:', '2024-09-01');
+      consoleSpy.mockRestore();
     });
   });
 
@@ -322,8 +357,46 @@ describe('SelecaoPeriodoComponent', () => {
       expect(mockSelecaoPeriodoService.validarLimiteHistorico).toHaveBeenCalled();
     });
 
+    it('deve retornar null para data início vazia', () => {
+      const validador = component['criarValidadorDataInicio']();
+      const controle = { value: '' };
+
+      const resultado = validador(controle as any);
+
+      expect(resultado).toBeNull();
+    });
+
     it('deve retornar erro para data início fora do histórico', () => {
       const validador = component['criarValidadorDataInicio']();
+      const controle = { value: '2020-01-01' };
+      mockSelecaoPeriodoService.validarLimiteHistorico.mockReturnValue(false);
+
+      const resultado = validador(controle as any);
+
+      expect(resultado).toEqual({ dataForaHistorico: true });
+    });
+
+    it('deve validar data fim corretamente', () => {
+      const validador = component['criarValidadorDataFim']();
+      const controle = { value: '2024-09-30' };
+
+      const resultado = validador(controle as any);
+
+      expect(resultado).toBeNull();
+      expect(mockSelecaoPeriodoService.validarLimiteHistorico).toHaveBeenCalled();
+    });
+
+    it('deve retornar null para data fim vazia', () => {
+      const validador = component['criarValidadorDataFim']();
+      const controle = { value: '' };
+
+      const resultado = validador(controle as any);
+
+      expect(resultado).toBeNull();
+    });
+
+    it('deve retornar erro para data fim fora do histórico', () => {
+      const validador = component['criarValidadorDataFim']();
       const controle = { value: '2020-01-01' };
       mockSelecaoPeriodoService.validarLimiteHistorico.mockReturnValue(false);
 
@@ -362,6 +435,37 @@ describe('SelecaoPeriodoComponent', () => {
 
       expect(resultado).toEqual({ dataInicioMaiorQueFim: true });
     });
+
+    it('deve retornar erro para intervalo maior que 90 dias', () => {
+      const validador = component['criarValidadorIntervaloDatas']();
+      const controle = {
+        get: jest.fn().mockImplementation((field) => {
+          if (field === 'dataInicio') return { value: '2024-09-01' };
+          if (field === 'dataFim') return { value: '2024-12-01' };
+          return null;
+        })
+      };
+      mockSelecaoPeriodoService.validarIntervaloDatas.mockReturnValue(false);
+
+      const resultado = validador(controle as any);
+
+      expect(resultado).toEqual({ intervaloMaiorQue90Dias: true });
+    });
+
+    it('deve retornar null quando datas estão vazias', () => {
+      const validador = component['criarValidadorIntervaloDatas']();
+      const controle = {
+        get: jest.fn().mockImplementation((field) => {
+          if (field === 'dataInicio') return { value: '' };
+          if (field === 'dataFim') return { value: '' };
+          return null;
+        })
+      };
+
+      const resultado = validador(controle as any);
+
+      expect(resultado).toBeNull();
+    });
   });
 
   describe('métodos auxiliares', () => {
@@ -391,6 +495,54 @@ describe('SelecaoPeriodoComponent', () => {
       component.anoSelecionado.set('');
 
       expect(component.botaoDesabilitado()).toBe(true);
+    });
+
+    it('deve retornar false para botaoDesabilitado quando formulário é válido', () => {
+      component.tipoSelecao.set('mes');
+      component.mesSelecionado.set('9');
+      component.anoSelecionado.set('2024');
+
+      expect(component.botaoDesabilitado()).toBe(false);
+    });
+
+    it('deve retornar string vazia para periodoFormatado quando campos estão vazios', () => {
+      component.tipoSelecao.set('mes');
+      component.mesSelecionado.set('');
+      component.anoSelecionado.set('');
+
+      expect(component.periodoFormatado()).toBe('');
+    });
+
+    it('deve retornar false para mesInvalido quando tipo não é mes', () => {
+      component.tipoSelecao.set('intervalo');
+      component.mesSelecionado.set('9');
+      component.anoSelecionado.set('2024');
+
+      expect(component.mesInvalido()).toBe(false);
+    });
+
+    it('deve retornar false para intervaloInvalido quando tipo não é intervalo', () => {
+      component.tipoSelecao.set('mes');
+      component.dataInicio.set('2024-09-01');
+      component.dataFim.set('2024-09-30');
+
+      expect(component.intervaloInvalido()).toBe(false);
+    });
+
+    it('deve retornar false para mesInvalido quando campos estão vazios', () => {
+      component.tipoSelecao.set('mes');
+      component.mesSelecionado.set('');
+      component.anoSelecionado.set('');
+
+      expect(component.mesInvalido()).toBe(false);
+    });
+
+    it('deve retornar false para intervaloInvalido quando campos estão vazios', () => {
+      component.tipoSelecao.set('intervalo');
+      component.dataInicio.set('');
+      component.dataFim.set('');
+
+      expect(component.intervaloInvalido()).toBe(false);
     });
   });
 });
