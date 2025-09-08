@@ -1,9 +1,12 @@
 import { Injectable } from '@angular/core';
 import { IGeradorPeriodo } from '../interfaces/gerador.interface';
-import { Mes, PeriodoMesAno } from '../interfaces/periodo.interface';
+import { Mes, PeriodoMesAno, ConfiguracaoPeriodo } from '../interfaces/periodo.interface';
 
 /**
  * Serviço responsável apenas pela geração de dados de período (Single Responsibility Principle)
+ * - SRP: Responsável exclusivamente por gerar dados de período
+ * - Open/Closed: Aberto para extensão, fechado para modificação
+ * - Liskov Substitution: Pode ser substituído por outras implementações de IGeradorPeriodo
  */
 @Injectable({
   providedIn: 'root'
@@ -21,8 +24,10 @@ export class GeradorPeriodoService implements IGeradorPeriodo {
       const ano = data.getFullYear();
       
       periodos.push({
-        tipo: this.obterNomeMesPorNumero(mes) + '/' + ano,
-        valor: `${mes}/${ano}`
+        tipo: 'mes',
+        valor: `${mes}/${ano}`,
+        mes: mes.toString(),
+        ano: ano.toString()
       });
     }
     
@@ -65,6 +70,34 @@ export class GeradorPeriodoService implements IGeradorPeriodo {
     }
     
     return Array.from(anosSet).sort((a, b) => parseInt(a) - parseInt(b));
+  }
+
+  gerarPeriodoAtual(): { mes: string; ano: string } {
+    const dataAtual = new Date();
+    return {
+      mes: (dataAtual.getMonth() + 1).toString(),
+      ano: dataAtual.getFullYear().toString()
+    };
+  }
+
+  gerarPeriodosComConfiguracao(configuracao: ConfiguracaoPeriodo): PeriodoMesAno[] {
+    const periodos: PeriodoMesAno[] = [];
+    const dataAtual = new Date();
+    
+    for (let i = 0; i < configuracao.limiteMesesHistorico; i++) {
+      const data = new Date(dataAtual.getFullYear(), dataAtual.getMonth() - i, 1);
+      const mes = data.getMonth() + 1;
+      const ano = data.getFullYear();
+      
+      periodos.push({
+        tipo: 'mes',
+        valor: `${mes}/${ano}`,
+        mes: mes.toString(),
+        ano: ano.toString()
+      });
+    }
+    
+    return periodos;
   }
 
   private obterNomeMesPorNumero(numeroMes: number): string {

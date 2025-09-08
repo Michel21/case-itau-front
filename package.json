@@ -8,8 +8,11 @@
     "build:prod": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "test:jest": "jest",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",
+    "test:selecao-periodo": "jest src/app/features/extrato/selecao-periodo --passWithNoTests --verbose",
+    "test:selecao-periodo:watch": "jest src/app/features/extrato/selecao-periodo --watch --passWithNoTests",
     "lint": "ng lint",
     "e2e": "ng e2e"
   },

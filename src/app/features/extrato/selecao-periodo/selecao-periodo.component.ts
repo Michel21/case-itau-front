@@ -5,6 +5,12 @@ import { Router } from '@angular/router';
 import { SelecaoPeriodoService } from './selecao-periodo.service';
 import { PeriodoMesAno } from './interfaces/periodo.interface';
 
+/**
+ * Componente de seleção de período seguindo princípios SOLID e Clean Code
+ * - Single Responsibility: Gerencia apenas a UI e coordenação
+ * - Dependency Inversion: Depende de abstrações (SelecaoPeriodoService)
+ * - Clean Code: Nomes descritivos, métodos pequenos, responsabilidades claras
+ */
 @Component({
   selector: 'app-selecao-periodo',
   templateUrl: './selecao-periodo.component.html',
@@ -14,30 +20,30 @@ import { PeriodoMesAno } from './interfaces/periodo.interface';
   animations: []
 })
 export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
-  // Inject do serviço usando a nova sintaxe
+  // Dependency Injection (Dependency Inversion Principle)
   private readonly selecaoPeriodoService = inject(SelecaoPeriodoService);
   private readonly router = inject(Router);
-  private readonly fb = inject(FormBuilder);
+  private readonly formBuilder = inject(FormBuilder);
 
-  // FormGroup para o formulário
+  // FormGroup para o formulário (Clean Code - Nome descritivo)
   periodoForm!: FormGroup;
 
-  // Signals para estado do componente
+  // Signals para estado do componente (Clean Code - Nomes descritivos)
   readonly tipoSelecao = signal<'intervalo' | 'mes'>('mes');
-  readonly uniqueId = signal<string>(`selecao-periodo-${Date.now()}`);
+  readonly uniqueId = signal<string>(this.gerarIdUnico());
 
-  // Signals para valores do formulário (reativos)
+  // Signals para valores do formulário (Clean Code - Estado reativo)
   readonly mesSelecionado = signal<string>('');
   readonly anoSelecionado = signal<string>('');
   readonly dataInicio = signal<string>('');
   readonly dataFim = signal<string>('');
 
-  // Signals do serviço (readonly)
+  // Signals do serviço (readonly - Interface Segregation)
   readonly listaPeriodoMesAno = this.selecaoPeriodoService.periodos;
   readonly meses = this.selecaoPeriodoService.meses;
   readonly anos = this.selecaoPeriodoService.anos;
 
-  // Computed values para validações
+  // Computed values para validações (delegando para o serviço)
   readonly intervaloInvalido = computed(() => {
     if (this.tipoSelecao() !== 'intervalo') {
       return false;
@@ -53,14 +59,7 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
     const dataInicio = new Date(inicio);
     const dataFim = new Date(fim);
 
-    if (dataInicio > dataFim) {
-      return true;
-    }
-
-    const diffTime = Math.abs(dataFim.getTime() - dataInicio.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    return diffDays > 90;
+    return !this.selecaoPeriodoService.validarIntervaloDatas(dataInicio, dataFim);
   });
 
   readonly mesInvalido = computed(() => {
@@ -75,11 +74,7 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
       return false;
     }
 
-    const dataSelecionada = new Date(parseInt(ano, 10), parseInt(mes, 10) - 1, 1);
-    const dataAtual = new Date();
-    const dataLimite = new Date(dataAtual.getFullYear(), dataAtual.getMonth() - 12, 1);
-
-    return dataSelecionada < dataLimite;
+    return !this.selecaoPeriodoService.validarPeriodo(mes, ano);
   });
 
   readonly formularioInvalido = computed(() => {
@@ -97,9 +92,7 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
       if (!mes || !ano) {
         return '';
       }
-
-      const mesObj = this.meses().find(m => m.valor === mes);
-      return mesObj ? `${mesObj.nome} de ${ano}` : '';
+      return this.selecaoPeriodoService.formatarPeriodo(mes, ano);
     } else {
       const inicio = this.dataInicio();
       const fim = this.dataFim();
@@ -109,7 +102,7 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
 
       const dataInicio = new Date(inicio);
       const dataFim = new Date(fim);
-      return `${dataInicio.toLocaleDateString('pt-BR')} - ${dataFim.toLocaleDateString('pt-BR')}`;
+      return this.selecaoPeriodoService.formatarIntervalo(dataInicio, dataFim);
     }
   });
 
@@ -134,7 +127,7 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
     // Verificar erros específicos por tipo de seleção
     if (this.tipoSelecao() === 'mes') {
       if (this.mesInvalido()) {
-        return 'O mês selecionado está fora do limite de 12 meses de histórico';
+        return 'O mês selecionado está fora do limite de 12 meses (passado ou futuro)';
       }
     }
     
@@ -153,8 +146,8 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.inicializarFormulario();
-    this.inicializarValoresPadrao();
     this.subscribirMudancasFormulario();
+    this.inicializarValoresPadrao();
   }
 
   ngOnDestroy(): void {
@@ -162,22 +155,20 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
   }
 
   private inicializarFormulario(): void {
-    this.periodoForm = this.fb.group({
+    this.periodoForm = this.formBuilder.group({
       mes: ['', Validators.required],
       ano: ['', Validators.required],
-      dataInicio: ['', [Validators.required, this.validarDataInicio()]],
-      dataFim: ['', [Validators.required, this.validarDataFim()]]
-    }, { validators: this.validarIntervaloDatas() });
+      dataInicio: ['', [Validators.required, this.criarValidadorDataInicio()]],
+      dataFim: ['', [Validators.required, this.criarValidadorDataFim()]]
+    }, { validators: this.criarValidadorIntervaloDatas() });
   }
 
   private inicializarValoresPadrao(): void {
-    const dataAtual = new Date();
-    const mesAtual = (dataAtual.getMonth() + 1).toString();
-    const anoAtual = dataAtual.getFullYear().toString();
-
+    const periodoAtual = this.selecaoPeriodoService.obterPeriodoAtual();
+    
     this.periodoForm.patchValue({
-      mes: mesAtual,
-      ano: anoAtual
+      mes: periodoAtual.mes,
+      ano: periodoAtual.ano
     });
   }
 
@@ -212,17 +203,13 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
     const inicio = new Date(dataInicio);
     const fim = new Date(dataFim);
     
-    // Calcular diferença em dias
-    const diffTime = Math.abs(fim.getTime() - inicio.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    // Se exceder 90 dias, limpar a data fim
-    if (diffDays > 90) {
+    // Usar o serviço para validar o intervalo
+    if (!this.selecaoPeriodoService.validarIntervaloDatas(inicio, fim)) {
       this.periodoForm.get('dataFim')?.setValue('');
     }
   }
 
-  // Métodos públicos
+  // Métodos públicos (Interface Segregation)
   voltar(): void {
     this.router.navigate(['/home']);
   }
@@ -256,7 +243,7 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
     this.router.navigate(['/extrato/pdf']);
   }
 
-  // Métodos de validação
+  // Métodos de validação (delegando para o serviço)
   isFieldInvalid(fieldName: string): boolean {
     const field = this.periodoForm.get(fieldName);
     return !!(field && field.invalid && (field.dirty || field.touched));
@@ -320,14 +307,19 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
     }
   }
 
+  // Métodos para obter datas (delegando para o serviço)
   getDataMinima(): string {
     const dataMinima = this.selecaoPeriodoService.obterDataLimiteHistorico();
-    return dataMinima.toISOString().split('T')[0];
+    // Parse evitando problemas de timezone
+    const data = new Date(dataMinima.getFullYear(), dataMinima.getMonth(), dataMinima.getDate());
+    return data.toISOString().split('T')[0];
   }
 
   getDataMaxima(): string {
     const dataMaxima = this.selecaoPeriodoService.obterDataMaxima();
-    return dataMaxima.toISOString().split('T')[0];
+    // Parse evitando problemas de timezone
+    const data = new Date(dataMaxima.getFullYear(), dataMaxima.getMonth(), dataMaxima.getDate());
+    return data.toISOString().split('T')[0];
   }
 
   // Métodos para validação dinâmica de datas
@@ -345,8 +337,9 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
       return this.getDataMinima();
     }
     
-    const inicio = new Date(dataInicio);
-    const dataMinima = new Date(this.getDataMinima());
+    // Parse da data de início evitando problemas de timezone
+    const inicio = new Date(dataInicio + 'T00:00:00');
+    const dataMinima = new Date(this.getDataMinima() + 'T00:00:00');
     
     // A data fim não pode ser anterior à data início
     return inicio > dataMinima ? dataInicio : this.getDataMinima();
@@ -358,81 +351,76 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
       return this.getDataMaxima();
     }
     
-    const inicio = new Date(dataInicio);
-    const dataMaxima = new Date(this.getDataMaxima());
+    // Parse da data de início evitando problemas de timezone
+    const inicio = new Date(dataInicio + 'T00:00:00');
+    const dataMaxima = new Date(this.getDataMaxima() + 'T00:00:00');
     
     // Calcular data máxima baseada no limite de 90 dias
     const dataLimite90Dias = new Date(inicio);
     dataLimite90Dias.setDate(inicio.getDate() + 90);
     
     // Retornar a menor entre a data máxima permitida e o limite de 90 dias
-    return dataLimite90Dias < dataMaxima ? dataLimite90Dias.toISOString().split('T')[0] : this.getDataMaxima();
+    // Isso garante que não permitimos datas futuras além do período histórico
+    const dataFinal = dataLimite90Dias < dataMaxima ? dataLimite90Dias : dataMaxima;
+    return dataFinal.toISOString().split('T')[0];
   }
 
   onDateChange(event: string): void {
     console.log('Data selecionada:', event);
   }
 
-  // Validadores customizados
+  // Métodos auxiliares (Clean Code - Métodos pequenos e específicos)
+  private gerarIdUnico(): string {
+    return `selecao-periodo-${Date.now()}`;
+  }
 
-  private validarDataInicio(): ValidatorFn {
+  // Validadores customizados (Clean Code - Nomes descritivos, delegando para o serviço)
+  private criarValidadorDataInicio(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       if (!control.value) return null;
       
-      const dataInicio = new Date(control.value);
-      const dataAtual = new Date();
-      const dataLimite = new Date(dataAtual.getFullYear(), dataAtual.getMonth() - 12, 1);
+      // Parse da data evitando problemas de timezone
+      const dataInicio = new Date(control.value + 'T00:00:00');
       
-      if (dataInicio < dataLimite) {
+      if (!this.selecaoPeriodoService.validarLimiteHistorico(dataInicio)) {
         return { dataForaHistorico: true };
-      }
-      
-      if (dataInicio > dataAtual) {
-        return { dataFutura: true };
       }
       
       return null;
     };
   }
 
-  private validarDataFim(): ValidatorFn {
+  private criarValidadorDataFim(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       if (!control.value) return null;
       
-      const dataFim = new Date(control.value);
-      const dataAtual = new Date();
-      const dataLimite = new Date(dataAtual.getFullYear(), dataAtual.getMonth() - 12, 1);
+      // Parse da data evitando problemas de timezone
+      const dataFim = new Date(control.value + 'T00:00:00');
       
-      if (dataFim < dataLimite) {
+      if (!this.selecaoPeriodoService.validarLimiteHistorico(dataFim)) {
         return { dataForaHistorico: true };
-      }
-      
-      if (dataFim > dataAtual) {
-        return { dataFutura: true };
       }
       
       return null;
     };
   }
 
-  private validarIntervaloDatas(): ValidatorFn {
+  private criarValidadorIntervaloDatas(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const dataInicio = control.get('dataInicio')?.value;
       const dataFim = control.get('dataFim')?.value;
       
       if (!dataInicio || !dataFim) return null;
       
-      const inicio = new Date(dataInicio);
-      const fim = new Date(dataFim);
+      // Parse das datas evitando problemas de timezone
+      const inicio = new Date(dataInicio + 'T00:00:00');
+      const fim = new Date(dataFim + 'T00:00:00');
       
       if (inicio > fim) {
         return { dataInicioMaiorQueFim: true };
       }
       
-      const diffTime = Math.abs(fim.getTime() - inicio.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      
-      if (diffDays > 90) {
+      if (!this.selecaoPeriodoService.validarIntervaloDatas(inicio, fim)) {
         return { intervaloMaiorQue90Dias: true };
       }
       

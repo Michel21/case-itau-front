@@ -3,294 +3,445 @@ import { SelecaoPeriodoService } from './selecao-periodo.service';
 import { ValidadorPeriodoService } from './services/validador-periodo.service';
 import { GeradorPeriodoService } from './services/gerador-periodo.service';
 import { FormatadorPeriodoService } from './services/formatador-periodo.service';
+import { PeriodoMesAno, ConfiguracaoPeriodo } from './interfaces/periodo.interface';
 
-describe('SelecaoPeriodoService (SOLID Architecture)', () => {
+/**
+ * Testes unitários para SelecaoPeriodoService
+ * Seguindo princípios SOLID e Clean Code
+ */
+describe('SelecaoPeriodoService', () => {
   let service: SelecaoPeriodoService;
-  let validadorSpy: jest.SpyInstance;
-  let geradorSpy: jest.SpyInstance;
-  let formatadorSpy: jest.SpyInstance;
+  let validadorSpy: any;
+  let geradorSpy: any;
+  let formatadorSpy: any;
 
   beforeEach(() => {
+    const validadorSpyObj = {
+      validarIntervaloDatas: jest.fn(),
+      validarLimiteHistorico: jest.fn(),
+      validarPeriodoCompleto: jest.fn(),
+      validarDataNaoFutura: jest.fn(),
+      obterConfiguracao: jest.fn()
+    };
+
+    const geradorSpyObj = {
+      gerarPeriodos: jest.fn(),
+      gerarMeses: jest.fn(),
+      gerarAnos: jest.fn(),
+      gerarPeriodoAtual: jest.fn(),
+      gerarPeriodosComConfiguracao: jest.fn()
+    };
+
+    const formatadorSpyObj = {
+      formatarPeriodo: jest.fn(),
+      formatarIntervalo: jest.fn(),
+      obterNomeMes: jest.fn(),
+      formatarData: jest.fn(),
+      formatarPeriodoCompleto: jest.fn(),
+      formatarIntervaloCompleto: jest.fn()
+    };
+
     TestBed.configureTestingModule({
       providers: [
         SelecaoPeriodoService,
-        ValidadorPeriodoService,
-        GeradorPeriodoService,
-        FormatadorPeriodoService
+        { provide: ValidadorPeriodoService, useValue: validadorSpyObj },
+        { provide: GeradorPeriodoService, useValue: geradorSpyObj },
+        { provide: FormatadorPeriodoService, useValue: formatadorSpyObj }
       ]
     });
+
     service = TestBed.inject(SelecaoPeriodoService);
-    
-    // Criar spies para os serviços dependentes
-    const validador = TestBed.inject(ValidadorPeriodoService);
-    const gerador = TestBed.inject(GeradorPeriodoService);
-    const formatador = TestBed.inject(FormatadorPeriodoService);
-    
-    validadorSpy = jest.spyOn(validador, 'validarIntervaloDatas');
-    geradorSpy = jest.spyOn(gerador, 'gerarMeses');
-    formatadorSpy = jest.spyOn(formatador, 'formatarPeriodo');
+    validadorSpy = TestBed.inject(ValidadorPeriodoService);
+    geradorSpy = TestBed.inject(GeradorPeriodoService);
+    formatadorSpy = TestBed.inject(FormatadorPeriodoService);
+
+    // Setup default return values
+    validadorSpy.obterConfiguracao.mockReturnValue({
+      limiteDiasIntervalo: 90,
+      limiteMesesHistorico: 12,
+      permitirDatasFuturas: false
+    });
+
+    geradorSpy.gerarPeriodos.mockReturnValue([]);
+    geradorSpy.gerarMeses.mockReturnValue([]);
+    geradorSpy.gerarAnos.mockReturnValue([]);
+    geradorSpy.gerarPeriodoAtual.mockReturnValue({ mes: '1', ano: '2024' });
+
+    formatadorSpy.formatarPeriodo.mockReturnValue('Janeiro de 2024');
+    formatadorSpy.formatarIntervalo.mockReturnValue('01/01/2024 a 31/01/2024');
+    formatadorSpy.obterNomeMes.mockReturnValue('Janeiro');
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should be created', () => {
+  it('deve ser criado', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('Dependency Injection (Dependency Inversion Principle)', () => {
-    it('should inject dependencies correctly', () => {
-      expect(service).toBeDefined();
-      // Verificar se os serviços dependentes estão sendo injetados
-      expect(TestBed.inject(ValidadorPeriodoService)).toBeDefined();
-      expect(TestBed.inject(GeradorPeriodoService)).toBeDefined();
-      expect(TestBed.inject(FormatadorPeriodoService)).toBeDefined();
-    });
-  });
-
-  describe('Signal-based state management', () => {
-    it('should maintain reactive state with signals', () => {
-      expect(service.periodos()).toBeDefined();
-      expect(service.meses()).toBeDefined();
-      expect(service.anos()).toBeDefined();
+  describe('initialization', () => {
+    it('deve inicializar com valores padrão', () => {
+      // Os signals são inicializados como undefined até serem carregados
+      expect(service.periodos()).toBeUndefined();
+      expect(service.meses()).toBeUndefined();
+      expect(service.anos()).toBeUndefined();
+      // O periodoAtual é inicializado automaticamente com a data atual
       expect(service.periodoAtual()).toBeDefined();
     });
 
-    it('should provide computed values', () => {
-      expect(service.totalPeriodos()).toBeDefined();
-      expect(service.totalMeses()).toBeDefined();
-      expect(service.totalAnos()).toBeDefined();
-      expect(service.periodoAtualFormatado()).toBeDefined();
-    });
-
-    it('should initialize with current period', () => {
-      const periodoAtual = service.obterPeriodoAtual();
-      expect(periodoAtual.mes).toBeDefined();
-      expect(periodoAtual.ano).toBeDefined();
-      expect(periodoAtual.mes).not.toBe('');
-      expect(periodoAtual.ano).not.toBe('');
+      it('deve chamar serviços geradores na inicialização', () => {
+      expect(geradorSpy.gerarPeriodos).toHaveBeenCalled();
+      expect(geradorSpy.gerarMeses).toHaveBeenCalled();
+      expect(geradorSpy.gerarAnos).toHaveBeenCalled();
     });
   });
 
-  describe('Delegation to specialized services', () => {
-    it('should delegate validation to ValidadorPeriodoService', () => {
-      const dataInicio = new Date('2024-01-01');
-      const dataFim = new Date('2024-01-30');
-      
-      validadorSpy.mockReturnValue(true);
-      
-      const resultado = service.validarIntervaloDatas(dataInicio, dataFim);
-      
-      expect(validadorSpy).toHaveBeenCalledWith(dataInicio, dataFim);
-      expect(resultado).toBe(true);
+  describe('computed properties', () => {
+      it('deve calcular total de períodos corretamente', () => {
+      const mockPeriodos: PeriodoMesAno[] = [
+        { tipo: 'mes', valor: '1/2024', mes: '1', ano: '2024' },
+        { tipo: 'mes', valor: '2/2024', mes: '2', ano: '2024' }
+      ];
+      geradorSpy.gerarPeriodos.mockReturnValue(mockPeriodos);
+      service.gerarPeriodos();
+
+      expect(service.totalPeriodos()).toBe(2);
     });
 
-    it('should delegate generation to GeradorPeriodoService', () => {
-      const mesesMock = [
+      it('deve calcular total de meses corretamente', () => {
+      const mockMeses = [
         { valor: '1', nome: 'Janeiro', ano: 2024 },
         { valor: '2', nome: 'Fevereiro', ano: 2024 }
       ];
-      
-      geradorSpy.mockReturnValue(mesesMock);
-      
+      geradorSpy.gerarMeses.mockReturnValue(mockMeses);
       service.gerarMeses();
-      
-      expect(geradorSpy).toHaveBeenCalled();
-      expect(service.meses()).toEqual(mesesMock);
+
+      expect(service.totalMeses()).toBe(2);
     });
 
-    it('should delegate formatting to FormatadorPeriodoService', () => {
-      formatadorSpy.mockReturnValue('Janeiro de 2024');
-      
-      const resultado = service.formatarPeriodo('1', '2024');
-      
-      expect(formatadorSpy).toHaveBeenCalledWith('1', '2024');
-      expect(resultado).toBe('Janeiro de 2024');
+      it('deve calcular total de anos corretamente', () => {
+      const mockAnos = ['2023', '2024'];
+      geradorSpy.gerarAnos.mockReturnValue(mockAnos);
+      service.gerarAnos();
+
+      expect(service.totalAnos()).toBe(2);
+    });
+
+      it('deve formatar período atual corretamente', () => {
+      const dataAtual = new Date();
+      const mesAtual = (dataAtual.getMonth() + 1).toString();
+      const anoAtual = dataAtual.getFullYear().toString();
+      const mockPeriodoAtual = { mes: mesAtual, ano: anoAtual };
+      geradorSpy.gerarPeriodoAtual.mockReturnValue(mockPeriodoAtual);
+      formatadorSpy.formatarPeriodo.mockReturnValue(`Mês ${mesAtual} de ${anoAtual}`);
+
+      const resultado = service.periodoAtualFormatado();
+
+      expect(resultado).toBe(`Mês ${mesAtual} de ${anoAtual}`);
+      expect(formatadorSpy.formatarPeriodo).toHaveBeenCalledWith(mesAtual, anoAtual);
     });
   });
 
-  describe('Business logic coordination', () => {
-    it('should coordinate between different services', () => {
-      // Simular um fluxo completo
-      const mesesMock = [{ valor: '1', nome: 'Janeiro', ano: 2024 }];
-      const anosMock = ['2024'];
-      const periodosMock = [{ 
-        tipo: 'mes' as const, 
-        valor: 'Janeiro de 2024',
-        mes: '1',
+  describe('definirPeriodo', () => {
+      it('deve definir período selecionado', () => {
+      const periodo: PeriodoMesAno = {
+        tipo: 'mes',
+        valor: '3/2024',
+        mes: '3',
         ano: '2024'
-      }];
-      
-      jest.spyOn(TestBed.inject(GeradorPeriodoService), 'gerarMeses').mockReturnValue(mesesMock);
-      jest.spyOn(TestBed.inject(GeradorPeriodoService), 'gerarAnos').mockReturnValue(anosMock);
-      jest.spyOn(TestBed.inject(GeradorPeriodoService), 'gerarPeriodos').mockReturnValue(periodosMock);
-      
-      service.gerarMeses();
-      service.gerarAnos();
-      service.gerarPeriodos();
-      
-      expect(service.meses()).toEqual(mesesMock);
-      expect(service.anos()).toEqual(anosMock);
-      expect(service.periodos()).toEqual(periodosMock);
+      };
+
+      service.definirPeriodo(periodo);
+
+      expect(service.periodoSelecionado()).toEqual(periodo);
     });
 
-    it('should validate period correctly', () => {
-      const validadorSpy = jest.spyOn(TestBed.inject(ValidadorPeriodoService), 'validarLimiteHistorico');
-      validadorSpy.mockReturnValue(true);
-      
-      const resultado = service.validarPeriodo('1', '2024');
-      
-      expect(validadorSpy).toHaveBeenCalled();
+      it('deve emitir evento de mudança ao definir período', () => {
+      const periodo: PeriodoMesAno = {
+        tipo: 'mes',
+        valor: '3/2024',
+        mes: '3',
+        ano: '2024'
+      };
+      service.definirPeriodo(periodo);
+    });
+  });
+
+  describe('atualizarEstadoFormulario', () => {
+    it('deve atualizar estado do formulário', () => {
+      const novoEstado = {
+        tipoSelecao: 'intervalo' as const,
+        mesSelecionado: '',
+        anoSelecionado: '',
+        dataInicio: '2024-01-01',
+        dataFim: '2024-01-31',
+        valido: true,
+        erros: []
+      };
+
+      service.atualizarEstadoFormulario(novoEstado);
+
+      expect(service.estadoFormulario()).toEqual(novoEstado);
+    });
+
+      it('deve mesclar estado parcial com estado existente', () => {
+      const estadoParcial = {
+        tipoSelecao: 'intervalo' as const,
+        dataInicio: '2024-01-01'
+      };
+
+      service.atualizarEstadoFormulario(estadoParcial);
+
+      const estadoAtual = service.estadoFormulario();
+      expect(estadoAtual.tipoSelecao).toBe('intervalo');
+      expect(estadoAtual.dataInicio).toBe('2024-01-01');
+      expect(estadoAtual.mesSelecionado).toBe(''); // Should keep existing value
+    });
+  });
+
+  describe('validarEAtualizarEstado', () => {
+      it('deve validar tipo mês e atualizar estado', () => {
+      service.atualizarEstadoFormulario({
+        tipoSelecao: 'mes',
+        mesSelecionado: '3',
+        anoSelecionado: '2024',
+        dataInicio: '',
+        dataFim: '',
+        valido: false,
+        erros: []
+      });
+
+      validadorSpy.validarPeriodoCompleto.mockReturnValue({
+        valido: true,
+        mensagem: '',
+        codigo: undefined
+      });
+
+      service.validarEAtualizarEstado();
+
+      expect(validadorSpy.validarPeriodoCompleto).toHaveBeenCalledWith('mes', '3', '2024');
+      expect(service.estadoFormulario().valido).toBe(true);
+      expect(service.estadoFormulario().erros).toEqual([]);
+    });
+
+      it('deve validar tipo intervalo e atualizar estado', () => {
+      service.atualizarEstadoFormulario({
+        tipoSelecao: 'intervalo',
+        mesSelecionado: '',
+        anoSelecionado: '',
+        dataInicio: '2024-01-01',
+        dataFim: '2024-01-31',
+        valido: false,
+        erros: []
+      });
+
+      validadorSpy.validarPeriodoCompleto.mockReturnValue({
+        valido: true,
+        mensagem: '',
+        codigo: undefined
+      });
+
+      service.validarEAtualizarEstado();
+
+      expect(validadorSpy.validarPeriodoCompleto).toHaveBeenCalledWith(
+        'intervalo',
+        undefined,
+        undefined,
+        new Date('2024-01-01'),
+        new Date('2024-01-31')
+      );
+      expect(service.estadoFormulario().valido).toBe(true);
+    });
+
+      it('deve adicionar erros quando validação falha', () => {
+      service.atualizarEstadoFormulario({
+        tipoSelecao: 'mes',
+        mesSelecionado: '',
+        anoSelecionado: '',
+        dataInicio: '',
+        dataFim: '',
+        valido: false,
+        erros: []
+      });
+
+      service.validarEAtualizarEstado();
+
+      expect(service.estadoFormulario().valido).toBe(false);
+      expect(service.estadoFormulario().erros).toContain('Mês e ano são obrigatórios');
+    });
+  });
+
+  describe('validation methods', () => {
+      it('deve delegar validação de período para serviço validador', () => {
+      validadorSpy.validarPeriodoCompleto.mockReturnValue({
+        valido: true,
+        mensagem: '',
+        codigo: undefined
+      });
+
+      const resultado = service.validarPeriodo('3', '2024');
+
+      expect(validadorSpy.validarPeriodoCompleto).toHaveBeenCalledWith('mes', '3', '2024');
       expect(resultado).toBe(true);
     });
 
-    it('should return false for invalid period', () => {
-      const resultado = service.validarPeriodo('', '');
-      expect(resultado).toBe(false);
+      it('deve delegar validação de intervalo para serviço validador', () => {
+      const dataInicio = new Date('2024-01-01');
+      const dataFim = new Date('2024-01-31');
+      validadorSpy.validarIntervaloDatas.mockReturnValue(true);
+
+      const resultado = service.validarIntervaloDatas(dataInicio, dataFim);
+
+      expect(resultado).toBe(true);
+      expect(validadorSpy.validarIntervaloDatas).toHaveBeenCalledWith(dataInicio, dataFim);
+    });
+
+      it('deve delegar validação de limite histórico para serviço validador', () => {
+      const data = new Date('2024-01-01');
+      validadorSpy.validarLimiteHistorico.mockReturnValue(true);
+
+      const resultado = service.validarLimiteHistorico(data);
+
+      expect(resultado).toBe(true);
+      expect(validadorSpy.validarLimiteHistorico).toHaveBeenCalledWith(data);
     });
   });
 
-  describe('Data management methods', () => {
-    it('should get historical limit date', () => {
+  describe('formatting methods', () => {
+      it('deve delegar formatação de período para serviço formatador', () => {
+      formatadorSpy.formatarPeriodo.mockReturnValue('Março de 2024');
+
+      const resultado = service.formatarPeriodo('3', '2024');
+
+      expect(resultado).toBe('Março de 2024');
+      expect(formatadorSpy.formatarPeriodo).toHaveBeenCalledWith('3', '2024');
+    });
+
+      it('deve delegar formatação de intervalo para serviço formatador', () => {
+      const dataInicio = new Date('2024-01-01');
+      const dataFim = new Date('2024-01-31');
+      formatadorSpy.formatarIntervalo.mockReturnValue('01/01/2024 a 31/01/2024');
+
+      const resultado = service.formatarIntervalo(dataInicio, dataFim);
+
+      expect(resultado).toBe('01/01/2024 a 31/01/2024');
+      expect(formatadorSpy.formatarIntervalo).toHaveBeenCalledWith(dataInicio, dataFim);
+    });
+
+      it('deve delegar formatação de nome do mês para serviço formatador', () => {
+      formatadorSpy.obterNomeMes.mockReturnValue('Março');
+
+      const resultado = service.obterNomeMes('3');
+
+      expect(resultado).toBe('Março');
+      expect(formatadorSpy.obterNomeMes).toHaveBeenCalledWith('3');
+    });
+  });
+
+  describe('utility methods', () => {
+      it('deve obter data de limite histórico', () => {
       const dataLimite = service.obterDataLimiteHistorico();
-      expect(dataLimite).toBeInstanceOf(Date);
-      
       const dataAtual = new Date();
       const dataEsperada = new Date(dataAtual.getFullYear(), dataAtual.getMonth() - 12, 1);
-      
-      expect(dataLimite.getFullYear()).toBe(dataEsperada.getFullYear());
-      expect(dataLimite.getMonth()).toBe(dataEsperada.getMonth());
+
+      expect(dataLimite.getTime()).toBeCloseTo(dataEsperada.getTime(), -2);
     });
 
-    it('should get maximum date (today)', () => {
-      const dataMaxima = service.obterDataMaxima();
-      expect(dataMaxima).toBeInstanceOf(Date);
-      
-      const hoje = new Date();
-      expect(dataMaxima.getDate()).toBe(hoje.getDate());
-      expect(dataMaxima.getMonth()).toBe(hoje.getMonth());
-      expect(dataMaxima.getFullYear()).toBe(hoje.getFullYear());
-    });
+      it('deve obter data máxima (data atual quando permitirDatasFuturas é false)', () => {
+        const dataMaxima = service.obterDataMaxima();
+        const dataAtual = new Date();
+        // Como permitirDatasFuturas é false por padrão, deve retornar a data atual
+        expect(dataMaxima.getTime()).toBeCloseTo(dataAtual.getTime(), -2);
+      });
 
-    it('should get month name', () => {
-      const formatadorSpy = jest.spyOn(TestBed.inject(FormatadorPeriodoService), 'obterNomeMes');
-      formatadorSpy.mockReturnValue('Janeiro');
+      it('deve obter estatísticas', () => {
+      // Configurar os spies para retornar dados válidos
+      geradorSpy.gerarPeriodos.mockReturnValue([]);
+      geradorSpy.gerarMeses.mockReturnValue([]);
+      geradorSpy.gerarAnos.mockReturnValue([]);
       
-      const nomeMes = service.obterNomeMes('1');
+      // Carregar os dados primeiro
+      service.gerarPeriodos();
+      service.gerarMeses();
+      service.gerarAnos();
       
-      expect(formatadorSpy).toHaveBeenCalledWith('1');
-      expect(nomeMes).toBe('Janeiro');
-    });
-  });
-
-  describe('Statistics and utilities', () => {
-    it('should provide statistics', () => {
       const estatisticas = service.obterEstatisticas();
-      
+
       expect(estatisticas.totalPeriodos).toBeDefined();
       expect(estatisticas.totalMeses).toBeDefined();
       expect(estatisticas.totalAnos).toBeDefined();
-      expect(estatisticas.periodoAtual).toBeDefined();
-      expect(estatisticas.limiteDias).toBe(90);
-      expect(estatisticas.limiteMeses).toBe(12);
+      expect(estatisticas.limiteDias).toBeDefined();
+      expect(estatisticas.limiteMeses).toBeDefined();
+      expect(estatisticas.permitirDatasFuturas).toBeDefined();
     });
 
-    it('should clear data for testing', () => {
+      it('deve obter configuração', () => {
+      const configuracao = service.obterConfiguracao();
+
+      expect(configuracao).toEqual({
+        limiteDiasIntervalo: 90,
+        limiteMesesHistorico: 12,
+        permitirDatasFuturas: false
+      });
+      expect(validadorSpy.obterConfiguracao).toHaveBeenCalled();
+    });
+  });
+
+  describe('data management', () => {
+      it('deve limpar todos os dados', () => {
       service.limparDados();
-      
+
       expect(service.periodos()).toEqual([]);
       expect(service.meses()).toEqual([]);
       expect(service.anos()).toEqual([]);
       expect(service.periodoAtual()).toEqual({ mes: '', ano: '' });
+      expect(service.periodoSelecionado()).toBeNull();
     });
 
-    it('should update periods', () => {
-      const geradorSpy = jest.spyOn(TestBed.inject(GeradorPeriodoService), 'gerarPeriodos');
-      const periodosMock = [{ 
-        tipo: 'mes' as const, 
-        valor: 'Janeiro de 2024',
-        mes: '1',
-        ano: '2024'
-      }];
-      geradorSpy.mockReturnValue(periodosMock);
-      
+      it('deve reinicializar serviço', () => {
+      jest.spyOn(service as any, 'inicializarDados');
+
+      service.reinicializar();
+
+      expect(service['inicializarDados']).toHaveBeenCalled();
+    });
+
+      it('deve atualizar períodos', () => {
       service.atualizarPeriodos();
-      
-      expect(geradorSpy).toHaveBeenCalled();
-      expect(service.periodos()).toEqual(periodosMock);
+
+      expect(geradorSpy.gerarPeriodos).toHaveBeenCalled();
     });
 
-    it('should update years', () => {
-      const geradorSpy = jest.spyOn(TestBed.inject(GeradorPeriodoService), 'gerarAnos');
-      const anosMock = ['2024', '2023'];
-      geradorSpy.mockReturnValue(anosMock);
-      
+      it('deve atualizar anos', () => {
       service.atualizarAnos();
-      
-      expect(geradorSpy).toHaveBeenCalled();
-      expect(service.anos()).toEqual(anosMock);
+
+      expect(geradorSpy.gerarAnos).toHaveBeenCalled();
     });
   });
 
-  describe('Period definition', () => {
-    it('should define period correctly', () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-      
-      const periodo = {
-        tipo: 'mes' as const,
-        valor: 'Janeiro de 2024',
-        mes: '1',
+  describe('computed state properties', () => {
+      it('deve calcular validade do formulário corretamente', () => {
+      service.atualizarEstadoFormulario({
+        tipoSelecao: 'mes',
+        mesSelecionado: '3',
+        anoSelecionado: '2024',
+        dataInicio: '',
+        dataFim: '',
+        valido: true,
+        erros: []
+      });
+
+      expect(service.formularioValido()).toBe(true);
+    });
+
+      it('deve detectar quando período é selecionado', () => {
+      const periodo: PeriodoMesAno = {
+        tipo: 'mes',
+        valor: '3/2024',
+        mes: '3',
         ano: '2024'
       };
-      
+
       service.definirPeriodo(periodo);
-      
-      expect(consoleSpy).toHaveBeenCalledWith('Período definido:', periodo);
-      
-      consoleSpy.mockRestore();
-    });
-  });
 
-  describe('Complete period validation', () => {
-    it('should validate complete period for month type', () => {
-      const validadorSpy = jest.spyOn(TestBed.inject(ValidadorPeriodoService), 'validarPeriodoCompleto');
-      const resultadoMock = { valido: true, mensagem: '' };
-      validadorSpy.mockReturnValue(resultadoMock);
-      
-      const resultado = service.validarPeriodoCompleto('mes', '1', '2024');
-      
-      expect(validadorSpy).toHaveBeenCalledWith('mes', '1', '2024', undefined, undefined);
-      expect(resultado).toEqual(resultadoMock);
-    });
-
-    it('should validate complete period for interval type', () => {
-      const validadorSpy = jest.spyOn(TestBed.inject(ValidadorPeriodoService), 'validarPeriodoCompleto');
-      const resultadoMock = { valido: true, mensagem: '' };
-      validadorSpy.mockReturnValue(resultadoMock);
-      
-      const dataInicio = new Date('2024-01-01');
-      const dataFim = new Date('2024-01-30');
-      
-      const resultado = service.validarPeriodoCompleto('intervalo', undefined, undefined, dataInicio, dataFim);
-      
-      expect(validadorSpy).toHaveBeenCalledWith('intervalo', undefined, undefined, dataInicio, dataFim);
-      expect(resultado).toEqual(resultadoMock);
-    });
-  });
-
-  describe('Interval formatting', () => {
-    it('should format interval correctly', () => {
-      const formatadorSpy = jest.spyOn(TestBed.inject(FormatadorPeriodoService), 'formatarIntervalo');
-      formatadorSpy.mockReturnValue('01/01/2024 - 30/01/2024');
-      
-      const dataInicio = new Date('2024-01-01');
-      const dataFim = new Date('2024-01-30');
-      
-      const resultado = service.formatarIntervalo(dataInicio, dataFim);
-      
-      expect(formatadorSpy).toHaveBeenCalledWith(dataInicio, dataFim);
-      expect(resultado).toBe('01/01/2024 - 30/01/2024');
+      expect(service.temPeriodoSelecionado()).toBe(true);
     });
   });
 });

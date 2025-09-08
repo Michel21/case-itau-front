@@ -5,11 +5,21 @@ import { IFormatadorPeriodo } from './interfaces/formatador.interface';
 import { ValidadorPeriodoService } from './services/validador-periodo.service';
 import { GeradorPeriodoService } from './services/gerador-periodo.service';
 import { FormatadorPeriodoService } from './services/formatador-periodo.service';
-import { PeriodoMesAno, Mes, PeriodoAtual, ResultadoValidacao } from './interfaces/periodo.interface';
+import { 
+  PeriodoMesAno, 
+  Mes, 
+  PeriodoAtual, 
+  ResultadoValidacao, 
+  ConfiguracaoPeriodo,
+  EstadoFormulario,
+  EventoMudancaPeriodo
+} from './interfaces/periodo.interface';
 
 /**
  * Serviço principal que coordena as operações de período (Dependency Inversion Principle)
- * Depende de abstrações (interfaces) ao invés de implementações concretas
+ * - DIP: Depende de abstrações (interfaces) ao invés de implementações concretas
+ * - SRP: Coordena operações entre serviços especializados
+ * - Open/Closed: Aberto para extensão através de novas implementações das interfaces
  */
 @Injectable({
   providedIn: 'root'
@@ -20,17 +30,29 @@ export class SelecaoPeriodoService {
   private readonly gerador = inject<IGeradorPeriodo>(GeradorPeriodoService);
   private readonly formatador = inject<IFormatadorPeriodo>(FormatadorPeriodoService);
 
-  // Signals para estado reativo
+  // Signals para estado reativo (Clean Code - Nomes descritivos)
   private readonly _periodos = signal<PeriodoMesAno[]>([]);
   private readonly _meses = signal<Mes[]>([]);
   private readonly _anos = signal<string[]>([]);
   private readonly _periodoAtual = signal<PeriodoAtual>({ mes: '', ano: '' });
+  private readonly _periodoSelecionado = signal<PeriodoMesAno | null>(null);
+  private readonly _estadoFormulario = signal<EstadoFormulario>({
+    tipoSelecao: 'mes',
+    mesSelecionado: '',
+    anoSelecionado: '',
+    dataInicio: '',
+    dataFim: '',
+    valido: false,
+    erros: []
+  });
 
-  // Computed values para dados derivados
+  // Computed values para dados derivados (Clean Code - Computed properties)
   readonly periodos = this._periodos.asReadonly();
   readonly meses = this._meses.asReadonly();
   readonly anos = this._anos.asReadonly();
   readonly periodoAtual = this._periodoAtual.asReadonly();
+  readonly periodoSelecionado = this._periodoSelecionado.asReadonly();
+  readonly estadoFormulario = this._estadoFormulario.asReadonly();
 
   // Computed para estatísticas básicas
   readonly totalPeriodos = computed(() => this._periodos().length);
@@ -42,6 +64,16 @@ export class SelecaoPeriodoService {
       return this.formatador.formatarPeriodo(periodo.mes, periodo.ano);
     }
     return '';
+  });
+
+  // Computed para validação do estado atual
+  readonly formularioValido = computed(() => {
+    const estado = this._estadoFormulario();
+    return estado.valido && estado.erros.length === 0;
+  });
+
+  readonly temPeriodoSelecionado = computed(() => {
+    return this._periodoSelecionado() !== null;
   });
 
   constructor() {
@@ -99,11 +131,83 @@ export class SelecaoPeriodoService {
   }
 
   /**
-   * Define um período selecionado
+   * Define um período selecionado (Clean Code - Método com responsabilidade única)
    */
   definirPeriodo(periodo: PeriodoMesAno): void {
-    // Aqui você pode implementar a lógica para salvar o período selecionado
-    console.log('Período definido:', periodo);
+    this._periodoSelecionado.set(periodo);
+    this.emitirEventoMudanca('selecao', periodo);
+  }
+
+  /**
+   * Atualiza o estado do formulário (Clean Code - Método específico)
+   */
+  atualizarEstadoFormulario(estado: Partial<EstadoFormulario>): void {
+    const estadoAtual = this._estadoFormulario();
+    const novoEstado: EstadoFormulario = {
+      ...estadoAtual,
+      ...estado
+    };
+    
+    this._estadoFormulario.set(novoEstado);
+  }
+
+  /**
+   * Valida e atualiza o estado do formulário (Clean Code - Método com responsabilidade única)
+   */
+  validarEAtualizarEstado(): void {
+    const estado = this._estadoFormulario();
+    const erros: string[] = [];
+    
+    if (estado.tipoSelecao === 'mes') {
+      if (!estado.mesSelecionado || !estado.anoSelecionado) {
+        erros.push('Mês e ano são obrigatórios');
+      } else {
+        const validacao = this.validador.validarPeriodoCompleto(
+          'mes',
+          estado.mesSelecionado,
+          estado.anoSelecionado
+        );
+        if (!validacao.valido) {
+          erros.push(validacao.mensagem);
+        }
+      }
+    } else {
+      if (!estado.dataInicio || !estado.dataFim) {
+        erros.push('Data de início e fim são obrigatórias');
+      } else {
+        const dataInicio = new Date(estado.dataInicio);
+        const dataFim = new Date(estado.dataFim);
+        const validacao = this.validador.validarPeriodoCompleto(
+          'intervalo',
+          undefined,
+          undefined,
+          dataInicio,
+          dataFim
+        );
+        if (!validacao.valido) {
+          erros.push(validacao.mensagem);
+        }
+      }
+    }
+    
+    this.atualizarEstadoFormulario({
+      valido: erros.length === 0,
+      erros
+    });
+  }
+
+  /**
+   * Emite evento de mudança (Clean Code - Método auxiliar)
+   */
+  private emitirEventoMudanca(tipo: EventoMudancaPeriodo['tipo'], dados: PeriodoMesAno): void {
+    const evento: EventoMudancaPeriodo = {
+      tipo,
+      dados,
+      timestamp: new Date()
+    };
+    
+    // Aqui você pode implementar um sistema de eventos se necessário
+    console.log('Evento de mudança:', evento);
   }
 
   /**
@@ -112,8 +216,8 @@ export class SelecaoPeriodoService {
   validarPeriodo(mes: string, ano: string): boolean {
     if (!mes || !ano) return false;
     
-    const dataPeriodo = new Date(parseInt(ano), parseInt(mes) - 1, 1);
-    return this.validador.validarLimiteHistorico(dataPeriodo);
+    const validacao = this.validador.validarPeriodoCompleto('mes', mes, ano);
+    return validacao.valido;
   }
 
   /**
@@ -166,10 +270,19 @@ export class SelecaoPeriodoService {
   }
 
   /**
-   * Obtém a data máxima permitida (hoje)
+   * Obtém a data máxima permitida
    */
   obterDataMaxima(): Date {
-    return new Date();
+    const dataAtual = new Date();
+    const configuracao = this.validador.obterConfiguracao();
+    
+    // Se não permitir datas futuras, retornar apenas a data atual
+    if (!configuracao.permitirDatasFuturas) {
+      return dataAtual;
+    }
+    
+    // Se permitir datas futuras, retornar 12 meses no futuro
+    return new Date(dataAtual.getFullYear(), dataAtual.getMonth() + 12, dataAtual.getDate());
   }
 
   /**
@@ -194,26 +307,56 @@ export class SelecaoPeriodoService {
   }
 
   /**
-   * Obtém estatísticas básicas dos dados
+   * Obtém estatísticas básicas dos dados (Clean Code - Método com responsabilidade única)
    */
   obterEstatisticas() {
+    const configuracao = this.validador.obterConfiguracao();
+    
     return {
       totalPeriodos: this.totalPeriodos(),
       totalMeses: this.totalMeses(),
       totalAnos: this.totalAnos(),
       periodoAtual: this.periodoAtualFormatado(),
-      limiteDias: 90,
-      limiteMeses: 12
+      limiteDias: configuracao.limiteDiasIntervalo,
+      limiteMeses: configuracao.limiteMesesHistorico,
+      permitirDatasFuturas: configuracao.permitirDatasFuturas,
+      temPeriodoSelecionado: this.temPeriodoSelecionado(),
+      formularioValido: this.formularioValido()
     };
   }
 
   /**
-   * Limpa todos os dados (útil para testes)
+   * Limpa todos os dados (útil para testes) (Clean Code - Método específico)
    */
   limparDados(): void {
     this._periodos.set([]);
     this._meses.set([]);
     this._anos.set([]);
     this._periodoAtual.set({ mes: '', ano: '' });
+    this._periodoSelecionado.set(null);
+    this._estadoFormulario.set({
+      tipoSelecao: 'mes',
+      mesSelecionado: '',
+      anoSelecionado: '',
+      dataInicio: '',
+      dataFim: '',
+      valido: false,
+      erros: []
+    });
+  }
+
+  /**
+   * Obtém configuração atual (Clean Code - Método de acesso)
+   */
+  obterConfiguracao(): ConfiguracaoPeriodo {
+    return this.validador.obterConfiguracao();
+  }
+
+  /**
+   * Reinicializa o serviço (Clean Code - Método de reset)
+   */
+  reinicializar(): void {
+    this.limparDados();
+    this.inicializarDados();
   }
 }

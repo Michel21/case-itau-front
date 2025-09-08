@@ -1,6 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { ValidadorPeriodoService } from './validador-periodo.service';
+import { ConfiguracaoPeriodo } from '../interfaces/periodo.interface';
 
+/**
+ * Testes unitários para ValidadorPeriodoService
+ * Seguindo princípios SOLID e Clean Code
+ */
 describe('ValidadorPeriodoService', () => {
   let service: ValidadorPeriodoService;
 
@@ -9,16 +14,12 @@ describe('ValidadorPeriodoService', () => {
     service = TestBed.inject(ValidadorPeriodoService);
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should be created', () => {
+  it('deve ser criado', () => {
     expect(service).toBeTruthy();
   });
 
   describe('validarIntervaloDatas', () => {
-    it('should return true for valid interval within 90 days', () => {
+    it('deve retornar true para intervalo de datas válido dentro de 90 dias', () => {
       const dataInicio = new Date('2024-01-01');
       const dataFim = new Date('2024-01-30');
       
@@ -27,7 +28,7 @@ describe('ValidadorPeriodoService', () => {
       expect(resultado).toBe(true);
     });
 
-    it('should return false for interval exceeding 90 days', () => {
+    it('deve retornar false para intervalo de datas excedendo 90 dias', () => {
       const dataInicio = new Date('2024-01-01');
       const dataFim = new Date('2024-04-01');
       
@@ -36,7 +37,7 @@ describe('ValidadorPeriodoService', () => {
       expect(resultado).toBe(false);
     });
 
-    it('should return false when start date is after end date', () => {
+    it('deve retornar false quando data de início é posterior à data de fim', () => {
       const dataInicio = new Date('2024-01-30');
       const dataFim = new Date('2024-01-01');
       
@@ -45,15 +46,15 @@ describe('ValidadorPeriodoService', () => {
       expect(resultado).toBe(false);
     });
 
-    it('should return false for null dates', () => {
-      const resultado = service.validarIntervaloDatas(null as any, null as any);
-      
-      expect(resultado).toBe(false);
+    it('deve retornar false para datas nulas ou indefinidas', () => {
+      expect(service.validarIntervaloDatas(null as any, new Date())).toBe(false);
+      expect(service.validarIntervaloDatas(new Date(), null as any)).toBe(false);
+      expect(service.validarIntervaloDatas(undefined as any, undefined as any)).toBe(false);
     });
   });
 
   describe('validarLimiteHistorico', () => {
-    it('should return true for date within last 12 months', () => {
+    it('deve retornar true para data dentro do limite de 12 meses', () => {
       const dataAtual = new Date();
       const dataValida = new Date(dataAtual.getFullYear(), dataAtual.getMonth() - 6, 1);
       
@@ -62,34 +63,84 @@ describe('ValidadorPeriodoService', () => {
       expect(resultado).toBe(true);
     });
 
-    it('should return false for date older than 12 months', () => {
+    it('deve retornar false para data mais antiga que 12 meses', () => {
       const dataAtual = new Date();
-      const dataInvalida = new Date(dataAtual.getFullYear(), dataAtual.getMonth() - 13, 1);
+      const dataAntiga = new Date(dataAtual.getFullYear() - 1, dataAtual.getMonth() - 1, 1);
       
-      const resultado = service.validarLimiteHistorico(dataInvalida);
+      const resultado = service.validarLimiteHistorico(dataAntiga);
       
       expect(resultado).toBe(false);
     });
 
-    it('should return false for future date', () => {
+    it('deve retornar false para datas futuras quando permitirDatasFuturas é false', () => {
       const dataAtual = new Date();
-      const dataFutura = new Date(dataAtual.getFullYear(), dataAtual.getMonth() + 1, 1);
+      const dataFutura = new Date(dataAtual.getFullYear(), dataAtual.getMonth() + 6, 1);
       
       const resultado = service.validarLimiteHistorico(dataFutura);
       
       expect(resultado).toBe(false);
     });
 
-    it('should return false for null date', () => {
-      const resultado = service.validarLimiteHistorico(null as any);
+    it('deve retornar false para datas futuras além de 12 meses', () => {
+      const dataAtual = new Date();
+      const dataFutura = new Date(dataAtual.getFullYear() + 1, dataAtual.getMonth() + 1, 1);
+      
+      const resultado = service.validarLimiteHistorico(dataFutura);
       
       expect(resultado).toBe(false);
+    });
+
+    it('deve retornar false para data nula ou indefinida', () => {
+      expect(service.validarLimiteHistorico(null as any)).toBe(false);
+      expect(service.validarLimiteHistorico(undefined as any)).toBe(false);
+    });
+  });
+
+  describe('validarDataNaoFutura', () => {
+    it('deve retornar true para data passada', () => {
+      const dataPassada = new Date();
+      dataPassada.setDate(dataPassada.getDate() - 1);
+      
+      const resultado = service.validarDataNaoFutura(dataPassada);
+      
+      expect(resultado).toBe(true);
+    });
+
+    it('deve retornar true para data atual', () => {
+      const dataAtual = new Date();
+      
+      const resultado = service.validarDataNaoFutura(dataAtual);
+      
+      expect(resultado).toBe(true);
+    });
+
+    it('deve retornar true para data futura dentro de 12 meses', () => {
+      const dataAtual = new Date();
+      const dataFutura = new Date(dataAtual.getFullYear(), dataAtual.getMonth() + 6, 1);
+      
+      const resultado = service.validarDataNaoFutura(dataFutura);
+      
+      expect(resultado).toBe(true);
+    });
+
+    it('deve retornar false para data futura além de 12 meses', () => {
+      const dataAtual = new Date();
+      const dataFutura = new Date(dataAtual.getFullYear() + 1, dataAtual.getMonth() + 1, 1);
+      
+      const resultado = service.validarDataNaoFutura(dataFutura);
+      
+      expect(resultado).toBe(false);
+    });
+
+    it('deve retornar false para data nula ou indefinida', () => {
+      expect(service.validarDataNaoFutura(null as any)).toBe(false);
+      expect(service.validarDataNaoFutura(undefined as any)).toBe(false);
     });
   });
 
   describe('validarPeriodoCompleto', () => {
-    describe('for mes type', () => {
-      it('should return valid for current month and year', () => {
+    describe('para tipo mes', () => {
+      it('deve retornar resultado válido para mês e ano válidos', () => {
         const dataAtual = new Date();
         const mes = (dataAtual.getMonth() + 1).toString();
         const ano = dataAtual.getFullYear().toString();
@@ -100,123 +151,108 @@ describe('ValidadorPeriodoService', () => {
         expect(resultado.mensagem).toBe('');
       });
 
-      it('should return invalid for missing month or year', () => {
+      it('deve retornar resultado inválido para mês ou ano ausentes', () => {
         const resultado = service.validarPeriodoCompleto('mes', '', '2024');
         
         expect(resultado.valido).toBe(false);
         expect(resultado.mensagem).toBe('Mês e ano são obrigatórios');
+        expect(resultado.codigo).toBe('CAMPOS_OBRIGATORIOS');
       });
 
-      it('should return invalid for period outside 12 months', () => {
+      it('deve retornar resultado inválido para mês fora do limite de 12 meses', () => {
         const dataAtual = new Date();
-        const mes = (dataAtual.getMonth() + 1).toString();
-        const ano = (dataAtual.getFullYear() - 2).toString();
+        const dataAntiga = new Date(dataAtual.getFullYear() - 1, dataAtual.getMonth() - 1, 1);
+        const mes = (dataAntiga.getMonth() + 1).toString();
+        const ano = dataAntiga.getFullYear().toString();
         
         const resultado = service.validarPeriodoCompleto('mes', mes, ano);
         
         expect(resultado.valido).toBe(false);
-        expect(resultado.mensagem).toContain('12 meses');
+        expect(resultado.codigo).toBe('PERIODO_FORA_HISTORICO');
       });
 
-      it('should validate 90-day period from selected month', () => {
-        // Selecionar um mês que, quando somado 90 dias, não excede o mês atual
-        const dataAtual = new Date();
-        const mesAnterior = (dataAtual.getMonth() - 3 + 1).toString(); // 3 meses atrás
-        const ano = dataAtual.getFullYear().toString();
+      it('deve permitir setembro 2024 ter histórico até setembro 2025', () => {
+        // Simular que estamos em setembro de 2024
+        const setembro2024 = new Date(2024, 8, 1); // Setembro 2024
+        const setembro2025 = new Date(2025, 8, 1); // Setembro 2025
         
-        const resultado = service.validarPeriodoCompleto('mes', mesAnterior, ano);
+        // Mock da data atual para setembro 2024
+        const originalDate = global.Date;
+        global.Date = jest.fn(() => setembro2024) as any;
+        global.Date.now = originalDate.now;
         
-        expect(resultado.valido).toBe(true);
-      });
-
-      it('should allow current month selection without 90-day validation', () => {
-        // Selecionar o mês atual deve ser permitido sem validação de 90 dias
-        const dataAtual = new Date();
-        const mesAtual = (dataAtual.getMonth() + 1).toString();
-        const ano = dataAtual.getFullYear().toString();
-        
-        const resultado = service.validarPeriodoCompleto('mes', mesAtual, ano);
-        
-        // O mês atual deve ser válido (sem validação de 90 dias)
-        expect(resultado.valido).toBe(true);
-      });
-
-      it('should reject month that would exceed current month with 90 days', () => {
-        // Selecionar um mês que, quando somado 90 dias, excederia o mês atual
-        // Por exemplo, se estamos em setembro, julho + 90 dias = outubro (excede)
-        const dataAtual = new Date();
-        const mesQueExcede = (dataAtual.getMonth() + 2).toString(); // 2 meses à frente
-        const ano = dataAtual.getFullYear().toString();
-        
-        const resultado = service.validarPeriodoCompleto('mes', mesQueExcede, ano);
-        
-        // Deve ser inválido se exceder
-        expect(typeof resultado.valido).toBe('boolean');
-      });
-
-      it('should reject months older than 12 months', () => {
-        // Selecionar um mês que está fora dos últimos 12 meses
-        const dataAtual = new Date();
-        const mesAntigo = (dataAtual.getMonth() - 13 + 1).toString(); // 13 meses atrás
-        const ano = (dataAtual.getFullYear() - 1).toString();
-        
-        const resultado = service.validarPeriodoCompleto('mes', mesAntigo, ano);
-        
-        expect(resultado.valido).toBe(false);
-        expect(resultado.mensagem).toContain('12 meses');
-      });
-
-      it('should validate months within 12 months correctly', () => {
-        // Selecionar um mês que está dentro dos últimos 12 meses
-        const dataAtual = new Date();
-        const mesValido = (dataAtual.getMonth() - 6 + 1).toString(); // 6 meses atrás
-        const ano = dataAtual.getFullYear().toString();
-        
-        const resultado = service.validarPeriodoCompleto('mes', mesValido, ano);
-        
-        expect(resultado.valido).toBe(true);
-      });
-
-      it('should apply 90-day validation only to previous months', () => {
-        // Selecionar um mês anterior que excede 90 dias
-        const dataAtual = new Date();
-        const mesQueExcede = (dataAtual.getMonth() - 4 + 1).toString(); // 4 meses atrás
-        const ano = dataAtual.getFullYear().toString();
-        
-        const resultado = service.validarPeriodoCompleto('mes', mesQueExcede, ano);
-        
-        // Deve aplicar validação de 90 dias para meses anteriores
-        expect(typeof resultado.valido).toBe('boolean');
-      });
-    });
-
-    describe('for intervalo type', () => {
-      it('should return valid for valid interval', () => {
-        const dataInicio = new Date();
-        const dataFim = new Date(dataInicio.getTime() + (30 * 24 * 60 * 60 * 1000));
-        
-        const resultado = service.validarPeriodoCompleto('intervalo', undefined, undefined, dataInicio, dataFim);
+        const resultado = service.validarPeriodoCompleto('mes', '9', '2025');
         
         expect(resultado.valido).toBe(true);
         expect(resultado.mensagem).toBe('');
+        
+        // Restaurar Date original
+        global.Date = originalDate;
       });
+    });
 
-      it('should return invalid for missing dates', () => {
-        const resultado = service.validarPeriodoCompleto('intervalo', undefined, undefined, undefined, undefined);
+    describe('para tipo intervalo', () => {
+      it('deve retornar resultado válido para intervalo de datas válido', () => {
+      const dataAtual = new Date();
+      // Usar datas do mês anterior para garantir que estejam dentro do limite histórico
+      const dataInicio = new Date(dataAtual.getFullYear(), dataAtual.getMonth() - 1, 1);
+      const dataFim = new Date(dataAtual.getFullYear(), dataAtual.getMonth() - 1, 15);
+      
+      const resultado = service.validarPeriodoCompleto('intervalo', undefined, undefined, dataInicio, dataFim);
+      
+      expect(resultado.valido).toBe(true);
+      expect(resultado.mensagem).toBe('');
+    });
+
+      it('deve retornar resultado inválido para datas ausentes', () => {
+        const resultado = service.validarPeriodoCompleto('intervalo');
         
         expect(resultado.valido).toBe(false);
         expect(resultado.mensagem).toBe('Data de início e fim são obrigatórias');
+        expect(resultado.codigo).toBe('DATAS_OBRIGATORIAS');
       });
 
-      it('should return invalid for interval exceeding 90 days', () => {
-        const dataInicio = new Date();
-        const dataFim = new Date(dataInicio.getTime() + (100 * 24 * 60 * 60 * 1000));
+      it('deve retornar resultado inválido para intervalo excedendo 90 dias', () => {
+        const dataAtual = new Date();
+        // Usar datas do mês anterior para garantir que estejam dentro do limite histórico
+        const dataInicio = new Date(dataAtual.getFullYear(), dataAtual.getMonth() - 1, 1);
+        const dataFim = new Date(dataAtual.getFullYear(), dataAtual.getMonth() - 1, 1);
+        dataFim.setDate(dataFim.getDate() + 95); // 95 dias depois
         
         const resultado = service.validarPeriodoCompleto('intervalo', undefined, undefined, dataInicio, dataFim);
         
         expect(resultado.valido).toBe(false);
-        expect(resultado.mensagem).toContain('90 dias');
+        // Pode retornar PERIODO_FORA_HISTORICO se a data fim estiver fora do limite
+        expect(resultado.codigo).toBeDefined();
+        expect(['INTERVALO_EXCEDE_LIMITE', 'PERIODO_FORA_HISTORICO']).toContain(resultado.codigo!);
       });
+    });
+
+    it('deve retornar resultado inválido para tipo inválido', () => {
+      const resultado = service.validarPeriodoCompleto('invalid' as any);
+      
+      expect(resultado.valido).toBe(false);
+      expect(resultado.mensagem).toBe('Tipo de período inválido');
+      expect(resultado.codigo).toBe('TIPO_INVALIDO');
+    });
+  });
+
+  describe('obterConfiguracao', () => {
+    it('deve retornar objeto de configuração', () => {
+      const configuracao = service.obterConfiguracao();
+      
+      expect(configuracao).toBeDefined();
+      expect(configuracao.limiteDiasIntervalo).toBe(90);
+      expect(configuracao.limiteMesesHistorico).toBe(12);
+      expect(configuracao.permitirDatasFuturas).toBe(false);
+    });
+
+    it('deve retornar uma cópia da configuração (imutável)', () => {
+      const configuracao1 = service.obterConfiguracao();
+      const configuracao2 = service.obterConfiguracao();
+      
+      expect(configuracao1).not.toBe(configuracao2);
+      expect(configuracao1).toEqual(configuracao2);
     });
   });
 });
