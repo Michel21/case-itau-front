@@ -1,0 +1,465 @@
+<!-- Text Field -->
+@if (!calendarOnly) {
+  <div class="date-picker-container">
+    <label 
+      class="date-picker-label"
+      [class.disabled]="config.disabled">
+      
+      <input 
+        #dateInput
+        [formControl]="control"
+        aria-label="Campo de data" 
+        class="date-picker-input" 
+        type="text" 
+        [placeholder]="config.placeholder || 'Escolha a data'"
+        [disabled]="config.disabled"
+        (click)="onInputClick()"
+        readonly />
+      
+      <span class="date-picker-label-text">
+        {{ config.label || 'Data' }}
+      </span>
+      
+      <button 
+        type="button"
+        aria-label="Abrir calendário" 
+        class="date-picker-button" 
+        (click)="openModal()"
+        (keydown)="onKeyDown($event, 'open')"
+        [disabled]="config.disabled"
+        tabindex="0">
+        📅
+      </button>
+      
+      @if (config.helperText) {
+        <span class="date-picker-helper">{{ config.helperText }}</span>
+      }
+    </label>
+  </div>
+}
+
+<!-- Modal -->
+@if (isModalOpen() && !calendarOnly) {
+  <div 
+    #modal
+    class="date-picker-modal" 
+    role="dialog" 
+    aria-modal="true"
+    [attr.aria-labelledby]="'date-picker-title-' + uniqueId"
+    [attr.aria-describedby]="'date-picker-description-' + uniqueId"
+    (click)="onModalBackdropClick($event)"
+    (keydown)="onKeyDown($event, 'close')">
+    
+    <div class="date-picker-modal-content">
+      <!-- Header do Modal -->
+      <header class="date-picker-modal-header">
+        <h2 
+          [id]="'date-picker-title-' + uniqueId"
+          class="date-picker-modal-title">
+          Selecionar Data
+        </h2>
+        <button 
+          type="button"
+          class="date-picker-modal-close" 
+          (click)="closeModal()" 
+          (keydown)="onKeyDown($event, 'close')"
+          aria-label="Fechar modal" 
+          tabindex="0">
+          <span class="date-picker-close-icon" aria-hidden="true">×</span>
+        </button>
+      </header>
+      
+      <!-- Conteúdo Principal -->
+      <main class="date-picker-modal-main">
+        <div class="date-picker-modal-intro">
+          <h3 class="date-picker-modal-subtitle">
+            Para visualizar o extrato, escolha o período
+          </h3>
+          <p 
+            [id]="'date-picker-description-' + uniqueId"
+            class="date-picker-modal-info">
+            É possível consultar lançamentos dos últimos 12 meses.
+          </p>
+        </div>
+        
+        <!-- Pills de seleção -->
+        <nav class="date-picker-mode-selector" role="tablist" aria-label="Seleção de modo">
+          <button 
+            type="button"
+            class="date-picker-mode-pill"
+            [class.active]="withInterval"
+            (click)="setMode(true)"
+            role="tab"
+            [attr.aria-selected]="withInterval"
+            [attr.aria-controls]="'date-picker-calendar-' + uniqueId"
+            tabindex="0">
+            <span class="date-picker-mode-pill-text">Intervalo</span>
+          </button>
+          <button 
+            type="button"
+            class="date-picker-mode-pill"
+            [class.active]="!withInterval"
+            (click)="setMode(false)"
+            role="tab"
+            [attr.aria-selected]="!withInterval"
+            [attr.aria-controls]="'date-picker-calendar-' + uniqueId"
+            tabindex="0">
+            <span class="date-picker-mode-pill-text">Mês</span>
+          </button>
+        </nav>
+    
+        <!-- Calendar -->
+        <section 
+          [id]="'date-picker-calendar-' + uniqueId"
+          class="date-picker-calendar"
+          role="tabpanel"
+          [attr.aria-labelledby]="'date-picker-title-' + uniqueId">
+          
+          <!-- Header do Calendário -->
+          <header class="date-picker-calendar-header">
+            <button 
+              type="button"
+              class="date-picker-nav-button"
+              (click)="previousMonth()"
+              (keydown)="onKeyDown($event, 'prev')"
+              aria-label="Mês anterior"
+              tabindex="0">
+              <span class="date-picker-nav-icon" aria-hidden="true">‹</span>
+            </button>
+            
+            <div class="date-picker-month-year">
+              @if (currentView() === 'days') {
+                <button 
+                  type="button"
+                  class="date-picker-month-year-button"
+                  (click)="goToMonthView()"
+                  tabindex="0">
+                  <span class="date-picker-month">{{ monthName() }}</span>
+                </button>
+                <button 
+                  type="button"
+                  class="date-picker-month-year-button"
+                  (click)="goToYearView()"
+                  tabindex="0">
+                  <span class="date-picker-year">{{ currentYear() }}</span>
+                </button>
+              } @else if (currentView() === 'months') {
+                <button 
+                  type="button"
+                  class="date-picker-month-year-button"
+                  (click)="goToYearView()"
+                  tabindex="0">
+                  <span class="date-picker-year">{{ currentYear() }}</span>
+                </button>
+              } @else {
+                <span class="date-picker-year-range">{{ yearsList()[0] }} - {{ yearsList()[yearsList().length - 1] }}</span>
+              }
+            </div>
+            
+            <button 
+              type="button"
+              class="date-picker-nav-button"
+              (click)="nextMonth()"
+              (keydown)="onKeyDown($event, 'next')"
+              aria-label="Próximo mês"
+              tabindex="0">
+              <span class="date-picker-nav-icon" aria-hidden="true">›</span>
+            </button>
+          </header>
+          
+          <!-- Conteúdo do Calendário -->
+          @if (currentView() === 'days') {
+            <!-- Dias da Semana -->
+            <div class="date-picker-weekdays" role="row">
+              @for (day of weekDays; track day) {
+                <div class="date-picker-weekday" role="columnheader" [attr.aria-label]="'Dia da semana: ' + day">
+                  {{ day }}
+                </div>
+              }
+            </div>
+            
+            <!-- Dias do Mês -->
+            <div class="date-picker-days" role="grid" [attr.aria-label]="'Calendário de ' + monthName() + ' ' + currentYear()">
+              @for (dayInfo of calendarDays(); track $index) {
+                <button
+                  type="button"
+                  class="date-picker-day"
+                  [class.current-month]="dayInfo.isCurrentMonth"
+                  [class.selected]="dayInfo.isSelected"
+                  [class.today]="dayInfo.isToday"
+                  [class.other-month]="!dayInfo.isCurrentMonth"
+                  [class.in-period]="dayInfo.isInPeriod"
+                  [class.period-start]="dayInfo.isPeriodStart"
+                  [class.period-end]="dayInfo.isPeriodEnd"
+                  (click)="selectDate(dayInfo.date)"
+                  (keydown)="onDateKeyDown($event, dayInfo.date)"
+                  [disabled]="!dayInfo.isCurrentMonth"
+                  role="gridcell"
+                  [attr.aria-label]="'Selecionar ' + dayInfo.date.toLocaleDateString('pt-BR')"
+                  [attr.aria-selected]="dayInfo.isSelected"
+                  tabindex="0">
+                  <span class="date-picker-day-text">{{ dayInfo.day }}</span>
+                </button>
+              }
+            </div>
+          } @else if (currentView() === 'months') {
+            <!-- Visualização de Meses -->
+            <div class="date-picker-months" role="grid" [attr.aria-label]="'Meses de ' + currentYear()">
+              @for (month of monthsList(); track month.value) {
+                <button
+                  type="button"
+                  class="date-picker-month"
+                  [class.selected]="month.value === currentMonth()"
+                  [class.current-month]="isCurrentMonth(month.value)"
+                  (click)="selectMonth(month.value)"
+                  (keydown)="onKeyDown($event, 'select')"
+                  role="gridcell"
+                  [attr.aria-label]="'Selecionar ' + month.name + ' de ' + currentYear()"
+                  [attr.aria-selected]="month.value === currentMonth()"
+                  tabindex="0">
+                  <span class="date-picker-month-text">{{ month.short }}</span>
+                </button>
+              }
+            </div>
+          } @else if (currentView() === 'years') {
+            <!-- Visualização de Anos -->
+            <div class="date-picker-years" role="grid" [attr.aria-label]="'Anos disponíveis'">
+              @for (year of yearsList(); track year) {
+                <button
+                  type="button"
+                  class="date-picker-year"
+                  [class.selected]="year === currentYear()"
+                  [class.current-year]="isCurrentYear(year)"
+                  (click)="selectYear(year)"
+                  (keydown)="onKeyDown($event, 'select')"
+                  role="gridcell"
+                  [attr.aria-label]="'Selecionar ano ' + year"
+                  [attr.aria-selected]="year === currentYear()"
+                  tabindex="0">
+                  <span class="date-picker-year-text">{{ year }}</span>
+                </button>
+              }
+            </div>
+          }
+        </section>
+      </main>
+    
+      <!-- Footer do Modal -->
+      <footer class="date-picker-modal-footer">
+        <div class="date-picker-selection-info">
+          <h4 class="date-picker-selection-label">
+            @if (withInterval) {
+              Período selecionado
+            } @else {
+              Data selecionada
+            }
+          </h4>
+          
+          <p class="date-picker-selection-value">
+            {{ displayValue() || 'Nenhuma data selecionada' }}
+          </p>
+          
+          @if (periodValidation().message) {
+            <div class="date-picker-validation-message" 
+                 [class.valid]="periodValidation().isValid"
+                 [class.invalid]="!periodValidation().isValid"
+                 role="alert"
+                 [attr.aria-live]="periodValidation().isValid ? 'polite' : 'assertive'">
+              <span class="date-picker-validation-icon" aria-hidden="true">
+                {{ periodValidation().isValid ? '✓' : '⚠' }}
+              </span>
+              {{ periodValidation().message }}
+            </div>
+          }
+        </div>
+        
+        <div class="date-picker-modal-actions">
+          <button 
+            type="button"
+            class="date-picker-button date-picker-button-secondary"
+            [disabled]="!isClearButtonEnabled()"
+            (click)="clearSelection()"
+            aria-label="Limpar seleção"
+            tabindex="0">
+            <span class="date-picker-button-text">Limpar</span>
+          </button>
+          
+          <button 
+            type="button"
+            class="date-picker-button date-picker-button-primary"
+            [disabled]="!isConfirmButtonEnabled()"
+            (click)="confirmSelection()"
+            aria-label="Confirmar seleção"
+            tabindex="0">
+            <span class="date-picker-button-text">Confirmar</span>
+          </button>
+        </div>
+      </footer>
+    </div>
+  </div>
+}
+
+<!-- Calendário Apenas (sem modal) -->
+@if (calendarOnly) {
+  <div class="date-picker-calendar-only">
+    <!-- Pills de seleção -->
+    <nav class="date-picker-mode-selector" role="tablist" aria-label="Seleção de modo">
+      <button 
+        type="button"
+        class="date-picker-mode-pill"
+        [class.active]="withInterval"
+        (click)="setMode(true)"
+        role="tab"
+        [attr.aria-selected]="withInterval"
+        [attr.aria-controls]="'date-picker-calendar-' + uniqueId"
+        tabindex="0">
+        <span class="date-picker-mode-pill-text">Intervalo</span>
+      </button>
+      <button 
+        type="button"
+        class="date-picker-mode-pill"
+        [class.active]="!withInterval"
+        (click)="setMode(false)"
+        role="tab"
+        [attr.aria-selected]="!withInterval"
+        [attr.aria-controls]="'date-picker-calendar-' + uniqueId"
+        tabindex="0">
+        <span class="date-picker-mode-pill-text">Mês</span>
+      </button>
+    </nav>
+
+    <!-- Calendar -->
+    <section 
+      [id]="'date-picker-calendar-' + uniqueId"
+      class="date-picker-calendar"
+      role="tabpanel">
+      
+      <!-- Header do Calendário -->
+      <header class="date-picker-calendar-header">
+        <button 
+          type="button"
+          class="date-picker-nav-button"
+          (click)="previousMonth()"
+          (keydown)="onKeyDown($event, 'prev')"
+          aria-label="Mês anterior"
+          tabindex="0">
+          <span class="date-picker-nav-icon" aria-hidden="true">‹</span>
+        </button>
+        
+        <div class="date-picker-month-year">
+          @if (currentView() === 'days') {
+            <button 
+              type="button"
+              class="date-picker-month-year-button"
+              (click)="goToMonthView()"
+              tabindex="0">
+              <span class="date-picker-month">{{ monthName() }}</span>
+            </button>
+            <button 
+              type="button"
+              class="date-picker-month-year-button"
+              (click)="goToYearView()"
+              tabindex="0">
+              <span class="date-picker-year">{{ currentYear() }}</span>
+            </button>
+          } @else if (currentView() === 'months') {
+            <button 
+              type="button"
+              class="date-picker-month-year-button"
+              (click)="goToYearView()"
+              tabindex="0">
+              <span class="date-picker-year">{{ currentYear() }}</span>
+            </button>
+          } @else {
+            <span class="date-picker-year-range">{{ yearsList()[0] }} - {{ yearsList()[yearsList().length - 1] }}</span>
+          }
+        </div>
+        
+        <button 
+          type="button"
+          class="date-picker-nav-button"
+          (click)="nextMonth()"
+          (keydown)="onKeyDown($event, 'next')"
+          aria-label="Próximo mês"
+          tabindex="0">
+          <span class="date-picker-nav-icon" aria-hidden="true">›</span>
+        </button>
+      </header>
+      
+      <!-- Conteúdo do Calendário -->
+      @if (currentView() === 'days') {
+        <!-- Dias da Semana -->
+        <div class="date-picker-weekdays" role="row">
+          @for (day of weekDays; track day) {
+            <div class="date-picker-weekday" role="columnheader" [attr.aria-label]="'Dia da semana: ' + day">
+              {{ day }}
+            </div>
+          }
+        </div>
+        
+        <!-- Dias do Mês -->
+        <div class="date-picker-days" role="grid" [attr.aria-label]="'Calendário de ' + monthName() + ' ' + currentYear()">
+          @for (dayInfo of calendarDays(); track $index) {
+            <button
+              type="button"
+              class="date-picker-day"
+              [class.current-month]="dayInfo.isCurrentMonth"
+              [class.selected]="dayInfo.isSelected"
+              [class.today]="dayInfo.isToday"
+              [class.other-month]="!dayInfo.isCurrentMonth"
+              [class.in-period]="dayInfo.isInPeriod"
+              [class.period-start]="dayInfo.isPeriodStart"
+              [class.period-end]="dayInfo.isPeriodEnd"
+              (click)="selectDate(dayInfo.date)"
+              (keydown)="onDateKeyDown($event, dayInfo.date)"
+              [disabled]="!dayInfo.isCurrentMonth"
+              role="gridcell"
+              [attr.aria-label]="'Selecionar ' + dayInfo.date.toLocaleDateString('pt-BR')"
+              [attr.aria-selected]="dayInfo.isSelected"
+              tabindex="0">
+              <span class="date-picker-day-text">{{ dayInfo.day }}</span>
+            </button>
+          }
+        </div>
+      } @else if (currentView() === 'months') {
+        <!-- Visualização de Meses -->
+        <div class="date-picker-months" role="grid" [attr.aria-label]="'Meses de ' + currentYear()">
+          @for (month of monthsList(); track month.value) {
+            <button
+              type="button"
+              class="date-picker-month"
+              [class.selected]="month.value === currentMonth()"
+              [class.current-month]="isCurrentMonth(month.value)"
+              (click)="selectMonth(month.value)"
+              (keydown)="onKeyDown($event, 'select')"
+              role="gridcell"
+              [attr.aria-label]="'Selecionar ' + month.name + ' de ' + currentYear()"
+              [attr.aria-selected]="month.value === currentMonth()"
+              tabindex="0">
+              <span class="date-picker-month-text">{{ month.short }}</span>
+            </button>
+          }
+        </div>
+      } @else if (currentView() === 'years') {
+        <!-- Visualização de Anos -->
+        <div class="date-picker-years" role="grid" [attr.aria-label]="'Anos disponíveis'">
+          @for (year of yearsList(); track year) {
+            <button
+              type="button"
+              class="date-picker-year"
+              [class.selected]="year === currentYear()"
+              [class.current-year]="year === new Date().getFullYear()"
+              (click)="selectYear(year)"
+              (keydown)="onKeyDown($event, 'select')"
+              role="gridcell"
+              [attr.aria-label]="'Selecionar ano ' + year"
+              [attr.aria-selected]="year === currentYear()"
+              tabindex="0">
+              <span class="date-picker-year-text">{{ year }}</span>
+            </button>
+          }
+        </div>
+      }
+    </section>
+  </div>
+}

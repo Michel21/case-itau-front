@@ -99,6 +99,14 @@ export class SelecaoPeriodoService {
   }
 
   /**
+   * Define um período selecionado
+   */
+  definirPeriodo(periodo: PeriodoMesAno): void {
+    // Aqui você pode implementar a lógica para salvar o período selecionado
+    console.log('Período definido:', periodo);
+  }
+
+  /**
    * Valida se um período é válido
    */
   validarPeriodo(mes: string, ano: string): boolean {

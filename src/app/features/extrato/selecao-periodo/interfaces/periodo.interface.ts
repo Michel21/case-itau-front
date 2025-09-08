@@ -5,6 +5,10 @@
 export interface PeriodoMesAno {
   tipo: string;
   valor: string;
+  mes?: string;
+  ano?: string;
+  dataInicio?: string;
+  dataFim?: string;
 }
 
 export interface PeriodoIntervalo {

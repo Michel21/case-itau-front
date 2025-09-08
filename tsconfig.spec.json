@@ -3,9 +3,12 @@
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
     "module": "CommonJs",
-    "types": ["jest"],
-    "esModuleInterop": true, // 2
-    "emitDecoratorMetadata": true // 3
+    "types": [
+      "jest",
+      "node"
+    ],
+    "esModuleInterop": true,
+    "emitDecoratorMetadata": true
   },
   "files": [
     "src/test.ts",
@@ -15,5 +18,4 @@
     "src/**/*.spec.ts",
     "src/**/*.d.ts"
   ]
-  
 }

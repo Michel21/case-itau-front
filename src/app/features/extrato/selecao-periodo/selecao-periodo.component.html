@@ -1,167 +1,194 @@
-<main class="selecao-periodo" role="main" aria-label="Tela de seleção de período para visualização de extrato">
-  <!-- Header com navegação -->
-  <header class="header" role="banner">
+<div class="app-container">
+  <!-- Área de conteúdo -->
+  <main class="content-area" role="main" aria-label="Tela de seleção de período para visualização de extrato">
+    <!-- Botão voltar -->
     <button 
-      class="btn-voltar" 
+      class="back-button" 
       (click)="voltar()" 
       (keydown)="onKeyDown($event, 'voltar')"
       aria-label="Voltar para tela anterior"
       tabindex="0">
-      <img src="assets/icons8-left-24.png" alt="Ícone de voltar" class="icon-voltar">
-      Voltar
+      <span class="back-icon">←</span>
+      <span class="back-text">Investimentos</span>
     </button>
-  </header>
-
-  <!-- Conteúdo principal -->
-  <div class="conteudo">
     <!-- Título e subtítulo -->
-    <h1 class="titulo" tabindex="0">Seleção de Período</h1>
-    <p class="subtitulo" tabindex="0">
-      É possível consultar lançamentos dos últimos 12 meses
-    </p>
-
-    <!-- Seleção de tipo de período -->
-    <div class="tipo-selecao" role="radiogroup" aria-label="Seleção de tipo de filtro: intervalo ou mês">
-      <button 
-        class="pill-selecao" 
-        [class.ativo]="tipoSelecao() === 'mes'"
-        (click)="alterarTipoSelecao('mes')"
-        (keydown)="onKeyDown($event, 'tipo-mes')"
-        role="radio"
-        [attr.aria-pressed]="tipoSelecao() === 'mes'"
-        aria-label="Selecionar filtro por mês e ano"
-        tabindex="0">
-        Mês
-      </button>
-      
-      <button 
-        class="pill-selecao" 
-        [class.ativo]="tipoSelecao() === 'intervalo'"
-        (click)="alterarTipoSelecao('intervalo')"
-        (keydown)="onKeyDown($event, 'tipo-intervalo')"
-        role="radio"
-        [attr.aria-pressed]="tipoSelecao() === 'intervalo'"
-        aria-label="Selecionar filtro por intervalo de datas"
-        tabindex="0">
-        Intervalo
-      </button>
+    <div class="content-header">
+      <h1 class="content-title">Para visualizar o extrato, escolha o período</h1>
+      <p class="content-subtitle">É possível consultar lançamentos dos últimos 12 meses.</p>
     </div>
 
-    <!-- Seleção por intervalo de datas usando @if -->
-    @if (tipoSelecao() === 'intervalo') {
-      <div class="selecao-intervalo" role="group" aria-label="Seleção de intervalo de datas">
-        <div class="campo-data">
-          <label for="data-inicio" class="label-data">Data de início</label>
-          <input 
-            type="date" 
-            id="data-inicio"
-            [value]="dataInicio()"
-            (change)="atualizarDataInicio($any($event.target).value)"
-            [min]="getDataMinima()"
-            [max]="getDataMaxima()"
-            class="input-data"
-            aria-label="Data de início para o intervalo"
-            [attr.aria-invalid]="intervaloInvalido() || limiteHistoricoInvalido()"
-            [attr.aria-describedby]="(intervaloInvalido() || limiteHistoricoInvalido()) ? 'erro-intervalo' : null"
-            tabindex="0">
-        </div>
-        
-        <div class="campo-data">
-          <label for="data-fim" class="label-data">Data de fim</label>
-          <input 
-            type="date" 
-            id="data-fim"
-            [value]="dataFim()"
-            (change)="atualizarDataFim($any($event.target).value)"
-            [min]="getDataMinima()"
-            [max]="getDataMaxima()"
-            class="input-data"
-            aria-label="Data de fim para o intervalo"
-            [attr.aria-invalid]="intervaloInvalido() || limiteHistoricoInvalido()"
-            [attr.aria-describedby]="(intervaloInvalido() || limiteHistoricoInvalido()) ? 'erro-intervalo' : null"
-            tabindex="0">
-        </div>
+    <!-- Formulário -->
+    <form [formGroup]="periodoForm" (ngSubmit)="aplicarFiltro()" class="periodo-form" novalidate>
+      <!-- Pills de seleção de tipo -->
+      <div class="pills-container" role="radiogroup" aria-label="Seleção de tipo de filtro: intervalo ou mês">
+        <button 
+          type="button"
+          class="pill" 
+          [class.pill-active]="tipoSelecao() === 'intervalo'"
+          (click)="alterarTipoSelecao('intervalo')"
+          (keydown)="onKeyDown($event, 'tipo-intervalo')"
+          role="radio"
+          [attr.aria-checked]="tipoSelecao() === 'intervalo'"
+          aria-label="Selecionar filtro por intervalo de datas"
+          tabindex="0">
+          Intervalo
+        </button>
+        <button 
+          type="button"
+          class="pill" 
+          [class.pill-active]="tipoSelecao() === 'mes'"
+          (click)="alterarTipoSelecao('mes')"
+          (keydown)="onKeyDown($event, 'tipo-mes')"
+          role="radio"
+          [attr.aria-checked]="tipoSelecao() === 'mes'"
+          aria-label="Selecionar filtro por mês"
+          tabindex="0">
+          Mês
+        </button>
       </div>
-    }
 
-    <!-- Seleção por mês e ano usando @if -->
-    @if (tipoSelecao() === 'mes') {
-      <div class="selecao-mes-ano" role="group" aria-label="Seleção de mês e ano">
-        <div class="campo-select">
-          <label for="mes" class="label-select">Mês</label>
-          <select 
-            id="mes"
-            (change)="atualizarMesSelecionado($any($event.target).value)"
-            class="select"
-            aria-label="Seleção do mês para o filtro"
-            tabindex="0">
-            <option value="">Selecione o mês</option>
-            @for (mes of meses(); track mes.valor) {
-              <option 
-                [value]="mes.valor"
-                [selected]="mes.valor === mesSelecionado()">
-                {{ mes.nome }}
-              </option>
-            }
-          </select>
+      <!-- Painel de seleção por mês -->
+      @if (tipoSelecao() === 'mes') {
+        <div class="form-fields" role="tabpanel" id="mes-panel" aria-labelledby="mes-tab">
+          <div class="field-group">
+            <div class="field">
+              <label for="mes" class="field-label">Mês</label>
+              <div class="field-input-container">
+                <select
+                  id="mes"
+                  formControlName="mes"
+                  class="field-select"
+                  [class.field-invalid]="isFieldInvalid('mes')"
+                  aria-label="Seleção do mês para o filtro"
+                  tabindex="0">
+                  <option value="">Selecione o mês</option>
+                  @for (mes of meses(); track mes.valor) {
+                    <option [value]="mes.valor">
+                      {{ mes.nome }}
+                    </option>
+                  }
+                </select>
+                <span class="field-arrow">▼</span>
+              </div>
+              @if (isFieldInvalid('mes')) {
+                <span class="field-error" role="alert">
+                  {{ getFieldError('mes') }}
+                </span>
+              }
+            </div>
+
+            <div class="field">
+              <label for="ano" class="field-label">Ano</label>
+              <div class="field-input-container">
+                <select
+                  id="ano"
+                  formControlName="ano"
+                  class="field-select"
+                  [class.field-invalid]="isFieldInvalid('ano')"
+                  aria-label="Seleção do ano para o filtro"
+                  tabindex="0">
+                  <option value="">Selecione o ano</option>
+                  @for (ano of anos(); track ano) {
+                    <option [value]="ano">
+                      {{ ano }}
+                    </option>
+                  }
+                </select>
+                <span class="field-arrow">▼</span>
+              </div>
+              @if (isFieldInvalid('ano')) {
+                <span class="field-error" role="alert">
+                  {{ getFieldError('ano') }}
+                </span>
+              }
+            </div>
+          </div>
         </div>
-        
-        <div class="campo-select">
-          <label for="ano" class="label-select">Ano</label>
-          <select 
-            id="ano"
-            (change)="atualizarAnoSelecionado($any($event.target).value)"
-            class="select"
-            aria-label="Seleção do ano para o filtro"
-            tabindex="0">
-            <option value="">Selecione o ano</option>
-            @for (ano of anos(); track ano) {
-              <option 
-                [value]="ano"
-                [selected]="ano === anoSelecionado()">
-                {{ ano }}
-              </option>
-            }
-          </select>
+      }
+
+      <!-- Painel de seleção por intervalo -->
+      @if (tipoSelecao() === 'intervalo') {
+        <div class="form-fields" role="tabpanel" id="intervalo-panel" aria-labelledby="intervalo-tab">
+          <div class="field-group">
+            <div class="field">
+              <label for="dataInicio" class="field-label">Data de Início</label>
+              <div class="field-input-container">
+                <input
+                  type="date"
+                  id="dataInicio"
+                  formControlName="dataInicio"
+                  class="field-date"
+                  [class.field-invalid]="isFieldInvalid('dataInicio')"
+                  [min]="getDataMinimaInicio()"
+                  [max]="getDataMaximaInicio()"
+                  aria-label="Data de início do período"
+                  tabindex="0">
+              </div>
+              @if (isFieldInvalid('dataInicio')) {
+                <span class="field-error" role="alert">
+                  {{ getFieldError('dataInicio') }}
+                </span>
+              }
+            </div>
+
+            <div class="field">
+              <label for="dataFim" class="field-label">Data de Fim</label>
+              <div class="field-input-container">
+                <input
+                  type="date"
+                  id="dataFim"
+                  formControlName="dataFim"
+                  class="field-date"
+                  [class.field-invalid]="isFieldInvalid('dataFim')"
+                  [min]="getDataMinimaFim()"
+                  [max]="getDataMaximaFim()"
+                  aria-label="Data de fim do período"
+                  tabindex="0">
+              </div>
+              @if (isFieldInvalid('dataFim')) {
+                <span class="field-error" role="alert">
+                  {{ getFieldError('dataFim') }}
+                </span>
+              }
+            </div>
+          </div>
+          
+          <!-- Informação sobre o período de 90 dias -->
+          @if (dataInicio()) {
+            <div class="periodo-info">
+              <div class="periodo-info-content">
+                <span class="periodo-info-text">
+                  Período disponível: até {{ getDataMaximaFim() }} (máximo 90 dias)
+                </span>
+              </div>
+            </div>
+          }
         </div>
-      </div>
-    }
-
-    <!-- Mensagens de erro usando @if -->
-    @if (temErros()) {
-      <div class="erro-validacao" role="alert" aria-live="polite">
-        <div class="erro-geral" id="erro-intervalo">
-          <span class="sr-only">Erro de validação: </span>
-          {{ mensagemErro() }}
+      }
+  
+      <!-- Mensagens de erro -->
+      @if (temErros()) {
+        <div class="error-message" role="alert" aria-live="polite">
+          <div class="error-content" id="erro-intervalo">
+            {{ mensagemErro() }}
+          </div>
         </div>
+      }
+
+      <!-- Botão aplicar filtro -->
+      <div class="form-actions">
+        <button 
+          type="submit"
+          class="btn-apply-filter" 
+          [class.btn-disabled]="botaoDesabilitado()"
+          [disabled]="botaoDesabilitado()"
+          (keydown)="onKeyDown($event, 'aplicar')"
+          aria-label="Botão para aplicar o filtro selecionado"
+          [attr.aria-describedby]="temErros() ? 'erro-intervalo' : null"
+          tabindex="0">
+          Aplicar filtro
+        </button>
       </div>
-    }
-
-    <!-- Botão aplicar filtro -->
-    <button 
-      class="btn-aplicar-filtro" 
-      [class.desabilitado]="botaoDesabilitado()"
-      [disabled]="botaoDesabilitado()"
-      (click)="aplicarFiltro()"
-      (keydown)="onKeyDown($event, 'aplicar')"
-      aria-label="Botão para aplicar o filtro selecionado (funcionalidade não implementada nesta versão)"
-      [attr.aria-describedby]="temErros() ? 'erro-intervalo' : null"
-      tabindex="0">
-      Aplicar Filtro
-    </button>
-
-    <!-- Informações do período selecionado usando @if -->
-    @if (periodoFormatado()) {
-      <div class="periodo-selecionado" role="status" aria-live="polite">
-        <span class="sr-only">Período selecionado: </span>
-        {{ periodoFormatado() }}
-      </div>
-    }
-  </div>
-</main>
-
-<!-- Elementos para leitores de tela -->
-<span class="sr-only" aria-live="polite">
-  Tela de seleção de período para visualização de extrato bancário. 
-  É possível consultar lançamentos dos últimos 12 meses.
-</span>
+    </form>
+  </main>
+</div>

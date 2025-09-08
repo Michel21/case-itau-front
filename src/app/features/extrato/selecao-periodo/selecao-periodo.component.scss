@@ -1,360 +1,399 @@
-.selecao-periodo {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  padding: 20px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-// Elementos para leitores de tela (screen readers)
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-.header {
+// Container principal
+.app-container {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 40px;
-  padding: 0 10px;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: white;
 }
 
-.btn-voltar {
+// Botão voltar
+.back-button {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
   display: flex;
   align-items: center;
   gap: 8px;
-  background: none;
-  border: none;
-  color: #2c3e50;
-  font-size: 16px;
+  padding: 12px 20px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  font-size: 14px;
   font-weight: 500;
-  cursor: pointer;
-  padding: 8px 12px;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  outline: none;
+  margin: 20px 0 0 20px;
+  align-self: flex-start;
 
   &:hover {
-    background-color: rgba(44, 62, 80, 0.1);
-    transform: translateX(-2px);
+    background-color: rgba(0, 123, 255, 0.1);
   }
 
   &:focus {
-    outline: 2px solid #3498db;
+    outline: 2px solid rgba(0, 123, 255, 0.5);
     outline-offset: 2px;
   }
 }
 
-.icon-voltar {
-  width: 24px;
-  height: 24px;
+.back-icon {
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1;
 }
 
-.conteudo {
-  max-width: 500px;
-  margin: 0 auto;
-  background: white;
-  border-radius: 20px;
-  padding: 40px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+.back-text {
+  font-size: 14px;
+  line-height: 1.2;
 }
 
-.titulo {
-  font-size: 28px;
+// Área de conteúdo
+.content-area {
+  flex: 1;
+  background-color: white;
+  padding: 20px 40px 40px 40px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+// Header do conteúdo
+.content-header {
+  margin-bottom: 40px;
+}
+
+.content-title {
+  font-size: 24px;
   font-weight: 700;
-  color: #2c3e50;
-  margin-bottom: 16px;
-  text-align: center;
+  color: #333;
+  margin: 0 0 12px 0;
   line-height: 1.3;
 }
 
-.subtitulo {
+.content-subtitle {
   font-size: 16px;
-  color: #7f8c8d;
-  text-align: center;
-  margin-bottom: 40px;
-  line-height: 1.5;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
 }
 
-.tipo-selecao {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 40px;
-  justify-content: center;
-}
-
-.pill-selecao {
-  padding: 12px 24px;
-  border: 2px solid #e0e6ed;
-  background: white;
-  color: #7f8c8d;
-  border-radius: 25px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  min-width: 120px;
-  outline: none;
-
-  &:hover {
-    border-color: #3498db;
-    color: #3498db;
-    transform: translateY(-2px);
-  }
-
-  &:focus {
-    outline: 2px solid #3498db;
-    outline-offset: 2px;
-  }
-
-  &.ativo {
-    background: #3498db;
-    border-color: #3498db;
-    color: white;
-    box-shadow: 0 8px 20px rgba(52, 152, 219, 0.3);
-  }
-}
-
-.selecao-mes-ano,
-.selecao-intervalo {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  margin-bottom: 40px;
-}
-
-.campo-select,
-.campo-data {
+// Formulário
+.periodo-form {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-
-  label {
-    font-size: 14px;
-    font-weight: 600;
-    color: #2c3e50;
-    margin-left: 4px;
-  }
+  gap: 30px;
+  max-width: 400px;
 }
 
-.label-select,
-.label-data {
+// Container das pills
+.pills-container {
+  display: flex;
+  gap: 0;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 4px;
+  border: 1px solid #e9ecef;
+}
+
+// Pills de seleção
+.pill {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 6px;
+  background-color: transparent;
+  color: #666;
   font-size: 14px;
-  font-weight: 600;
-  color: #2c3e50;
-  margin-left: 4px;
-}
-
-.select,
-.input-data {
-  width: 100%;
-  padding: 16px 20px;
-  border: 2px solid #e0e6ed;
-  background: white;
-  border-radius: 12px;
-  font-size: 16px;
   font-weight: 500;
-  color: #2c3e50;
-  outline: none;
-  transition: all 0.3s ease;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
 
   &:hover {
-    border-color: #3498db;
+    background-color: rgba(0, 123, 255, 0.1);
+    color: #007bff;
   }
 
   &:focus {
-    border-color: #3498db;
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-  }
-
-  &[aria-invalid="true"] {
-    border-color: #e74c3c;
-  }
-}
-
-.select {
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 16px center;
-  background-size: 16px;
-  padding-right: 48px;
-}
-
-// Estilos para mensagens de erro
-.erro-validacao {
-  margin-bottom: 24px;
-}
-
-.erro-geral {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: #e74c3c;
-  font-size: 14px;
-  font-weight: 500;
-  padding: 16px;
-  background: rgba(231, 76, 60, 0.1);
-  border-radius: 12px;
-  border-left: 4px solid #e74c3c;
-}
-
-.btn-aplicar-filtro {
-  width: 100%;
-  padding: 18px 24px;
-  background: #2c3e50;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-size: 18px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 8px 20px rgba(44, 62, 80, 0.2);
-  outline: none;
-
-  &:hover:not(.desabilitado) {
-    background: #34495e;
-    transform: translateY(-2px);
-    box-shadow: 0 12px 25px rgba(44, 62, 80, 0.3);
-  }
-
-  &:focus {
-    outline: 2px solid #3498db;
+    outline: 2px solid #007bff;
     outline-offset: 2px;
   }
 
-  &:active:not(.desabilitado) {
-    transform: translateY(0);
-  }
-
-  &.desabilitado {
-    background: #bdc3c7;
-    color: #7f8c8d;
-    cursor: not-allowed;
-    box-shadow: none;
-    transform: none;
+  &.pill-active {
+    background-color: #007bff;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
 
     &:hover {
-      background: #bdc3c7;
-      transform: none;
-      box-shadow: none;
+      background-color: #0056b3;
     }
   }
 }
 
-.periodo-selecionado {
-  margin-top: 24px;
-  padding: 16px;
-  background: rgba(52, 152, 219, 0.1);
-  border-radius: 12px;
-  border-left: 4px solid #3498db;
-  color: #2c3e50;
+// Campos do formulário
+.form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.field-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+// Campos de seleção (select)
+.field-select {
+  width: 100%;
+  padding: 12px 40px 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #333;
+  background-color: white;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  &:hover {
+    border-color: #007bff;
+  }
+
+  &:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  }
+
+  &.field-invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1);
+  }
+}
+
+// Seta do select
+.field-arrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  font-size: 12px;
+  pointer-events: none;
+}
+
+// Campos de data
+.field-date {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #333;
+  background-color: white;
+  cursor: pointer;
+
+  &:hover {
+    border-color: #007bff;
+  }
+
+  &:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  }
+
+  &.field-invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1);
+  }
+
+  // Estilizar o ícone do calendário
+  &::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+// Mensagens de erro
+.field-error {
+  font-size: 12px;
+  color: #dc3545;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+.error-message {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+
+.error-content {
+  font-size: 14px;
+  color: #721c24;
+  font-weight: 500;
+}
+
+// Ações do formulário
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+// Botão aplicar filtro
+.btn-apply-filter {
+  padding: 12px 24px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
-  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+
+  &:hover:not(.btn-disabled) {
+    background-color: #5a6268;
+    transform: translateY(-1px);
+  }
+
+  &:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+  }
+
+  &.btn-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
 }
 
 // Responsividade
 @media (max-width: 768px) {
-  .selecao-periodo {
-    padding: 16px;
-  }
-
-  .conteudo {
-    padding: 30px 24px;
-    margin: 0 16px;
-  }
-
-  .titulo {
-    font-size: 24px;
-  }
-
-  .selecao-mes-ano,
-  .selecao-intervalo {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .tipo-selecao {
+  .app-container {
     flex-direction: column;
-    align-items: center;
+    height: auto;
   }
 
-  .pill-selecao {
+  .nav-sidebar {
     width: 100%;
-    max-width: 200px;
+    height: 60px;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0 20px;
+  }
+
+  .nav-icons {
+    flex-direction: row;
+    margin-bottom: 0;
+  }
+
+  .nav-back-button {
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .nav-back-text {
+    font-size: 14px;
+  }
+
+  .content-area {
+    padding: 20px;
+  }
+
+  .content-title {
+    font-size: 20px;
+  }
+
+  .content-subtitle {
+    font-size: 14px;
+  }
+
+  .periodo-form {
+    max-width: 100%;
   }
 }
 
 @media (max-width: 480px) {
-  .header {
+  .content-area {
+    padding: 16px;
+  }
+
+  .content-title {
+    font-size: 18px;
+  }
+
+  .pills-container {
     flex-direction: column;
-    gap: 16px;
-    align-items: flex-start;
+    gap: 4px;
   }
 
-  .conteudo {
-    padding: 24px 20px;
+  .pill {
+    padding: 10px 16px;
   }
 
-  .titulo {
-    font-size: 22px;
+  .field-select,
+  .field-date {
+    padding: 10px 12px;
+    font-size: 13px;
   }
 
-  .btn-aplicar-filtro {
-    padding: 16px 20px;
-    font-size: 16px;
-  }
-
-  .erro-geral {
-    flex-direction: column;
-    text-align: center;
-    gap: 8px;
+  .btn-apply-filter {
+    width: 100%;
+    padding: 14px 20px;
   }
 }
 
-// Melhorias de acessibilidade para alto contraste
-@media (prefers-contrast: high) {
-  .pill-selecao {
-    border-width: 3px;
-  }
-
-  .btn-aplicar-filtro {
-    border: 3px solid #2c3e50;
-  }
-
-  .erro-geral {
-    border-width: 4px;
-  }
+// Informações do período de 90 dias
+.periodo-info {
+  background-color: #e3f2fd;
+  border: 1px solid #2196f3;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 16px;
 }
 
-// Suporte para modo escuro (se implementado no futuro)
-@media (prefers-color-scheme: dark) {
-  .selecao-periodo {
-    background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%);
-  }
+.periodo-info-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-  .conteudo {
-    background: #2c3e50;
-    color: white;
-  }
-
-  .titulo,
-  .subtitulo {
-    color: white;
-  }
-
-  .label-select,
-  .label-data {
-    color: #ecf0f1;
-  }
+.periodo-info-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1976d2;
+  margin: 0;
 }
