@@ -52,24 +52,17 @@
         <div class="form-fields" role="tabpanel" id="mes-panel" aria-labelledby="mes-tab">
           <div class="field-group">
             <div class="field">
-              <label for="mes" class="field-label">Mês</label>
-              <div class="field-input-container">
-                <select
-                  id="mes"
-                  formControlName="mes"
-                  class="field-select"
-                  [class.field-invalid]="isFieldInvalid('mes')"
-                  aria-label="Seleção do mês para o filtro"
-                  tabindex="0">
-                  <option value="">Selecione o mês</option>
-                  @for (mes of meses(); track mes.valor) {
-                    <option [value]="mes.valor">
-                      {{ mes.nome }}
-                    </option>
-                  }
-                </select>
-                <span class="field-arrow">▼</span>
-              </div>
+              <app-modal-select 
+                [id]="'select-mes'"
+                [label]="'Mês'"
+                type="Mês"
+                [placeholder]="'Selecione o mês'"
+                formControlName="mes"
+                [prefix]="'MES'"
+                [optionsSelect]="meses()"
+                [helperText]="'Escolha um mês válido'"
+                [class.field-invalid]="isFieldInvalid('mes')">
+              </app-modal-select>
               @if (isFieldInvalid('mes')) {
                 <span class="field-error" role="alert">
                   {{ getFieldError('mes') }}
@@ -78,24 +71,17 @@
             </div>
 
             <div class="field">
-              <label for="ano" class="field-label">Ano</label>
-              <div class="field-input-container">
-                <select
-                  id="ano"
-                  formControlName="ano"
-                  class="field-select"
-                  [class.field-invalid]="isFieldInvalid('ano')"
-                  aria-label="Seleção do ano para o filtro"
-                  tabindex="0">
-                  <option value="">Selecione o ano</option>
-                  @for (ano of anos(); track ano) {
-                    <option [value]="ano">
-                      {{ ano }}
-                    </option>
-                  }
-                </select>
-                <span class="field-arrow">▼</span>
-              </div>
+              <app-modal-select 
+                [id]="'select-ano'"
+                [label]="'Ano'"
+                formControlName="ano"
+                type="Ano"
+                [placeholder]="'Selecione o ano'"
+                [prefix]="'ANO'"
+                [optionsSelect]="anos()"
+                [helperText]="'Escolha um ano válido'"
+                [class.field-invalid]="isFieldInvalid('ano')">
+              </app-modal-select>
               @if (isFieldInvalid('ano')) {
                 <span class="field-error" role="alert">
                   {{ getFieldError('ano') }}
@@ -192,3 +178,4 @@
     </form>
   </main>
 </div>
+

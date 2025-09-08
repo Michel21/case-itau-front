@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractContro
 import { Router } from '@angular/router';
 import { SelecaoPeriodoService } from './selecao-periodo.service';
 import { PeriodoMesAno } from './interfaces/periodo.interface';
+import { ModalSelectComponent } from '../../../shared/components/modal-select/modal-select.component';
 
 /**
  * Componente de seleção de período seguindo princípios SOLID e Clean Code
@@ -16,7 +17,7 @@ import { PeriodoMesAno } from './interfaces/periodo.interface';
   templateUrl: './selecao-periodo.component.html',
   styleUrls: ['./selecao-periodo.component.scss'],
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ModalSelectComponent],
   animations: []
 })
 export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
