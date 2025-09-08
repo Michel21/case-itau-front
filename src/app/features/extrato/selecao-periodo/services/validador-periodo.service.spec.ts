@@ -96,47 +96,6 @@ describe('ValidadorPeriodoService', () => {
     });
   });
 
-  describe('validarDataNaoFutura', () => {
-    it('deve retornar true para data passada', () => {
-      const dataPassada = new Date();
-      dataPassada.setDate(dataPassada.getDate() - 1);
-      
-      const resultado = service.validarDataNaoFutura(dataPassada);
-      
-      expect(resultado).toBe(true);
-    });
-
-    it('deve retornar true para data atual', () => {
-      const dataAtual = new Date();
-      
-      const resultado = service.validarDataNaoFutura(dataAtual);
-      
-      expect(resultado).toBe(true);
-    });
-
-    it('deve retornar true para data futura dentro de 12 meses', () => {
-      const dataAtual = new Date();
-      const dataFutura = new Date(dataAtual.getFullYear(), dataAtual.getMonth() + 6, 1);
-      
-      const resultado = service.validarDataNaoFutura(dataFutura);
-      
-      expect(resultado).toBe(true);
-    });
-
-    it('deve retornar false para data futura além de 12 meses', () => {
-      const dataAtual = new Date();
-      const dataFutura = new Date(dataAtual.getFullYear() + 1, dataAtual.getMonth() + 1, 1);
-      
-      const resultado = service.validarDataNaoFutura(dataFutura);
-      
-      expect(resultado).toBe(false);
-    });
-
-    it('deve retornar false para data nula ou indefinida', () => {
-      expect(service.validarDataNaoFutura(null as any)).toBe(false);
-      expect(service.validarDataNaoFutura(undefined as any)).toBe(false);
-    });
-  });
 
   describe('validarPeriodoCompleto', () => {
     describe('para tipo mes', () => {
@@ -253,6 +212,190 @@ describe('ValidadorPeriodoService', () => {
       
       expect(configuracao1).not.toBe(configuracao2);
       expect(configuracao1).toEqual(configuracao2);
+    });
+  });
+
+  describe('validarDataNaoFutura', () => {
+    it('deve retornar false para data nula ou indefinida', () => {
+      expect(service.validarDataNaoFutura(null as any)).toBe(false);
+      expect(service.validarDataNaoFutura(undefined as any)).toBe(false);
+    });
+
+    it('deve retornar true para data atual', () => {
+      const dataAtual = new Date();
+      const resultado = service.validarDataNaoFutura(dataAtual);
+      expect(resultado).toBe(true);
+    });
+
+    it('deve retornar true para data passada', () => {
+      const dataPassada = new Date();
+      dataPassada.setFullYear(dataPassada.getFullYear() - 1);
+      
+      const resultado = service.validarDataNaoFutura(dataPassada);
+      expect(resultado).toBe(true);
+    });
+
+    it('deve retornar false para data muito futura (mais de 12 meses)', () => {
+      const dataMuitoFutura = new Date();
+      dataMuitoFutura.setFullYear(dataMuitoFutura.getFullYear() + 2);
+      
+      const resultado = service.validarDataNaoFutura(dataMuitoFutura);
+      expect(resultado).toBe(false);
+    });
+  });
+
+  describe('validarPeriodo90DiasAPartirDoMes (método privado)', () => {
+    it('deve retornar válido para mês atual', () => {
+      const dataAtual = new Date();
+      const resultado = (service as any).validarPeriodo90DiasAPartirDoMes(dataAtual);
+      
+      expect(resultado).toEqual({ valido: true, mensagem: '' });
+    });
+
+    it('deve retornar inválido para mês muito no passado (mais de 90 dias)', () => {
+      const dataAtual = new Date();
+      const mesMuitoPassado = new Date(dataAtual.getFullYear(), dataAtual.getMonth() - 4, 1);
+      
+      const resultado = (service as any).validarPeriodo90DiasAPartirDoMes(mesMuitoPassado);
+      
+      expect(resultado.valido).toBe(false);
+      expect(resultado.codigo).toBe('MES_FORA_PERIODO_90_DIAS');
+    });
+
+    it('deve retornar inválido para mês fora do limite histórico', () => {
+      const dataAtual = new Date();
+      const mesForaHistorico = new Date(dataAtual.getFullYear(), dataAtual.getMonth() - 13, 1);
+      
+      const resultado = (service as any).validarPeriodo90DiasAPartirDoMes(mesForaHistorico);
+      
+      expect(resultado.valido).toBe(false);
+      expect(resultado.codigo).toBe('MES_FORA_PERIODO_90_DIAS');
+    });
+
+    it('deve retornar inválido para mês muito no futuro', () => {
+      const dataAtual = new Date();
+      const mesMuitoFuturo = new Date(dataAtual.getFullYear(), dataAtual.getMonth() + 13, 1);
+      
+      const resultado = (service as any).validarPeriodo90DiasAPartirDoMes(mesMuitoFuturo);
+      
+      expect(resultado.valido).toBe(false);
+      expect(resultado.codigo).toBe('MES_MUITO_FUTURO');
+    });
+
+    it('deve retornar válido para mês dentro do limite de 12 meses', () => {
+      const dataAtual = new Date();
+      const mesValido = new Date(dataAtual.getFullYear(), dataAtual.getMonth() + 6, 1);
+      
+      const resultado = (service as any).validarPeriodo90DiasAPartirDoMes(mesValido);
+      
+      expect(resultado).toEqual({ valido: true, mensagem: '' });
+    });
+  });
+
+  describe('validarPeriodoCompleto - casos edge', () => {
+    it('deve retornar resultado inválido para tipo inválido', () => {
+      const resultado = service.validarPeriodoCompleto('invalid' as any);
+      
+      expect(resultado).toEqual({
+        valido: false,
+        mensagem: 'Tipo de período inválido',
+        codigo: 'TIPO_INVALIDO'
+      });
+    });
+
+    it('deve retornar resultado inválido para tipo undefined', () => {
+      const resultado = service.validarPeriodoCompleto(undefined as any);
+      
+      expect(resultado).toEqual({
+        valido: false,
+        mensagem: 'Tipo de período inválido',
+        codigo: 'TIPO_INVALIDO'
+      });
+    });
+  });
+
+  describe('validarLimiteHistorico - casos edge', () => {
+    it('deve retornar false para data nula', () => {
+      const resultado = service.validarLimiteHistorico(null as any);
+      expect(resultado).toBe(false);
+    });
+
+    it('deve retornar false para data undefined', () => {
+      const resultado = service.validarLimiteHistorico(undefined as any);
+      expect(resultado).toBe(false);
+    });
+
+    it('deve retornar true para data no limite exato do histórico', () => {
+      const dataAtual = new Date();
+      const dataLimite = new Date(
+        dataAtual.getFullYear(),
+        dataAtual.getMonth() - 12,
+        1
+      );
+      
+      const resultado = service.validarLimiteHistorico(dataLimite);
+      expect(resultado).toBe(true);
+    });
+
+    it('deve retornar false para data antes do limite histórico', () => {
+      const dataAtual = new Date();
+      const dataAntesLimite = new Date(
+        dataAtual.getFullYear(),
+        dataAtual.getMonth() - 13,
+        1
+      );
+      
+      const resultado = service.validarLimiteHistorico(dataAntesLimite);
+      expect(resultado).toBe(false);
+    });
+
+    it('deve retornar true para data no último dia do mês atual quando permitirDatasFuturas é false', () => {
+      const dataAtual = new Date();
+      const ultimoDiaMesAtual = new Date(dataAtual.getFullYear(), dataAtual.getMonth() + 1, 0);
+      
+      const resultado = service.validarLimiteHistorico(ultimoDiaMesAtual);
+      expect(resultado).toBe(true);
+    });
+
+    it('deve retornar false para data após o último dia do mês atual quando permitirDatasFuturas é false', () => {
+      const dataAtual = new Date();
+      const primeiroDiaProximoMes = new Date(dataAtual.getFullYear(), dataAtual.getMonth() + 1, 1);
+      
+      const resultado = service.validarLimiteHistorico(primeiroDiaProximoMes);
+      expect(resultado).toBe(false);
+    });
+  });
+
+  describe('validarIntervaloDatas - casos edge', () => {
+    it('deve retornar true para intervalo de exatamente 90 dias', () => {
+      const dataInicio = new Date('2024-01-01');
+      const dataFim = new Date('2024-03-31'); // 90 dias depois
+      
+      const resultado = service.validarIntervaloDatas(dataInicio, dataFim);
+      expect(resultado).toBe(true);
+    });
+
+    it('deve retornar false para intervalo de 91 dias', () => {
+      const dataInicio = new Date('2024-01-01');
+      const dataFim = new Date('2024-04-01'); // 91 dias depois
+      
+      const resultado = service.validarIntervaloDatas(dataInicio, dataFim);
+      expect(resultado).toBe(false);
+    });
+
+    it('deve retornar true para intervalo de 1 dia', () => {
+      const dataInicio = new Date('2024-01-01');
+      const dataFim = new Date('2024-01-01');
+      
+      const resultado = service.validarIntervaloDatas(dataInicio, dataFim);
+      expect(resultado).toBe(true);
+    });
+
+    it('deve retornar true para intervalo de 0 dias (mesma data)', () => {
+      const data = new Date('2024-01-01');
+      
+      const resultado = service.validarIntervaloDatas(data, data);
+      expect(resultado).toBe(true);
     });
   });
 });
