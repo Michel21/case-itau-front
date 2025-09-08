@@ -272,4 +272,92 @@ describe('ModalSelectComponent', () => {
       expect(() => component.ngOnInit()).not.toThrow();
     });
   });
+
+  describe('métodos adicionais', () => {
+    it('deve lidar com writeValue com valor string vazia', () => {
+      component.writeValue('');
+      expect(component.value).toBe('');
+    });
+
+    it('deve lidar com writeValue com valor string válida', () => {
+      component.writeValue('teste');
+      expect(component.value).toBe('teste');
+    });
+
+    it('deve lidar com writeValue com valor 0', () => {
+      component.writeValue('0');
+      expect(component.value).toBe('0');
+    });
+
+    it('deve lidar com writeValue com valor false', () => {
+      component.writeValue('false');
+      expect(component.value).toBe('false');
+    });
+
+    it('deve lidar com onSelectChange com evento válido', () => {
+      const mockCallback = jest.fn();
+      component.registerOnChange(mockCallback);
+      
+      const mockEvent = {
+        target: { value: 'opcao1' }
+      } as any;
+      
+      component.onSelectChange(mockEvent);
+      
+      expect(component.value).toBe('opcao1');
+      expect(mockCallback).toHaveBeenCalledWith('opcao1');
+    });
+
+    it('deve lidar com onSelectChange com valor vazio', () => {
+      const mockCallback = jest.fn();
+      component.registerOnChange(mockCallback);
+      
+      const mockEvent = {
+        target: { value: '' }
+      } as any;
+      
+      component.onSelectChange(mockEvent);
+      
+      expect(component.value).toBe('');
+      expect(mockCallback).toHaveBeenCalledWith('');
+    });
+
+    it('deve lidar com setDisabledState true', () => {
+      component.setDisabledState(true);
+      expect(component.disabled).toBe(true);
+    });
+
+    it('deve lidar com setDisabledState false', () => {
+      component.setDisabledState(false);
+      expect(component.disabled).toBe(false);
+    });
+
+    it('deve lidar com onChange callback', () => {
+      const mockCallback = jest.fn();
+      component.registerOnChange(mockCallback);
+      
+      // Simular chamada direta do onChange
+      component['onChange']('teste');
+      expect(mockCallback).toHaveBeenCalledWith('teste');
+    });
+
+    it('deve lidar com onTouched callback', () => {
+      const mockCallback = jest.fn();
+      component.registerOnTouched(mockCallback);
+      
+      // Simular chamada direta do onTouched
+      component.onTouched();
+      expect(mockCallback).toHaveBeenCalled();
+    });
+
+    it('deve lidar com onChange callback vazio', () => {
+      // Testar o comportamento padrão do onChange
+      expect(() => component['onChange']('teste')).not.toThrow();
+    });
+
+    it('deve lidar com onTouched callback vazio', () => {
+      // Testar o comportamento padrão do onTouched
+      expect(() => component.onTouched()).not.toThrow();
+    });
+  });
 });
