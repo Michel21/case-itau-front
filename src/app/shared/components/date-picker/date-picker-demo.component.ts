@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DatePickerComponent, DatePickerConfig } from './date-picker.component';
 
@@ -7,10 +7,22 @@ import { DatePickerComponent, DatePickerConfig } from './date-picker.component';
   standalone: true,
   imports: [CommonModule, DatePickerComponent],
   template: `
-    <div class="demo-container">
+    <div class="demo-container" [class]="'theme-' + currentTheme()">
       <header class="demo-header">
         <h1>DatePicker Component Demo</h1>
         <p>Demonstração completa do componente DatePicker profissional</p>
+        
+        <!-- Theme Selector -->
+        <div class="theme-selector">
+          <label for="theme-select">Tema:</label>
+          <select id="theme-select" [value]="currentTheme()" (change)="changeTheme($event)">
+            <option value="light">Claro</option>
+            <option value="dark">Escuro</option>
+            <option value="blue">Azul</option>
+            <option value="green">Verde</option>
+            <option value="purple">Roxo</option>
+          </select>
+        </div>
       </header>
 
       <div class="demo-sections">
@@ -162,15 +174,50 @@ import { DatePickerComponent, DatePickerConfig } from './date-picker.component';
       margin: 0 auto;
       padding: 20px;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      transition: all 0.3s ease;
     }
 
     .demo-header {
       text-align: center;
       margin-bottom: 40px;
       padding: 40px 20px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
       border-radius: 16px;
+      transition: all 0.3s ease;
+    }
+
+    /* Light Theme (Default) */
+    .demo-container.theme-light .demo-header {
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      color: #1e293b;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* Dark Theme */
+    .demo-container.theme-dark .demo-header {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      color: #f1f5f9;
+      border: 1px solid #334155;
+    }
+
+    /* Blue Theme */
+    .demo-container.theme-blue .demo-header {
+      background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+      color: white;
+      border: 1px solid #2563eb;
+    }
+
+    /* Green Theme */
+    .demo-container.theme-green .demo-header {
+      background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+      color: white;
+      border: 1px solid #059669;
+    }
+
+    /* Purple Theme */
+    .demo-container.theme-purple .demo-header {
+      background: linear-gradient(135deg, #8b5cf6 0%, #5b21b6 100%);
+      color: white;
+      border: 1px solid #7c3aed;
     }
 
     .demo-header h1 {
@@ -181,8 +228,58 @@ import { DatePickerComponent, DatePickerConfig } from './date-picker.component';
 
     .demo-header p {
       font-size: 1.1rem;
-      margin: 0;
+      margin: 0 0 20px 0;
       opacity: 0.9;
+    }
+
+    .theme-selector {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .theme-selector label {
+      font-size: 1rem;
+      font-weight: 600;
+      opacity: 0.9;
+    }
+
+    .theme-selector select {
+      padding: 8px 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      color: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .theme-selector select:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .theme-selector select:focus {
+      outline: none;
+      border-color: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+    }
+
+    /* Theme-specific select styles */
+    .theme-light .theme-selector select {
+      background: rgba(255, 255, 255, 0.8);
+      color: #1e293b;
+      border-color: rgba(30, 41, 59, 0.2);
+    }
+
+    .theme-light .theme-selector select:hover {
+      background: rgba(255, 255, 255, 0.9);
+      border-color: rgba(30, 41, 59, 0.3);
     }
 
     .demo-sections {
@@ -191,24 +288,75 @@ import { DatePickerComponent, DatePickerConfig } from './date-picker.component';
     }
 
     .demo-section {
-      background: white;
       border-radius: 12px;
       padding: 30px;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
       border: 1px solid #e5e7eb;
+      transition: all 0.3s ease;
+    }
+
+    /* Light theme sections */
+    .theme-light .demo-section {
+      background: white;
+      border-color: #e5e7eb;
+    }
+
+    /* Dark theme sections */
+    .theme-dark .demo-section {
+      background: #1e293b;
+      border-color: #334155;
+      color: #f1f5f9;
+    }
+
+    /* Colored theme sections */
+    .theme-blue .demo-section,
+    .theme-green .demo-section,
+    .theme-purple .demo-section {
+      background: rgba(255, 255, 255, 0.95);
+      border-color: rgba(255, 255, 255, 0.2);
+      color: #1e293b;
     }
 
     .demo-section h2 {
-      color: #1f2937;
       font-size: 1.5rem;
       margin: 0 0 10px 0;
       font-weight: 600;
     }
 
     .demo-section p {
-      color: #6b7280;
       margin: 0 0 20px 0;
       line-height: 1.6;
+    }
+
+    /* Light theme text colors */
+    .theme-light .demo-section h2 {
+      color: #1f2937;
+    }
+
+    .theme-light .demo-section p {
+      color: #6b7280;
+    }
+
+    /* Dark theme text colors */
+    .theme-dark .demo-section h2 {
+      color: #f1f5f9;
+    }
+
+    .theme-dark .demo-section p {
+      color: #cbd5e1;
+    }
+
+    /* Colored theme text colors */
+    .theme-blue .demo-section h2,
+    .theme-green .demo-section h2,
+    .theme-purple .demo-section h2 {
+      color: #1e293b;
+    }
+
+    .theme-blue .demo-section p,
+    .theme-green .demo-section p,
+    .theme-purple .demo-section p {
+      color: #475569;
     }
 
     .demo-controls {
@@ -393,7 +541,7 @@ import { DatePickerComponent, DatePickerConfig } from './date-picker.component';
     }
   `]
 })
-export class DatePickerDemoComponent {
+export class DatePickerDemoComponent implements OnInit {
   // Signals para controle de estado
   readonly showBasicPicker = signal(false);
   readonly showRestrictedPicker = signal(false);
@@ -404,6 +552,7 @@ export class DatePickerDemoComponent {
   readonly initialSelectedDate = signal<Date | null>(null);
   
   readonly eventsLog = signal<Array<{timestamp: Date, message: string, type: string}>>([]);
+  readonly currentTheme = signal('light');
 
   // Configurações dos Date Pickers
   readonly basicConfig: DatePickerConfig = {
@@ -425,6 +574,25 @@ export class DatePickerDemoComponent {
   constructor() {
     // Definir data inicial para o terceiro demo
     this.initialSelectedDate.set(new Date(2024, 9, 9)); // 9 de outubro de 2024
+  }
+
+  ngOnInit(): void {
+    // Carregar tema salvo do localStorage
+    const savedTheme = localStorage.getItem('demo-theme') || 'light';
+    this.currentTheme.set(savedTheme);
+    this.applyTheme(savedTheme);
+  }
+
+  changeTheme(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    const theme = target.value;
+    this.currentTheme.set(theme);
+    this.applyTheme(theme);
+    localStorage.setItem('demo-theme', theme);
+  }
+
+  private applyTheme(theme: string): void {
+    document.documentElement.setAttribute('data-theme', theme);
   }
 
   // Event handlers para o Date Picker básico
