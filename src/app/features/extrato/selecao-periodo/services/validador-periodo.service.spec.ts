@@ -398,4 +398,111 @@ describe('ValidadorPeriodoService', () => {
       expect(resultado).toBe(true);
     });
   });
+
+  describe('validarLimiteHistorico - permitir datas futuras', () => {
+    it('deve retornar true para data futura dentro do limite de 12 meses quando permitirDatasFuturas é true', () => {
+      // Criar um novo serviço com configuração personalizada
+      const serviceCustomizado = new ValidadorPeriodoService();
+      // Usar Object.defineProperty para modificar a propriedade readonly
+      Object.defineProperty(serviceCustomizado, 'configuracao', {
+        value: { limiteDiasIntervalo: 90, limiteMesesHistorico: 12, permitirDatasFuturas: true },
+        writable: true
+      });
+      
+      const dataFutura = new Date();
+      dataFutura.setMonth(dataFutura.getMonth() + 6); // 6 meses no futuro
+      
+      const resultado = serviceCustomizado.validarLimiteHistorico(dataFutura);
+      expect(resultado).toBe(true);
+    });
+
+    it('deve retornar false para data futura além do limite de 12 meses quando permitirDatasFuturas é true', () => {
+      // Criar um novo serviço com configuração personalizada
+      const serviceCustomizado = new ValidadorPeriodoService();
+      // Usar Object.defineProperty para modificar a propriedade readonly
+      Object.defineProperty(serviceCustomizado, 'configuracao', {
+        value: { limiteDiasIntervalo: 90, limiteMesesHistorico: 12, permitirDatasFuturas: true },
+        writable: true
+      });
+      
+      const dataFutura = new Date();
+      dataFutura.setMonth(dataFutura.getMonth() + 15); // 15 meses no futuro
+      
+      const resultado = serviceCustomizado.validarLimiteHistorico(dataFutura);
+      expect(resultado).toBe(false);
+    });
+  });
+
+  describe('validarDataNaoFutura - permitir datas futuras', () => {
+    it('deve retornar true quando permitirDatasFuturas é true', () => {
+      // Criar um novo serviço com configuração personalizada
+      const serviceCustomizado = new ValidadorPeriodoService();
+      // Usar Object.defineProperty para modificar a propriedade readonly
+      Object.defineProperty(serviceCustomizado, 'configuracao', {
+        value: { limiteDiasIntervalo: 90, limiteMesesHistorico: 12, permitirDatasFuturas: true },
+        writable: true
+      });
+      
+      const dataFutura = new Date();
+      dataFutura.setFullYear(dataFutura.getFullYear() + 1);
+      
+      const resultado = serviceCustomizado.validarDataNaoFutura(dataFutura);
+      expect(resultado).toBe(true);
+    });
+  });
+
+  describe('validarPeriodoCompleto - tipo intervalo - validação de intervalo', () => {
+    it('deve retornar resultado inválido quando validarIntervaloDatas retorna false', () => {
+      // Criar um novo serviço com configuração personalizada que permite datas futuras
+      const serviceCustomizado = new ValidadorPeriodoService();
+      Object.defineProperty(serviceCustomizado, 'configuracao', {
+        value: { limiteDiasIntervalo: 90, limiteMesesHistorico: 12, permitirDatasFuturas: true },
+        writable: true
+      });
+      
+      // Usar datas que passem na validação de limite histórico mas falhem na validação de intervalo
+      const dataInicio = new Date();
+      dataInicio.setDate(dataInicio.getDate() - 1); // Ontem
+      const dataFim = new Date();
+      dataFim.setDate(dataFim.getDate() + 95); // 95 dias no futuro (mais de 90)
+      
+      const resultado = serviceCustomizado.validarPeriodoCompleto('intervalo', undefined, undefined, dataInicio, dataFim);
+      
+      expect(resultado.valido).toBe(false);
+      expect(resultado.mensagem).toContain('Intervalo não pode ser superior a 90 dias');
+      expect(resultado.codigo).toBe('INTERVALO_EXCEDE_LIMITE');
+    });
+  });
+
+  describe('validarPeriodo90DiasAPartirDoMes - mês fora do histórico', () => {
+    it('deve retornar resultado inválido quando mês está fora do limite histórico', () => {
+      const dataMes = new Date(2020, 0, 1); // Janeiro 2020 - muito no passado
+      
+      const resultado = service['validarPeriodo90DiasAPartirDoMes'](dataMes);
+      
+      expect(resultado.valido).toBe(false);
+      expect(resultado.mensagem).toContain('O mês selecionado está fora do período de 90 dias do mês atual');
+      expect(resultado.codigo).toBe('MES_FORA_PERIODO_90_DIAS');
+    });
+
+    it('deve retornar resultado inválido quando mês está fora do limite histórico (configuração personalizada)', () => {
+      // Criar um novo serviço com configuração personalizada
+      const serviceCustomizado = new ValidadorPeriodoService();
+      Object.defineProperty(serviceCustomizado, 'configuracao', {
+        value: { limiteDiasIntervalo: 90, limiteMesesHistorico: 6, permitirDatasFuturas: false },
+        writable: true
+      });
+      
+      // Usar uma data que esteja fora do limite de 6 meses mas dentro de 90 dias
+      // Vamos usar uma data que esteja exatamente no limite de 90 dias mas fora de 6 meses
+      const dataAtual = new Date();
+      const dataMes = new Date(dataAtual.getFullYear(), dataAtual.getMonth() - 7, 1); // 7 meses atrás, dia 1
+      
+      const resultado = serviceCustomizado['validarPeriodo90DiasAPartirDoMes'](dataMes);
+      
+      expect(resultado.valido).toBe(false);
+      expect(resultado.mensagem).toContain('O mês selecionado deve estar dentro dos últimos 6 meses');
+      expect(resultado.codigo).toBe('MES_FORA_HISTORICO');
+    });
+  });
 });

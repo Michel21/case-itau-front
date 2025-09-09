@@ -29,35 +29,6 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
   // FormGroup para o formulário (Clean Code - Nome descritivo)
   periodoForm!: FormGroup;
 
-  // Formato de data personalizável
-  formatoData = 'dd/mm/aaaa';
-
-  // Signals para controlar a exibição do placeholder
-  readonly dataInicioVazia = signal(true);
-  readonly dataFimVazia = signal(true);
-
-  /**
-   * Altera o formato de data exibido nos inputs
-   * @param formato - Novo formato (ex: 'dd/mm/aaaa', 'mm/dd/yyyy', 'aaaa-mm-dd', etc.)
-   */
-  alterarFormatoData(formato: string): void {
-    this.formatoData = formato;
-  }
-
-  /**
-   * Verifica se um campo de data tem valor
-   * @param campo - Nome do campo (dataInicio ou dataFim)
-   * @returns true se o campo tem valor
-   */
-  temValorData(campo: string): boolean {
-    if (!this.periodoForm) return false;
-    
-    const control = this.periodoForm.get(campo);
-    if (!control) return false;
-    
-    const valor = control.value;
-    return valor && valor.toString().trim() !== '';
-  }
 
   // Signals para estado do componente (Clean Code - Nomes descritivos)
   readonly tipoSelecao = signal<'intervalo' | 'mes'>('mes');

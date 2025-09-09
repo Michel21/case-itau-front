@@ -95,37 +95,6 @@
       <!-- Painel de seleção por intervalo -->
       @if (tipoSelecao() === 'intervalo') {
         <div class="form-fields" role="tabpanel" id="intervalo-panel" aria-labelledby="intervalo-tab">
-          <!-- Controles de formato de data -->
-          <div class="format-controls">
-            <label class="format-label">Formato de Data:</label>
-            <div class="format-buttons">
-              <button type="button" 
-                      class="format-btn" 
-                      [class.active]="formatoData === 'dd/mm/aaaa'"
-                      (click)="alterarFormatoData('dd/mm/aaaa')">
-                dd/mm/aaaa
-              </button>
-              <button type="button" 
-                      class="format-btn" 
-                      [class.active]="formatoData === 'mm/dd/yyyy'"
-                      (click)="alterarFormatoData('mm/dd/yyyy')">
-                mm/dd/yyyy
-              </button>
-              <button type="button" 
-                      class="format-btn" 
-                      [class.active]="formatoData === 'aaaa-mm-dd'"
-                      (click)="alterarFormatoData('aaaa-mm-dd')">
-                aaaa-mm-dd
-              </button>
-              <button type="button" 
-                      class="format-btn" 
-                      [class.active]="formatoData === ''"
-                      (click)="alterarFormatoData('')">
-                Sem formato
-              </button>
-            </div>
-          </div>
-          
           <div class="field-group">
             <div class="field">
               <label for="dataInicio" class="field-label">Data de Início</label>
@@ -140,7 +109,7 @@
                   [max]="getDataMaximaInicio()"
                   aria-label="Data de início do período"
                   tabindex="0"
-                  [placeholder]="formatoData">
+                  placeholder="">
               </div>
               @if (isFieldInvalid('dataInicio')) {
                 <span class="field-error" role="alert">
@@ -162,7 +131,7 @@
                   [max]="getDataMaximaFim()"
                   aria-label="Data de fim do período"
                   tabindex="0"
-                  [placeholder]="formatoData">
+                  placeholder="">
               </div>
               @if (isFieldInvalid('dataFim')) {
                 <span class="field-error" role="alert">
