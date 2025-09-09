@@ -157,23 +157,32 @@ export class DatePickerComponent implements OnInit {
   private centerModalInViewport(): void {
     const dialog = document.querySelector('.date-picker-dialog') as HTMLElement;
     if (dialog) {
+      // Reset any existing positioning
+      dialog.style.position = 'fixed';
+      dialog.style.left = '50%';
+      dialog.style.top = '50%';
+      dialog.style.transform = 'translate(-50%, -50%)';
+      dialog.style.margin = '0';
+      
+      // Force a reflow to get accurate dimensions
+      dialog.offsetHeight;
+      
       const rect = dialog.getBoundingClientRect();
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
       
-      // Calculate center position
+      // Calculate true center position
       const centerX = (viewportWidth - rect.width) / 2;
       const centerY = (viewportHeight - rect.height) / 2;
       
-      // Ensure modal is within viewport bounds
-      const constrainedX = Math.max(20, Math.min(centerX, viewportWidth - rect.width - 20));
-      const constrainedY = Math.max(20, Math.min(centerY, viewportHeight - rect.height - 20));
+      // Ensure modal is within viewport bounds with padding
+      const padding = 20;
+      const constrainedX = Math.max(padding, Math.min(centerX, viewportWidth - rect.width - padding));
+      const constrainedY = Math.max(padding, Math.min(centerY, viewportHeight - rect.height - padding));
       
-      // Set initial position
-      dialog.style.position = 'fixed';
+      // Apply final position
       dialog.style.left = `${constrainedX}px`;
       dialog.style.top = `${constrainedY}px`;
-      dialog.style.margin = '0';
       dialog.style.transform = 'none';
       
       // Store initial position for drag calculations
