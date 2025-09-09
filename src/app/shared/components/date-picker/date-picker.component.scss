@@ -24,14 +24,12 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform, box-shadow;
+  transition: box-shadow 0.2s ease;
 }
 
 .date-picker-dialog.dragging {
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(59, 130, 246, 0.1);
-  transform: scale(1.02) rotate(0.5deg);
-  transition: box-shadow 0.2s ease, transform 0.1s ease;
+  transition: box-shadow 0.2s ease;
 }
 
 // Header

@@ -211,51 +211,54 @@ export class DatePickerComponent implements OnInit {
     this.cancelled.emit();
   }
 
-  // Drag and Drop Methods for Modal
+  // Drag and Drop Methods for Modal - Fixed positioning
   onHeaderMouseDown(event: MouseEvent): void {
     if (event.button !== 0) return; // Only left mouse button
     
+    event.preventDefault();
     this.isDragging.set(true);
-    this.dragStartX = event.clientX;
-    this.dragStartY = event.clientY;
     
     const dialog = (event.target as HTMLElement).closest('.date-picker-dialog') as HTMLElement;
     if (dialog) {
       const rect = dialog.getBoundingClientRect();
+      
+      // Store initial positions
       this.initialX = rect.left;
       this.initialY = rect.top;
+      this.dragStartX = event.clientX;
+      this.dragStartY = event.clientY;
       
+      // Set up for smooth dragging
       dialog.style.position = 'fixed';
       dialog.style.left = `${this.initialX}px`;
       dialog.style.top = `${this.initialY}px`;
       dialog.style.margin = '0';
       dialog.style.transform = 'none';
+      dialog.style.willChange = 'transform';
     }
     
     // Angular Features: Use takeUntilDestroyed for automatic cleanup
     const mouseMove$ = new Observable<MouseEvent>(subscriber => {
       const handler = (e: MouseEvent) => subscriber.next(e);
-      document.addEventListener('mousemove', handler);
+      document.addEventListener('mousemove', handler, { passive: true });
       return () => document.removeEventListener('mousemove', handler);
     });
     
     const mouseUp$ = new Observable<MouseEvent>(subscriber => {
       const handler = (e: MouseEvent) => subscriber.next(e);
-      document.addEventListener('mouseup', handler);
+      document.addEventListener('mouseup', handler, { passive: true });
       return () => document.removeEventListener('mouseup', handler);
     });
     
     mouseMove$.pipe(
       takeUntilDestroyed(this.destroyRef),
-      takeUntil(mouseUp$)
+      takeUntil(mouseUp$.pipe(take(1)))
     ).subscribe(this.onMouseMove.bind(this));
     
     mouseUp$.pipe(
       takeUntilDestroyed(this.destroyRef),
       take(1)
     ).subscribe(() => this.onMouseUp());
-    
-    event.preventDefault();
   }
 
   onHeaderTouchStart(event: TouchEvent): void {
@@ -324,8 +327,9 @@ export class DatePickerComponent implements OnInit {
       const constrainedX = Math.max(0, Math.min(newX, maxX));
       const constrainedY = Math.max(0, Math.min(newY, maxY));
       
-      // Use transform for better performance
-      dialog.style.transform = `translate3d(${constrainedX - this.initialX}px, ${constrainedY - this.initialY}px, 0)`;
+      // Use direct positioning for smoother movement
+      dialog.style.left = `${constrainedX}px`;
+      dialog.style.top = `${constrainedY}px`;
     }
   }
 
@@ -349,8 +353,9 @@ export class DatePickerComponent implements OnInit {
       const constrainedX = Math.max(0, Math.min(newX, maxX));
       const constrainedY = Math.max(0, Math.min(newY, maxY));
       
-      // Use transform for better performance
-      dialog.style.transform = `translate3d(${constrainedX - this.initialX}px, ${constrainedY - this.initialY}px, 0)`;
+      // Use direct positioning for smoother movement
+      dialog.style.left = `${constrainedX}px`;
+      dialog.style.top = `${constrainedY}px`;
     }
     
     event.preventDefault();
