@@ -27,6 +27,10 @@ export const routes: Routes = [
     loadChildren: () => import('./features/extrato/extrato.routes').then(m => m.EXTRATO_ROUTES)
   },
   {
+    path: 'demo',
+    loadChildren: () => import('./shared/components/demo.routes').then(m => m.demoRoutes)
+  },
+  {
     path: '',
     pathMatch: 'full',
     redirectTo: 'home'

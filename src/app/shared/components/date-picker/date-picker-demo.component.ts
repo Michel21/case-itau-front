@@ -369,7 +369,7 @@ import { DatePickerComponent, DatePickerConfig } from './date-picker.component';
       flex: 1;
     }
 
-    // Responsive
+    /* Responsive */
     @media (max-width: 768px) {
       .demo-container {
         padding: 10px;

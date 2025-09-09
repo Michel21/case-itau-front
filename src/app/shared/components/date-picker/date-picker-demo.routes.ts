@@ -3,8 +3,13 @@ import { DatePickerDemoComponent } from './date-picker-demo.component';
 
 export const datePickerDemoRoutes: Routes = [
   {
-    path: '',
+    path: 'date-picker',
     component: DatePickerDemoComponent,
     title: 'DatePicker Demo'
+  },
+  {
+    path: '',
+    redirectTo: 'date-picker',
+    pathMatch: 'full'
   }
 ];
