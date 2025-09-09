@@ -1,7 +1,11 @@
 <div class="date-picker-overlay" (click)="closeDialog()">
   <div class="date-picker-dialog" (click)="$event.stopPropagation()">
     <!-- Header -->
-    <div class="date-picker-header">
+    <div class="date-picker-header" 
+         [style.cursor]="dragState().cursor"
+         (mousedown)="onHeaderMouseDown($event)"
+         (touchstart)="onHeaderTouchStart($event)">
+      <div class="drag-indicator">⋮⋮</div>
       <h3 class="date-picker-title">{{ config.title || 'Selecione a data' }}</h3>
       <button type="button" class="close-button" (click)="closeDialog()" aria-label="Fechar">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

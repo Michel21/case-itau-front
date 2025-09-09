@@ -1,6 +1,9 @@
-import { Component, Input, Output, EventEmitter, OnInit, signal, computed } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, signal, computed, effect, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Observable } from 'rxjs';
+import { takeUntil, take } from 'rxjs/operators';
 
 export interface DatePickerConfig {
   title?: string;
@@ -24,6 +27,9 @@ export class DatePickerComponent implements OnInit {
   @Output() dateSelected = new EventEmitter<Date>();
   @Output() cancelled = new EventEmitter<void>();
 
+  // Angular Features: Inject DestroyRef
+  private destroyRef = inject(DestroyRef);
+
   // Signals para estado reativo
   readonly currentDate = signal(new Date());
   readonly selectedDateSignal = signal<Date | null>(null);
@@ -31,6 +37,7 @@ export class DatePickerComponent implements OnInit {
   readonly currentYear = signal(new Date().getFullYear());
   readonly showMonthPicker = signal(false);
   readonly showYearPicker = signal(false);
+  readonly isDragging = signal(false);
 
   // Computed values
   readonly monthNames = computed(() => [
@@ -83,12 +90,37 @@ export class DatePickerComponent implements OnInit {
     return years;
   });
 
+  // Computed signal for drag state
+  readonly dragState = computed(() => ({
+    isDragging: this.isDragging(),
+    cursor: this.isDragging() ? 'grabbing' : 'grab'
+  }));
+
+  // Drag and Drop properties using signals
+  private dragStartX = 0;
+  private dragStartY = 0;
+  private initialX = 0;
+  private initialY = 0;
+
   ngOnInit(): void {
     if (this.selectedDate) {
       this.selectedDateSignal.set(this.selectedDate);
       this.currentMonth.set(this.selectedDate.getMonth());
       this.currentYear.set(this.selectedDate.getFullYear());
     }
+
+    // Angular Features: Effect for reactive updates
+    effect(() => {
+      const dragging = this.isDragging();
+      const dialog = document.querySelector('.date-picker-dialog') as HTMLElement;
+      if (dialog) {
+        if (dragging) {
+          dialog.classList.add('dragging');
+        } else {
+          dialog.classList.remove('dragging');
+        }
+      }
+    });
   }
 
   selectDate(day: number): void {
@@ -177,5 +209,156 @@ export class DatePickerComponent implements OnInit {
 
   closeDialog(): void {
     this.cancelled.emit();
+  }
+
+  // Drag and Drop Methods for Modal
+  onHeaderMouseDown(event: MouseEvent): void {
+    if (event.button !== 0) return; // Only left mouse button
+    
+    this.isDragging.set(true);
+    this.dragStartX = event.clientX;
+    this.dragStartY = event.clientY;
+    
+    const dialog = (event.target as HTMLElement).closest('.date-picker-dialog') as HTMLElement;
+    if (dialog) {
+      const rect = dialog.getBoundingClientRect();
+      this.initialX = rect.left;
+      this.initialY = rect.top;
+      
+      dialog.style.position = 'fixed';
+      dialog.style.left = `${this.initialX}px`;
+      dialog.style.top = `${this.initialY}px`;
+      dialog.style.margin = '0';
+      dialog.style.transform = 'none';
+    }
+    
+    // Angular Features: Use takeUntilDestroyed for automatic cleanup
+    const mouseMove$ = new Observable<MouseEvent>(subscriber => {
+      const handler = (e: MouseEvent) => subscriber.next(e);
+      document.addEventListener('mousemove', handler);
+      return () => document.removeEventListener('mousemove', handler);
+    });
+    
+    const mouseUp$ = new Observable<MouseEvent>(subscriber => {
+      const handler = (e: MouseEvent) => subscriber.next(e);
+      document.addEventListener('mouseup', handler);
+      return () => document.removeEventListener('mouseup', handler);
+    });
+    
+    mouseMove$.pipe(
+      takeUntilDestroyed(this.destroyRef),
+      takeUntil(mouseUp$)
+    ).subscribe(this.onMouseMove.bind(this));
+    
+    mouseUp$.pipe(
+      takeUntilDestroyed(this.destroyRef),
+      take(1)
+    ).subscribe(() => this.onMouseUp());
+    
+    event.preventDefault();
+  }
+
+  onHeaderTouchStart(event: TouchEvent): void {
+    if (event.touches.length !== 1) return;
+    
+    this.isDragging.set(true);
+    this.dragStartX = event.touches[0].clientX;
+    this.dragStartY = event.touches[0].clientY;
+    
+    const dialog = (event.target as HTMLElement).closest('.date-picker-dialog') as HTMLElement;
+    if (dialog) {
+      const rect = dialog.getBoundingClientRect();
+      this.initialX = rect.left;
+      this.initialY = rect.top;
+      
+      dialog.style.position = 'fixed';
+      dialog.style.left = `${this.initialX}px`;
+      dialog.style.top = `${this.initialY}px`;
+      dialog.style.margin = '0';
+      dialog.style.transform = 'none';
+    }
+    
+    // Angular Features: Use RxJS for touch events
+    const touchMove$ = new Observable<TouchEvent>(subscriber => {
+      const handler = (e: TouchEvent) => subscriber.next(e);
+      document.addEventListener('touchmove', handler, { passive: false });
+      return () => document.removeEventListener('touchmove', handler);
+    });
+    
+    const touchEnd$ = new Observable<TouchEvent>(subscriber => {
+      const handler = (e: TouchEvent) => subscriber.next(e);
+      document.addEventListener('touchend', handler);
+      return () => document.removeEventListener('touchend', handler);
+    });
+    
+    touchMove$.pipe(
+      takeUntilDestroyed(this.destroyRef),
+      takeUntil(touchEnd$)
+    ).subscribe(this.onTouchMove.bind(this));
+    
+    touchEnd$.pipe(
+      takeUntilDestroyed(this.destroyRef),
+      take(1)
+    ).subscribe(() => this.onTouchEnd());
+    
+    event.preventDefault();
+  }
+
+  private onMouseMove(event: MouseEvent): void {
+    if (!this.isDragging()) return;
+    
+    const deltaX = event.clientX - this.dragStartX;
+    const deltaY = event.clientY - this.dragStartY;
+    
+    const newX = this.initialX + deltaX;
+    const newY = this.initialY + deltaY;
+    
+    // Constrain to viewport
+    const dialog = document.querySelector('.date-picker-dialog') as HTMLElement;
+    if (dialog) {
+      const rect = dialog.getBoundingClientRect();
+      const maxX = window.innerWidth - rect.width;
+      const maxY = window.innerHeight - rect.height;
+      
+      const constrainedX = Math.max(0, Math.min(newX, maxX));
+      const constrainedY = Math.max(0, Math.min(newY, maxY));
+      
+      dialog.style.left = `${constrainedX}px`;
+      dialog.style.top = `${constrainedY}px`;
+    }
+  }
+
+  private onTouchMove(event: TouchEvent): void {
+    if (!this.isDragging() || event.touches.length !== 1) return;
+    
+    const deltaX = event.touches[0].clientX - this.dragStartX;
+    const deltaY = event.touches[0].clientY - this.dragStartY;
+    
+    const newX = this.initialX + deltaX;
+    const newY = this.initialY + deltaY;
+    
+    // Constrain to viewport
+    const dialog = document.querySelector('.date-picker-dialog') as HTMLElement;
+    if (dialog) {
+      const rect = dialog.getBoundingClientRect();
+      const maxX = window.innerWidth - rect.width;
+      const maxY = window.innerHeight - rect.height;
+      
+      const constrainedX = Math.max(0, Math.min(newX, maxX));
+      const constrainedY = Math.max(0, Math.min(newY, maxY));
+      
+      dialog.style.left = `${constrainedX}px`;
+      dialog.style.top = `${constrainedY}px`;
+    }
+    
+    event.preventDefault();
+  }
+
+  private onMouseUp(): void {
+    this.isDragging.set(false);
+  }
+
+  private onTouchEnd(): void {
+    this.isDragging.set(false);
   }
 }

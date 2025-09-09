@@ -24,6 +24,12 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  transition: box-shadow 0.2s ease;
+}
+
+.date-picker-dialog.dragging {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  transform: scale(1.02);
 }
 
 // Header
@@ -33,6 +39,20 @@
   justify-content: space-between;
   padding: 20px 24px 16px;
   border-bottom: 1px solid #f3f4f6;
+  cursor: move;
+  user-select: none;
+  position: relative;
+}
+
+.drag-indicator {
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  transform: translateX(-50%);
+  color: #9ca3af;
+  font-size: 12px;
+  opacity: 0.6;
+  pointer-events: none;
 }
 
 .date-picker-title {
@@ -40,6 +60,8 @@
   font-weight: 600;
   color: #111827;
   margin: 0;
+  flex: 1;
+  text-align: center;
 }
 
 .close-button {
