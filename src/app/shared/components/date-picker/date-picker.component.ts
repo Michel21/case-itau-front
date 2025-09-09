@@ -157,7 +157,7 @@ export class DatePickerComponent implements OnInit {
   private centerModalInViewport(): void {
     const dialog = document.querySelector('.date-picker-dialog') as HTMLElement;
     if (dialog) {
-      // Reset any existing positioning
+      // Use CSS centering first for smooth initial positioning
       dialog.style.position = 'fixed';
       dialog.style.left = '50%';
       dialog.style.top = '50%';
@@ -180,14 +180,16 @@ export class DatePickerComponent implements OnInit {
       const constrainedX = Math.max(padding, Math.min(centerX, viewportWidth - rect.width - padding));
       const constrainedY = Math.max(padding, Math.min(centerY, viewportHeight - rect.height - padding));
       
-      // Apply final position
-      dialog.style.left = `${constrainedX}px`;
-      dialog.style.top = `${constrainedY}px`;
-      dialog.style.transform = 'none';
-      
-      // Store initial position for drag calculations
-      this.initialX = constrainedX;
-      this.initialY = constrainedY;
+      // Apply final position smoothly
+      requestAnimationFrame(() => {
+        dialog.style.left = `${constrainedX}px`;
+        dialog.style.top = `${constrainedY}px`;
+        dialog.style.transform = 'none';
+        
+        // Store initial position for drag calculations
+        this.initialX = constrainedX;
+        this.initialY = constrainedY;
+      });
     }
   }
 
@@ -287,7 +289,7 @@ export class DatePickerComponent implements OnInit {
     this.cancelled.emit();
   }
 
-  // Drag and Drop Methods for Modal - Fixed positioning
+  // Drag and Drop Methods for Modal - Smooth positioning
   onHeaderMouseDown(event: MouseEvent): void {
     if (event.button !== 0) return; // Only left mouse button
     
@@ -296,6 +298,7 @@ export class DatePickerComponent implements OnInit {
     
     const dialog = (event.target as HTMLElement).closest('.date-picker-dialog') as HTMLElement;
     if (dialog) {
+      // Get current position without changing it
       const rect = dialog.getBoundingClientRect();
       
       // Store initial positions
@@ -304,13 +307,15 @@ export class DatePickerComponent implements OnInit {
       this.dragStartX = event.clientX;
       this.dragStartY = event.clientY;
       
-      // Set up for smooth dragging
+      // Ensure dialog is ready for dragging without changing position
       dialog.style.position = 'fixed';
+      dialog.style.margin = '0';
+      dialog.style.willChange = 'transform';
+      
+      // Keep current position to avoid jumping
       dialog.style.left = `${this.initialX}px`;
       dialog.style.top = `${this.initialY}px`;
-      dialog.style.margin = '0';
       dialog.style.transform = 'none';
-      dialog.style.willChange = 'transform';
     }
     
     // Angular Features: Use takeUntilDestroyed for automatic cleanup
