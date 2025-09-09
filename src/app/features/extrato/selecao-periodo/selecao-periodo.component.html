@@ -112,7 +112,6 @@
                   data-format="dd/mm/aaaa"
                   placeholder="">
               </div>
-              <span class="field-helper">Formato: dd/mm/aaaa</span>
               @if (isFieldInvalid('dataInicio')) {
                 <span class="field-error" role="alert">
                   {{ getFieldError('dataInicio') }}
@@ -134,9 +133,8 @@
                   aria-label="Data de fim do período (formato: dd/mm/aaaa)"
                   tabindex="0"
                   data-format="dd/mm/aaaa"
-                  placeholder="dd/mm/aaaa">
+                  placeholder="">
               </div>
-              <span class="field-helper">Formato: dd/mm/aaaa</span>
               @if (isFieldInvalid('dataFim')) {
                 <span class="field-error" role="alert">
                   {{ getFieldError('dataFim') }}
