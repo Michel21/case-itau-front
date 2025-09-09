@@ -24,12 +24,14 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: box-shadow 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, box-shadow;
 }
 
 .date-picker-dialog.dragging {
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  transform: scale(1.02);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(59, 130, 246, 0.1);
+  transform: scale(1.02) rotate(0.5deg);
+  transition: box-shadow 0.2s ease, transform 0.1s ease;
 }
 
 // Header
@@ -42,6 +44,15 @@
   cursor: move;
   user-select: none;
   position: relative;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.02) 0%, rgba(147, 51, 234, 0.02) 100%);
+  }
+  
+  &:active {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(147, 51, 234, 0.05) 100%);
+  }
 }
 
 .drag-indicator {
@@ -53,6 +64,19 @@
   font-size: 12px;
   opacity: 0.6;
   pointer-events: none;
+  transition: all 0.3s ease;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateX(-50%) scale(1.1);
+  }
 }
 
 .date-picker-title {
@@ -425,6 +449,72 @@
 
   .action-buttons {
     padding: 16px 20px;
+  }
+}
+
+// Smooth animations for better UX
+.date-picker-dialog {
+  animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+// Enhanced hover effects
+.calendar-day {
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: -1;
+  }
+  
+  &:hover:not(.empty):not(.disabled)::before {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+// Smooth button transitions
+.selector-button, .nav-button, .calendar-day {
+  position: relative;
+  overflow: hidden;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 0;
+  }
+  
+  &:active::after {
+    width: 200%;
+    height: 200%;
   }
 }
 

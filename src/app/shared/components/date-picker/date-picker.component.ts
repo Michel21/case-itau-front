@@ -313,18 +313,19 @@ export class DatePickerComponent implements OnInit {
     const newX = this.initialX + deltaX;
     const newY = this.initialY + deltaY;
     
-    // Constrain to viewport
+    // Constrain to viewport with smooth boundaries
     const dialog = document.querySelector('.date-picker-dialog') as HTMLElement;
     if (dialog) {
       const rect = dialog.getBoundingClientRect();
       const maxX = window.innerWidth - rect.width;
       const maxY = window.innerHeight - rect.height;
       
+      // Smooth constraint with easing
       const constrainedX = Math.max(0, Math.min(newX, maxX));
       const constrainedY = Math.max(0, Math.min(newY, maxY));
       
-      dialog.style.left = `${constrainedX}px`;
-      dialog.style.top = `${constrainedY}px`;
+      // Use transform for better performance
+      dialog.style.transform = `translate3d(${constrainedX - this.initialX}px, ${constrainedY - this.initialY}px, 0)`;
     }
   }
 
@@ -337,18 +338,19 @@ export class DatePickerComponent implements OnInit {
     const newX = this.initialX + deltaX;
     const newY = this.initialY + deltaY;
     
-    // Constrain to viewport
+    // Constrain to viewport with smooth boundaries
     const dialog = document.querySelector('.date-picker-dialog') as HTMLElement;
     if (dialog) {
       const rect = dialog.getBoundingClientRect();
       const maxX = window.innerWidth - rect.width;
       const maxY = window.innerHeight - rect.height;
       
+      // Smooth constraint with easing
       const constrainedX = Math.max(0, Math.min(newX, maxX));
       const constrainedY = Math.max(0, Math.min(newY, maxY));
       
-      dialog.style.left = `${constrainedX}px`;
-      dialog.style.top = `${constrainedY}px`;
+      // Use transform for better performance
+      dialog.style.transform = `translate3d(${constrainedX - this.initialX}px, ${constrainedY - this.initialY}px, 0)`;
     }
     
     event.preventDefault();
@@ -356,9 +358,23 @@ export class DatePickerComponent implements OnInit {
 
   private onMouseUp(): void {
     this.isDragging.set(false);
+    
+    // Reset dialog styles for smooth transition
+    const dialog = document.querySelector('.date-picker-dialog') as HTMLElement;
+    if (dialog) {
+      dialog.style.willChange = 'auto';
+      dialog.style.transform = '';
+    }
   }
 
   private onTouchEnd(): void {
     this.isDragging.set(false);
+    
+    // Reset dialog styles for smooth transition
+    const dialog = document.querySelector('.date-picker-dialog') as HTMLElement;
+    if (dialog) {
+      dialog.style.willChange = 'auto';
+      dialog.style.transform = '';
+    }
   }
 }
