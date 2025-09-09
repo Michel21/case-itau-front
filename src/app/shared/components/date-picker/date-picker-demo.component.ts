@@ -175,12 +175,15 @@ import { DatePickerComponent, DatePickerConfig } from './date-picker.component';
       padding: 20px;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       transition: all 0.3s ease;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
     .demo-header {
       text-align: center;
-      margin-bottom: 40px;
-      padding: 40px 20px;
+      margin-bottom: 30px;
+      padding: 30px 20px;
       border-radius: 16px;
       transition: all 0.3s ease;
     }
@@ -284,12 +287,13 @@ import { DatePickerComponent, DatePickerConfig } from './date-picker.component';
 
     .demo-sections {
       display: grid;
-      gap: 30px;
+      gap: 25px;
+      flex: 1;
     }
 
     .demo-section {
       border-radius: 12px;
-      padding: 30px;
+      padding: 25px;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
       border: 1px solid #e5e7eb;
       transition: all 0.3s ease;
@@ -520,23 +524,92 @@ import { DatePickerComponent, DatePickerConfig } from './date-picker.component';
     /* Responsive */
     @media (max-width: 768px) {
       .demo-container {
-        padding: 10px;
+        padding: 15px;
+        min-height: 100vh;
       }
 
       .demo-header {
         padding: 20px 15px;
+        margin-bottom: 20px;
       }
 
       .demo-header h1 {
         font-size: 2rem;
       }
 
+      .demo-header p {
+        font-size: 1rem;
+      }
+
+      .demo-sections {
+        gap: 20px;
+      }
+
       .demo-section {
         padding: 20px;
       }
 
+      .demo-section h2 {
+        font-size: 1.3rem;
+      }
+
       .config-grid {
         grid-template-columns: 1fr;
+      }
+
+      .theme-selector {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .theme-selector select {
+        width: 100%;
+        max-width: 200px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .demo-container {
+        padding: 10px;
+      }
+
+      .demo-header {
+        padding: 15px 10px;
+        margin-bottom: 15px;
+      }
+
+      .demo-header h1 {
+        font-size: 1.75rem;
+      }
+
+      .demo-header p {
+        font-size: 0.9rem;
+      }
+
+      .demo-sections {
+        gap: 15px;
+      }
+
+      .demo-section {
+        padding: 15px;
+      }
+
+      .demo-section h2 {
+        font-size: 1.2rem;
+      }
+
+      .demo-section p {
+        font-size: 0.9rem;
+      }
+
+      .demo-button {
+        padding: 10px 20px;
+        font-size: 14px;
+      }
+
+      .selected-date-info {
+        padding: 12px;
+        font-size: 14px;
       }
     }
   `]

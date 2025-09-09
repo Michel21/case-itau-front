@@ -49,8 +49,11 @@ import { RouterModule } from '@angular/router';
   `,
   styles: [`
     .demo-nav {
-      padding: 40px 20px;
+      padding: 20px;
       min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: all 0.3s ease;
     }
 
@@ -86,12 +89,13 @@ import { RouterModule } from '@angular/router';
 
     .demo-nav-container {
       max-width: 1200px;
+      width: 100%;
       margin: 0 auto;
     }
 
     .demo-nav-header {
       text-align: center;
-      margin-bottom: 40px;
+      margin-bottom: 30px;
     }
 
     .demo-nav-header h1 {
@@ -158,8 +162,9 @@ import { RouterModule } from '@angular/router';
 
     .demo-nav-links {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 20px;
+      justify-items: center;
     }
 
     .demo-nav-link {
@@ -172,6 +177,8 @@ import { RouterModule } from '@angular/router';
       color: inherit;
       transition: all 0.3s ease;
       border: 2px solid transparent;
+      width: 100%;
+      max-width: 400px;
     }
 
     /* Light theme links */
@@ -263,24 +270,83 @@ import { RouterModule } from '@angular/router';
 
     @media (max-width: 768px) {
       .demo-nav {
-        padding: 20px 15px;
+        padding: 15px;
+        align-items: flex-start;
+        padding-top: 40px;
+      }
+
+      .demo-nav-container {
+        max-width: 100%;
+      }
+
+      .demo-nav-header {
+        margin-bottom: 25px;
       }
 
       .demo-nav-header h1 {
         font-size: 2rem;
       }
 
+      .demo-nav-header p {
+        font-size: 1rem;
+      }
+
       .demo-nav-links {
         grid-template-columns: 1fr;
+        gap: 15px;
+        justify-items: stretch;
       }
 
       .demo-nav-link {
         padding: 20px;
         gap: 16px;
+        max-width: none;
       }
 
       .demo-nav-icon {
         font-size: 1.5rem;
+      }
+
+      .theme-selector {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .theme-selector select {
+        width: 100%;
+        max-width: 200px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .demo-nav {
+        padding: 10px;
+        padding-top: 30px;
+      }
+
+      .demo-nav-header h1 {
+        font-size: 1.75rem;
+      }
+
+      .demo-nav-header p {
+        font-size: 0.9rem;
+      }
+
+      .demo-nav-link {
+        padding: 16px;
+        gap: 12px;
+      }
+
+      .demo-nav-icon {
+        font-size: 1.25rem;
+      }
+
+      .demo-nav-content h3 {
+        font-size: 1.1rem;
+      }
+
+      .demo-nav-content p {
+        font-size: 0.85rem;
       }
     }
   `]
