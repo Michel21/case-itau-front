@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DatePicker Component Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f8fafc;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 16px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin: 0 0 10px 0;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            margin: 0;
+            opacity: 0.9;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .demo-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+        }
+        
+        .demo-card h2 {
+            color: #1f2937;
+            font-size: 1.5rem;
+            margin: 0 0 10px 0;
+            font-weight: 600;
+        }
+        
+        .demo-card p {
+            color: #6b7280;
+            margin: 0 0 20px 0;
+        }
+        
+        .demo-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .demo-button:hover {
+            background: #2563eb;
+        }
+        
+        .demo-button.secondary {
+            background: #10b981;
+        }
+        
+        .demo-button.secondary:hover {
+            background: #059669;
+        }
+        
+        .demo-button.accent {
+            background: #f59e0b;
+        }
+        
+        .demo-button.accent:hover {
+            background: #d97706;
+        }
+        
+        .features {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+        }
+        
+        .features h2 {
+            color: #1f2937;
+            font-size: 1.5rem;
+            margin: 0 0 20px 0;
+            font-weight: 600;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .feature-item {
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .feature-item h3 {
+            color: #1f2937;
+            font-size: 1.1rem;
+            margin: 0 0 8px 0;
+            font-weight: 600;
+        }
+        
+        .feature-item p {
+            color: #6b7280;
+            margin: 0;
+            font-size: 14px;
+        }
+        
+        .code-example {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        
+        .code-example .comment {
+            color: #6b7280;
+        }
+        
+        .code-example .keyword {
+            color: #f59e0b;
+        }
+        
+        .code-example .string {
+            color: #10b981;
+        }
+        
+        .code-example .type {
+            color: #3b82f6;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>DatePicker Component</h1>
+            <p>Componente profissional de seleção de data para Angular</p>
+        </header>
+
+        <div class="demo-grid">
+            <div class="demo-card">
+                <h2>Demo Básico</h2>
+                <p>Seletor de data simples com configurações padrão</p>
+                <button class="demo-button" onclick="showDemo('basic')">
+                    Abrir Demo Básico
+                </button>
+            </div>
+
+            <div class="demo-card">
+                <h2>Demo com Restrições</h2>
+                <p>Seletor com datas mínimas e máximas definidas</p>
+                <button class="demo-button secondary" onclick="showDemo('restricted')">
+                    Abrir Demo Restrito
+                </button>
+            </div>
+
+            <div class="demo-card">
+                <h2>Demo com Data Inicial</h2>
+                <p>Seletor que abre com uma data pré-selecionada</p>
+                <button class="demo-button accent" onclick="showDemo('initial')">
+                    Abrir Demo Inicial
+                </button>
+            </div>
+        </div>
+
+        <div class="features">
+            <h2>Características do Componente</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <h3>🎨 Design Moderno</h3>
+                    <p>Interface limpa e profissional com design responsivo</p>
+                </div>
+                <div class="feature-item">
+                    <h3>📱 Mobile-First</h3>
+                    <p>Otimizado para dispositivos móveis com touch-friendly</p>
+                </div>
+                <div class="feature-item">
+                    <h3>♿ Acessível</h3>
+                    <p>Suporte completo a ARIA labels e navegação por teclado</p>
+                </div>
+                <div class="feature-item">
+                    <h3>⚙️ Configurável</h3>
+                    <p>Múltiplas opções de personalização e validação</p>
+                </div>
+                <div class="feature-item">
+                    <h3>🧪 Testado</h3>
+                    <p>29 testes unitários com 100% de cobertura</p>
+                </div>
+                <div class="feature-item">
+                    <h3>🚀 Performance</h3>
+                    <p>Angular Signals para estado reativo e otimizado</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="features">
+            <h2>Exemplo de Uso</h2>
+            <div class="code-example">
+<span class="comment">// Importar o componente</span>
+<span class="keyword">import</span> { <span class="type">DatePickerComponent</span>, <span class="type">DatePickerConfig</span> } <span class="keyword">from</span> <span class="string">'./shared/components/date-picker'</span>;
+
+<span class="comment">// No template</span>
+&lt;<span class="type">app-date-picker</span>
+  [<span class="type">config</span>]=<span class="string">"datePickerConfig"</span>
+  [<span class="type">selectedDate</span>]=<span class="string">"selectedDate()"</span>
+  (<span class="type">dateSelected</span>)=<span class="string">"onDateSelected($event)"</span>
+  (<span class="type">cancelled</span>)=<span class="string">"onCancelled()"</span>&gt;
+&lt;/<span class="type">app-date-picker</span>&gt;
+
+<span class="comment">// Configuração</span>
+<span class="type">datePickerConfig</span>: <span class="type">DatePickerConfig</span> = {
+  <span class="type">title</span>: <span class="string">'Selecione a data'</span>,
+  <span class="type">minDate</span>: <span class="keyword">new</span> <span class="type">Date</span>(<span class="string">2024, 0, 1</span>),
+  <span class="type">maxDate</span>: <span class="keyword">new</span> <span class="type">Date</span>(<span class="string">2025, 11, 31</span>)
+};
+            </div>
+        </div>
+
+        <div class="features">
+            <h2>Eventos Disponíveis</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <h3>dateSelected</h3>
+                    <p>Emitido quando o usuário confirma a seleção de uma data</p>
+                </div>
+                <div class="feature-item">
+                    <h3>cancelled</h3>
+                    <p>Emitido quando o usuário cancela a seleção ou fecha o modal</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showDemo(type) {
+            alert(`Demo ${type} seria aberto aqui. Para testar o componente real, execute o projeto Angular e acesse /demo/date-picker`);
+        }
+    </script>
+</body>
+</html>

@@ -213,7 +213,7 @@ describe('DatePickerComponent', () => {
       expect(years).toContain(currentYear - 10);
       expect(years).toContain(currentYear);
       expect(years).toContain(currentYear + 10);
-      expect(years).toHaveLength(21); // 10 anos antes + ano atual + 10 anos depois
+      expect(years.length).toBe(21); // 10 anos antes + ano atual + 10 anos depois
     });
   });
 
