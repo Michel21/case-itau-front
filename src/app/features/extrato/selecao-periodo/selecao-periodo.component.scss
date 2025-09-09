@@ -281,6 +281,69 @@
   &:-ms-input-placeholder {
     color: #999;
   }
+
+  // Ocultar o placeholder nativo do navegador
+  &::-webkit-datetime-edit-text {
+    color: transparent;
+  }
+  
+  &::-webkit-datetime-edit-month-field,
+  &::-webkit-datetime-edit-day-field,
+  &::-webkit-datetime-edit-year-field {
+    color: transparent;
+  }
+}
+
+
+// Controles de formato de data
+.format-controls {
+  margin-bottom: 20px;
+  padding: 16px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+
+  .format-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 12px;
+  }
+
+  .format-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+
+    .format-btn {
+      padding: 8px 16px;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      background-color: #fff;
+      color: #495057;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        border-color: #007bff;
+        color: #007bff;
+      }
+
+      &.active {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: #fff;
+      }
+
+      &:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+      }
+    }
+  }
 }
 
 // Texto de ajuda
