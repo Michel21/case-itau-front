@@ -1,0 +1,143 @@
+<div class="date-picker-overlay" (click)="closeDialog()">
+  <div class="date-picker-dialog" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="date-picker-header">
+      <h3 class="date-picker-title">{{ config.title || 'Selecione a data' }}</h3>
+      <button type="button" class="close-button" (click)="closeDialog()" aria-label="Fechar">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Month and Year Selectors -->
+    <div class="month-year-selectors">
+      <div class="selector-group">
+        <button type="button" class="selector-button" (click)="toggleMonthPicker()">
+          <span class="selector-text">{{ monthNames()[currentMonth()] }}</span>
+          <svg class="chevron-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6,9 12,15 18,9"></polyline>
+          </svg>
+        </button>
+        
+        <!-- Month Picker Dropdown -->
+        <div class="dropdown" [class.show]="showMonthPicker()">
+          <div class="dropdown-content">
+            @for (month of monthNames(); track $index) {
+              <button 
+                type="button" 
+                class="dropdown-item"
+                [class.active]="currentMonth() === $index"
+                (click)="selectMonth($index)">
+                {{ month }}
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="selector-group">
+        <button type="button" class="selector-button" (click)="toggleYearPicker()">
+          <span class="selector-text">{{ currentYear() }}</span>
+          <svg class="chevron-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6,9 12,15 18,9"></polyline>
+          </svg>
+        </button>
+        
+        <!-- Year Picker Dropdown -->
+        <div class="dropdown" [class.show]="showYearPicker()">
+          <div class="dropdown-content">
+            @for (year of availableYears(); track year) {
+              <button 
+                type="button" 
+                class="dropdown-item"
+                [class.active]="currentYear() === year"
+                (click)="selectYear(year)">
+                {{ year }}
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calendar Navigation -->
+    <div class="calendar-navigation">
+      <button type="button" class="nav-button" (click)="previousMonth()" aria-label="Mês anterior">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15,18 9,12 15,6"></polyline>
+        </svg>
+      </button>
+      
+      <div class="current-month-year">
+        {{ monthNames()[currentMonth()] }} {{ currentYear() }}
+      </div>
+      
+      <button type="button" class="nav-button" (click)="nextMonth()" aria-label="Próximo mês">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9,18 15,12 9,6"></polyline>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Calendar Grid -->
+    <div class="calendar-grid">
+      <!-- Day Headers -->
+      <div class="day-headers">
+        @for (day of dayNames(); track $index) {
+          <div class="day-header">{{ day }}</div>
+        }
+      </div>
+
+      <!-- Calendar Days -->
+      <div class="calendar-days">
+        @for (day of calendarDays(); track $index) {
+          <button 
+            type="button"
+            class="calendar-day"
+            [class.empty]="!day"
+            [class.selected]="isSelectedDate(day)"
+            [class.today]="isToday(day)"
+            [class.disabled]="isDisabled(day)"
+            [disabled]="!day || isDisabled(day)"
+            (click)="selectDate(day)">
+            {{ day }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Selected Date Display -->
+    @if (selectedDateSignal()) {
+      <div class="selected-date-display">
+        <div class="selected-date-content">
+          <svg class="calendar-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <div class="selected-date-text">
+            <div class="selected-date-label">Data selecionada</div>
+            <div class="selected-date-value">{{ selectedDateFormatted() }}</div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button type="button" class="cancel-button" (click)="cancelSelection()">
+        Cancelar
+      </button>
+      <button 
+        type="button" 
+        class="confirm-button" 
+        [disabled]="!selectedDateSignal()"
+        (click)="confirmSelection()">
+        Confirmar
+      </button>
+    </div>
+  </div>
+</div>
