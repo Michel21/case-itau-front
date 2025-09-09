@@ -12,6 +12,9 @@
   justify-content: center;
   z-index: 1000;
   padding: 20px;
+  overflow: auto;
+  min-height: 100vh;
+  min-width: 100vw;
 }
 
 .date-picker-dialog {
@@ -21,10 +24,13 @@
   width: 100%;
   max-width: 400px;
   max-height: 90vh;
+  min-height: 300px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   transition: box-shadow 0.2s ease;
+  position: relative;
+  margin: auto;
 }
 
 .date-picker-dialog.dragging {
@@ -414,39 +420,70 @@
 }
 
 // Responsive Design
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   .date-picker-overlay {
     padding: 10px;
+    align-items: flex-start;
+    padding-top: 5vh;
   }
 
   .date-picker-dialog {
-    max-width: 100%;
+    max-width: calc(100vw - 20px);
+    max-height: 90vh;
+    min-height: 250px;
     border-radius: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .date-picker-overlay {
+    padding: 5px;
+    align-items: flex-start;
+    padding-top: 2vh;
+  }
+
+  .date-picker-dialog {
+    max-width: calc(100vw - 10px);
+    max-height: 95vh;
+    min-height: 200px;
+    border-radius: 8px;
   }
 
   .date-picker-header {
-    padding: 16px 20px 12px;
+    padding: 12px 16px 8px;
   }
 
   .month-year-selectors {
-    padding: 12px 20px;
+    padding: 8px 16px;
   }
 
   .calendar-navigation {
-    padding: 12px 20px;
+    padding: 8px 16px;
   }
 
   .calendar-grid {
-    padding: 0 20px 12px;
+    padding: 0 16px 8px;
   }
 
   .selected-date-display {
-    margin: 12px 20px;
-    padding: 12px;
+    margin: 8px 16px;
+    padding: 8px;
   }
 
   .action-buttons {
-    padding: 16px 20px;
+    padding: 12px 16px;
+  }
+}
+
+@media (max-height: 600px) {
+  .date-picker-overlay {
+    align-items: flex-start;
+    padding-top: 10px;
+  }
+
+  .date-picker-dialog {
+    max-height: calc(100vh - 20px);
+    min-height: 200px;
   }
 }
 

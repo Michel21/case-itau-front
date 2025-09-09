@@ -109,6 +109,11 @@ export class DatePickerComponent implements OnInit {
       this.currentYear.set(this.selectedDate.getFullYear());
     }
 
+    // Center modal in viewport when it opens
+    setTimeout(() => {
+      this.centerModalInViewport();
+    }, 0);
+
     // Angular Features: Effect for reactive updates
     effect(() => {
       const dragging = this.isDragging();
@@ -121,6 +126,34 @@ export class DatePickerComponent implements OnInit {
         }
       }
     });
+  }
+
+  private centerModalInViewport(): void {
+    const dialog = document.querySelector('.date-picker-dialog') as HTMLElement;
+    if (dialog) {
+      const rect = dialog.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      
+      // Calculate center position
+      const centerX = (viewportWidth - rect.width) / 2;
+      const centerY = (viewportHeight - rect.height) / 2;
+      
+      // Ensure modal is within viewport bounds
+      const constrainedX = Math.max(20, Math.min(centerX, viewportWidth - rect.width - 20));
+      const constrainedY = Math.max(20, Math.min(centerY, viewportHeight - rect.height - 20));
+      
+      // Set initial position
+      dialog.style.position = 'fixed';
+      dialog.style.left = `${constrainedX}px`;
+      dialog.style.top = `${constrainedY}px`;
+      dialog.style.margin = '0';
+      dialog.style.transform = 'none';
+      
+      // Store initial position for drag calculations
+      this.initialX = constrainedX;
+      this.initialY = constrainedY;
+    }
   }
 
   selectDate(day: number): void {
