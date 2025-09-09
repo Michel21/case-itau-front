@@ -2,6 +2,14 @@ import { Component, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DatePickerComponent, DatePickerConfig } from './date-picker.component';
 
+interface DemoSection {
+  id: string;
+  title: string;
+  description: string;
+  type: 'basic' | 'restricted' | 'initial' | 'config' | 'events';
+  draggable: boolean;
+}
+
 @Component({
   selector: 'app-date-picker-demo',
   standalone: true,
@@ -25,118 +33,129 @@ import { DatePickerComponent, DatePickerConfig } from './date-picker.component';
         </div>
       </header>
 
-      <div class="demo-sections">
-        <!-- Seção 1: Demo Básico -->
-        <section class="demo-section">
-          <h2>Demo Básico</h2>
-          <p>Seletor de data simples com configurações padrão</p>
-          
-          <div class="demo-controls">
-            <button 
-              type="button" 
-              class="demo-button primary"
-              (click)="showBasicPicker.set(true)">
-              Abrir Date Picker Básico
-            </button>
+      <div class="demo-sections" 
+           (dragover)="onDragOver($event)"
+           (drop)="onDrop($event)">
+        @for (section of demoSections(); track section.id; let i = $index) {
+          <section class="demo-section" 
+                   [draggable]="section.draggable"
+                   (dragstart)="onDragStart($event, i)"
+                   (dragend)="onDragEnd($event)">
             
-            @if (basicSelectedDate()) {
-              <div class="selected-date-info">
-                <strong>Data selecionada:</strong> {{ formatDate(basicSelectedDate()!) }}
-              </div>
+            @if (section.draggable) {
+              <div class="drag-handle">⋮⋮</div>
             }
-          </div>
-        </section>
-
-        <!-- Seção 2: Demo com Restrições -->
-        <section class="demo-section">
-          <h2>Demo com Restrições</h2>
-          <p>Seletor com datas mínimas e máximas definidas</p>
-          
-          <div class="demo-controls">
-            <button 
-              type="button" 
-              class="demo-button secondary"
-              (click)="showRestrictedPicker.set(true)">
-              Abrir Date Picker com Restrições
-            </button>
             
-            @if (restrictedSelectedDate()) {
-              <div class="selected-date-info">
-                <strong>Data selecionada:</strong> {{ formatDate(restrictedSelectedDate()!) }}
-              </div>
-            }
-          </div>
-        </section>
-
-        <!-- Seção 3: Demo com Data Inicial -->
-        <section class="demo-section">
-          <h2>Demo com Data Inicial</h2>
-          <p>Seletor que abre com uma data pré-selecionada</p>
-          
-          <div class="demo-controls">
-            <button 
-              type="button" 
-              class="demo-button accent"
-              (click)="showInitialDatePicker.set(true)">
-              Abrir Date Picker com Data Inicial
-            </button>
-            
-            @if (initialSelectedDate()) {
-              <div class="selected-date-info">
-                <strong>Data selecionada:</strong> {{ formatDate(initialSelectedDate()!) }}
-              </div>
-            }
-          </div>
-        </section>
-
-        <!-- Seção 4: Demo de Configurações -->
-        <section class="demo-section">
-          <h2>Configurações Disponíveis</h2>
-          <div class="config-grid">
-            <div class="config-item">
-              <h3>title</h3>
-              <p>Título personalizado do modal</p>
-              <code>string</code>
-            </div>
-            <div class="config-item">
-              <h3>minDate</h3>
-              <p>Data mínima permitida</p>
-              <code>Date</code>
-            </div>
-            <div class="config-item">
-              <h3>maxDate</h3>
-              <p>Data máxima permitida</p>
-              <code>Date</code>
-            </div>
-            <div class="config-item">
-              <h3>locale</h3>
-              <p>Localização do componente</p>
-              <code>string</code>
-            </div>
-          </div>
-        </section>
-
-        <!-- Seção 5: Eventos -->
-        <section class="demo-section">
-          <h2>Eventos</h2>
-          <div class="events-log">
-            <h3>Log de Eventos:</h3>
-            <div class="events-list">
-              @for (event of eventsLog(); track $index) {
-                <div class="event-item" [class]="event.type">
-                  <span class="event-time">{{ event.timestamp | date:'HH:mm:ss' }}</span>
-                  <span class="event-message">{{ event.message }}</span>
+            @switch (section.type) {
+              @case ('basic') {
+                <h2>{{ section.title }}</h2>
+                <p>{{ section.description }}</p>
+                
+                <div class="demo-controls">
+                  <button 
+                    type="button" 
+                    class="demo-button primary"
+                    (click)="showBasicPicker.set(true)">
+                    Abrir Date Picker Básico
+                  </button>
+                  
+                  @if (basicSelectedDate()) {
+                    <div class="selected-date-info">
+                      <strong>Data selecionada:</strong> {{ formatDate(basicSelectedDate()!) }}
+                    </div>
+                  }
                 </div>
               }
-            </div>
-            <button 
-              type="button" 
-              class="demo-button small"
-              (click)="clearEvents()">
-              Limpar Log
-            </button>
-          </div>
-        </section>
+              
+              @case ('restricted') {
+                <h2>{{ section.title }}</h2>
+                <p>{{ section.description }}</p>
+                
+                <div class="demo-controls">
+                  <button 
+                    type="button" 
+                    class="demo-button secondary"
+                    (click)="showRestrictedPicker.set(true)">
+                    Abrir Date Picker com Restrições
+                  </button>
+                  
+                  @if (restrictedSelectedDate()) {
+                    <div class="selected-date-info">
+                      <strong>Data selecionada:</strong> {{ formatDate(restrictedSelectedDate()!) }}
+                    </div>
+                  }
+                </div>
+              }
+              
+              @case ('initial') {
+                <h2>{{ section.title }}</h2>
+                <p>{{ section.description }}</p>
+                
+                <div class="demo-controls">
+                  <button 
+                    type="button" 
+                    class="demo-button accent"
+                    (click)="showInitialDatePicker.set(true)">
+                    Abrir Date Picker com Data Inicial
+                  </button>
+                  
+                  @if (initialSelectedDate()) {
+                    <div class="selected-date-info">
+                      <strong>Data selecionada:</strong> {{ formatDate(initialSelectedDate()!) }}
+                    </div>
+                  }
+                </div>
+              }
+              
+              @case ('config') {
+                <h2>{{ section.title }}</h2>
+                <div class="config-grid">
+                  <div class="config-item">
+                    <h3>title</h3>
+                    <p>Título personalizado do modal</p>
+                    <code>string</code>
+                  </div>
+                  <div class="config-item">
+                    <h3>minDate</h3>
+                    <p>Data mínima permitida</p>
+                    <code>Date</code>
+                  </div>
+                  <div class="config-item">
+                    <h3>maxDate</h3>
+                    <p>Data máxima permitida</p>
+                    <code>Date</code>
+                  </div>
+                  <div class="config-item">
+                    <h3>locale</h3>
+                    <p>Localização do componente</p>
+                    <code>string</code>
+                  </div>
+                </div>
+              }
+              
+              @case ('events') {
+                <h2>{{ section.title }}</h2>
+                <div class="events-log">
+                  <h3>Log de Eventos:</h3>
+                  <div class="events-list">
+                    @for (event of eventsLog(); track $index) {
+                      <div class="event-item" [class]="event.type">
+                        <span class="event-time">{{ event.timestamp | date:'HH:mm:ss' }}</span>
+                        <span class="event-message">{{ event.message }}</span>
+                      </div>
+                    }
+                  </div>
+                  <button 
+                    type="button" 
+                    class="demo-button small"
+                    (click)="clearEvents()">
+                    Limpar Log
+                  </button>
+                </div>
+              }
+            }
+          </section>
+        }
       </div>
 
       <!-- Modais dos Date Pickers -->
@@ -521,6 +540,63 @@ import { DatePickerComponent, DatePickerConfig } from './date-picker.component';
       flex: 1;
     }
 
+    /* Drag and Drop Styles */
+    .demo-section.dragging {
+      opacity: 0.5;
+      transform: rotate(2deg);
+      z-index: 1000;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .drag-handle {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      color: rgba(107, 114, 128, 0.6);
+      font-size: 14px;
+      cursor: grab;
+      user-select: none;
+      padding: 6px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .drag-handle:hover {
+      color: rgba(107, 114, 128, 0.9);
+      background: rgba(255, 255, 255, 0.95);
+      transform: scale(1.1);
+    }
+
+    .demo-section {
+      position: relative;
+    }
+
+    /* Theme-specific drag handle styles */
+    .theme-dark .drag-handle {
+      color: rgba(203, 213, 225, 0.6);
+      background: rgba(30, 41, 59, 0.8);
+    }
+
+    .theme-dark .drag-handle:hover {
+      color: rgba(203, 213, 225, 0.9);
+      background: rgba(30, 41, 59, 0.95);
+    }
+
+    .theme-blue .drag-handle,
+    .theme-green .drag-handle,
+    .theme-purple .drag-handle {
+      color: rgba(30, 41, 59, 0.6);
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .theme-blue .drag-handle:hover,
+    .theme-green .drag-handle:hover,
+    .theme-purple .drag-handle:hover {
+      color: rgba(30, 41, 59, 0.9);
+      background: rgba(255, 255, 255, 0.95);
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .demo-container {
@@ -626,6 +702,45 @@ export class DatePickerDemoComponent implements OnInit {
   
   readonly eventsLog = signal<Array<{timestamp: Date, message: string, type: string}>>([]);
   readonly currentTheme = signal('light');
+  readonly demoSections = signal<DemoSection[]>([
+    {
+      id: 'basic',
+      title: 'Demo Básico',
+      description: 'Seletor de data simples com configurações padrão',
+      type: 'basic',
+      draggable: true
+    },
+    {
+      id: 'restricted',
+      title: 'Demo com Restrições',
+      description: 'Seletor com datas mínimas e máximas definidas',
+      type: 'restricted',
+      draggable: true
+    },
+    {
+      id: 'initial',
+      title: 'Demo com Data Inicial',
+      description: 'Seletor que abre com uma data pré-selecionada',
+      type: 'initial',
+      draggable: true
+    },
+    {
+      id: 'config',
+      title: 'Configurações Disponíveis',
+      description: 'Opções de personalização do componente',
+      type: 'config',
+      draggable: true
+    },
+    {
+      id: 'events',
+      title: 'Eventos',
+      description: 'Log de eventos em tempo real',
+      type: 'events',
+      draggable: true
+    }
+  ]);
+
+  private draggedIndex: number | null = null;
 
   // Configurações dos Date Pickers
   readonly basicConfig: DatePickerConfig = {
@@ -654,6 +769,9 @@ export class DatePickerDemoComponent implements OnInit {
     const savedTheme = localStorage.getItem('demo-theme') || 'light';
     this.currentTheme.set(savedTheme);
     this.applyTheme(savedTheme);
+
+    // Carregar ordem das seções salva
+    this.loadSectionOrder();
   }
 
   changeTheme(event: Event): void {
@@ -732,5 +850,93 @@ export class DatePickerDemoComponent implements OnInit {
   clearEvents(): void {
     this.eventsLog.set([]);
     this.addEvent('info', 'Log de eventos limpo');
+  }
+
+  // Drag and Drop Methods
+  onDragStart(event: DragEvent, index: number): void {
+    this.draggedIndex = index;
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/html', '');
+    }
+    
+    // Adicionar classe de drag
+    const target = event.target as HTMLElement;
+    target.classList.add('dragging');
+  }
+
+  onDragEnd(event: DragEvent): void {
+    // Remover classe de drag
+    const target = event.target as HTMLElement;
+    target.classList.remove('dragging');
+    this.draggedIndex = null;
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move';
+    }
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    
+    if (this.draggedIndex === null) return;
+
+    const target = event.target as HTMLElement;
+    const dropTarget = target.closest('.demo-section') as HTMLElement;
+    
+    if (!dropTarget) return;
+
+    const dropIndex = Array.from(dropTarget.parentElement?.children || [])
+      .indexOf(dropTarget);
+
+    if (dropIndex === -1 || dropIndex === this.draggedIndex) return;
+
+    // Reordenar as seções
+    const sections = [...this.demoSections()];
+    const draggedSection = sections[this.draggedIndex];
+    
+    // Remover a seção arrastada
+    sections.splice(this.draggedIndex, 1);
+    
+    // Inserir na nova posição
+    sections.splice(dropIndex, 0, draggedSection);
+    
+    // Atualizar o signal
+    this.demoSections.set(sections);
+    
+    // Salvar a nova ordem
+    this.saveSectionOrder();
+    
+    // Adicionar evento ao log
+    this.addEvent('info', `Seção "${draggedSection.title}" movida para posição ${dropIndex + 1}`);
+  }
+
+  private loadSectionOrder(): void {
+    const savedOrder = localStorage.getItem('demo-sections-order');
+    if (savedOrder) {
+      try {
+        const order = JSON.parse(savedOrder);
+        const currentSections = this.demoSections();
+        const reorderedSections = order.map((id: string) => 
+          currentSections.find(section => section.id === id)
+        ).filter(Boolean) as DemoSection[];
+        
+        // Adicionar seções que não estavam na ordem salva
+        const existingIds = reorderedSections.map(s => s.id);
+        const newSections = currentSections.filter(section => !existingIds.includes(section.id));
+        
+        this.demoSections.set([...reorderedSections, ...newSections]);
+      } catch (error) {
+        console.warn('Erro ao carregar ordem das seções:', error);
+      }
+    }
+  }
+
+  private saveSectionOrder(): void {
+    const order = this.demoSections().map(section => section.id);
+    localStorage.setItem('demo-sections-order', JSON.stringify(order));
   }
 }

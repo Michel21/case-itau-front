@@ -2,6 +2,16 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
+interface DemoItem {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  routerLink: string | null;
+  class: string;
+  draggable: boolean;
+}
+
 @Component({
   selector: 'app-demo-nav',
   standalone: true,
@@ -26,23 +36,27 @@ import { RouterModule } from '@angular/router';
           </div>
         </div>
         
-        <div class="demo-nav-links">
-          <a routerLink="/demo/date-picker" routerLinkActive="active" class="demo-nav-link">
-            <div class="demo-nav-icon">📅</div>
-            <div class="demo-nav-content">
-              <h3>DatePicker</h3>
-              <p>Seletor de data profissional e responsivo</p>
+        <div class="demo-nav-links" 
+             (dragover)="onDragOver($event)"
+             (drop)="onDrop($event)">
+          @for (demo of demos(); track demo.id; let i = $index) {
+            <div class="demo-nav-link" 
+                 [class]="demo.class"
+                 [draggable]="demo.draggable"
+                 (dragstart)="onDragStart($event, i)"
+                 (dragend)="onDragEnd($event)"
+                 [routerLink]="demo.routerLink"
+                 routerLinkActive="active">
+              <div class="demo-nav-icon">{{ demo.icon }}</div>
+              <div class="demo-nav-content">
+                <h3>{{ demo.title }}</h3>
+                <p>{{ demo.description }}</p>
+              </div>
+              @if (demo.draggable) {
+                <div class="drag-handle">⋮⋮</div>
+              }
             </div>
-          </a>
-          
-          <!-- Placeholder para futuros demos -->
-          <div class="demo-nav-link coming-soon">
-            <div class="demo-nav-icon">🔧</div>
-            <div class="demo-nav-content">
-              <h3>Mais Demos</h3>
-              <p>Novos componentes em breve...</p>
-            </div>
-          </div>
+          }
         </div>
       </div>
     </nav>
@@ -250,6 +264,45 @@ import { RouterModule } from '@angular/router';
       transform: none;
     }
 
+    /* Drag and Drop Styles */
+    .demo-nav-link.dragging {
+      opacity: 0.5;
+      transform: rotate(5deg);
+      z-index: 1000;
+    }
+
+    .drag-handle {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 12px;
+      cursor: grab;
+      user-select: none;
+      padding: 4px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .drag-handle:hover {
+      color: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .demo-nav-link {
+      position: relative;
+    }
+
+    /* Theme-specific drag handle styles */
+    .theme-light .drag-handle {
+      color: rgba(30, 41, 59, 0.6);
+    }
+
+    .theme-light .drag-handle:hover {
+      color: rgba(30, 41, 59, 0.9);
+      background: rgba(30, 41, 59, 0.1);
+    }
+
     .demo-nav-icon {
       font-size: 2rem;
       flex-shrink: 0;
@@ -353,12 +406,37 @@ import { RouterModule } from '@angular/router';
 })
 export class DemoNavComponent {
   readonly currentTheme = signal('light');
+  readonly demos = signal<DemoItem[]>([
+    {
+      id: 'date-picker',
+      title: 'DatePicker',
+      description: 'Seletor de data profissional e responsivo',
+      icon: '📅',
+      routerLink: '/demo/date-picker',
+      class: '',
+      draggable: true
+    },
+    {
+      id: 'coming-soon',
+      title: 'Mais Demos',
+      description: 'Novos componentes em breve...',
+      icon: '🔧',
+      routerLink: null,
+      class: 'coming-soon',
+      draggable: false
+    }
+  ]);
+
+  private draggedIndex: number | null = null;
 
   constructor() {
     // Carregar tema salvo do localStorage
     const savedTheme = localStorage.getItem('demo-theme') || 'light';
     this.currentTheme.set(savedTheme);
     this.applyTheme(savedTheme);
+
+    // Carregar ordem dos demos salva
+    this.loadDemoOrder();
   }
 
   changeTheme(event: Event): void {
@@ -371,5 +449,90 @@ export class DemoNavComponent {
 
   private applyTheme(theme: string): void {
     document.documentElement.setAttribute('data-theme', theme);
+  }
+
+  // Drag and Drop Methods
+  onDragStart(event: DragEvent, index: number): void {
+    this.draggedIndex = index;
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/html', '');
+    }
+    
+    // Adicionar classe de drag
+    const target = event.target as HTMLElement;
+    target.classList.add('dragging');
+  }
+
+  onDragEnd(event: DragEvent): void {
+    // Remover classe de drag
+    const target = event.target as HTMLElement;
+    target.classList.remove('dragging');
+    this.draggedIndex = null;
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move';
+    }
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    
+    if (this.draggedIndex === null) return;
+
+    const target = event.target as HTMLElement;
+    const dropTarget = target.closest('.demo-nav-link') as HTMLElement;
+    
+    if (!dropTarget) return;
+
+    const dropIndex = Array.from(dropTarget.parentElement?.children || [])
+      .indexOf(dropTarget);
+
+    if (dropIndex === -1 || dropIndex === this.draggedIndex) return;
+
+    // Reordenar os demos
+    const demos = [...this.demos()];
+    const draggedDemo = demos[this.draggedIndex];
+    
+    // Remover o item arrastado
+    demos.splice(this.draggedIndex, 1);
+    
+    // Inserir na nova posição
+    demos.splice(dropIndex, 0, draggedDemo);
+    
+    // Atualizar o signal
+    this.demos.set(demos);
+    
+    // Salvar a nova ordem
+    this.saveDemoOrder();
+  }
+
+  private loadDemoOrder(): void {
+    const savedOrder = localStorage.getItem('demo-order');
+    if (savedOrder) {
+      try {
+        const order = JSON.parse(savedOrder);
+        const currentDemos = this.demos();
+        const reorderedDemos = order.map((id: string) => 
+          currentDemos.find(demo => demo.id === id)
+        ).filter(Boolean) as DemoItem[];
+        
+        // Adicionar demos que não estavam na ordem salva
+        const existingIds = reorderedDemos.map(d => d.id);
+        const newDemos = currentDemos.filter(demo => !existingIds.includes(demo.id));
+        
+        this.demos.set([...reorderedDemos, ...newDemos]);
+      } catch (error) {
+        console.warn('Erro ao carregar ordem dos demos:', error);
+      }
+    }
+  }
+
+  private saveDemoOrder(): void {
+    const order = this.demos().map(demo => demo.id);
+    localStorage.setItem('demo-order', JSON.stringify(order));
   }
 }
