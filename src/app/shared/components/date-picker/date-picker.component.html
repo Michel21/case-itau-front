@@ -67,7 +67,7 @@
     </div>
 
     <!-- Calendar Navigation -->
-    <div class="calendar-navigation">
+    <div class="calendar-navigation" (click)="closeDropdowns()">
       <button type="button" class="nav-button" (click)="previousMonth()" aria-label="Mês anterior">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="15,18 9,12 15,6"></polyline>
@@ -86,7 +86,7 @@
     </div>
 
     <!-- Calendar Grid -->
-    <div class="calendar-grid">
+    <div class="calendar-grid" (click)="closeDropdowns()">
       <!-- Day Headers -->
       <div class="day-headers">
         @for (day of dayNames(); track $index) {

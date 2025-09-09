@@ -114,6 +114,9 @@ export class DatePickerComponent implements OnInit {
       this.centerModalInViewport();
     }, 0);
 
+    // Add click outside listener to close dropdowns
+    this.addClickOutsideListener();
+
     // Angular Features: Effect for reactive updates
     effect(() => {
       const dragging = this.isDragging();
@@ -124,6 +127,29 @@ export class DatePickerComponent implements OnInit {
         } else {
           dialog.classList.remove('dragging');
         }
+      }
+    });
+  }
+
+  private addClickOutsideListener(): void {
+    // Listen for clicks outside the dropdowns to close them
+    const clickOutside$ = new Observable<Event>(subscriber => {
+      const handler = (e: Event) => subscriber.next(e);
+      document.addEventListener('click', handler);
+      return () => document.removeEventListener('click', handler);
+    });
+
+    clickOutside$.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe((event) => {
+      const target = event.target as HTMLElement;
+      const isDropdownClick = target.closest('.dropdown') || 
+                             target.closest('.selector-button') ||
+                             target.closest('.calendar-grid') ||
+                             target.closest('.calendar-navigation');
+      
+      if (!isDropdownClick && (this.showMonthPicker() || this.showYearPicker())) {
+        this.closeDropdowns();
       }
     });
   }
@@ -159,8 +185,16 @@ export class DatePickerComponent implements OnInit {
   selectDate(day: number): void {
     if (!day) return;
     
+    // Close any open dropdowns when selecting a date
+    this.closeDropdowns();
+    
     const selectedDate = new Date(this.currentYear(), this.currentMonth(), day);
     this.selectedDateSignal.set(selectedDate);
+  }
+
+  closeDropdowns(): void {
+    this.showMonthPicker.set(false);
+    this.showYearPicker.set(false);
   }
 
   isSelectedDate(day: number): boolean {
