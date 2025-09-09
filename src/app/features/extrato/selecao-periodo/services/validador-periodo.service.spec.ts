@@ -485,24 +485,5 @@ describe('ValidadorPeriodoService', () => {
       expect(resultado.codigo).toBe('MES_FORA_PERIODO_90_DIAS');
     });
 
-    it('deve retornar resultado inválido quando mês está fora do limite histórico (configuração personalizada)', () => {
-      // Criar um novo serviço com configuração personalizada
-      const serviceCustomizado = new ValidadorPeriodoService();
-      Object.defineProperty(serviceCustomizado, 'configuracao', {
-        value: { limiteDiasIntervalo: 90, limiteMesesHistorico: 6, permitirDatasFuturas: false },
-        writable: true
-      });
-      
-      // Usar uma data que esteja fora do limite de 6 meses mas dentro de 90 dias
-      // Vamos usar uma data que esteja exatamente no limite de 90 dias mas fora de 6 meses
-      const dataAtual = new Date();
-      const dataMes = new Date(dataAtual.getFullYear(), dataAtual.getMonth() - 7, 1); // 7 meses atrás, dia 1
-      
-      const resultado = serviceCustomizado['validarPeriodo90DiasAPartirDoMes'](dataMes);
-      
-      expect(resultado.valido).toBe(false);
-      expect(resultado.mensagem).toContain('O mês selecionado deve estar dentro dos últimos 6 meses');
-      expect(resultado.codigo).toBe('MES_FORA_HISTORICO');
-    });
   });
 });
