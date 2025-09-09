@@ -107,9 +107,8 @@
                   [class.field-invalid]="isFieldInvalid('dataInicio')"
                   [min]="getDataMinimaInicio()"
                   [max]="getDataMaximaInicio()"
-                  aria-label="Data de início do período (formato: dd/mm/aaaa)"
+                  aria-label="Data de início do período"
                   tabindex="0"
-                  data-format="dd/mm/aaaa"
                   placeholder="">
               </div>
               @if (isFieldInvalid('dataInicio')) {
@@ -130,9 +129,8 @@
                   [class.field-invalid]="isFieldInvalid('dataFim')"
                   [min]="getDataMinimaFim()"
                   [max]="getDataMaximaFim()"
-                  aria-label="Data de fim do período (formato: dd/mm/aaaa)"
+                  aria-label="Data de fim do período"
                   tabindex="0"
-                  data-format="dd/mm/aaaa"
                   placeholder="">
               </div>
               @if (isFieldInvalid('dataFim')) {
