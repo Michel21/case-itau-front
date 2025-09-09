@@ -246,29 +246,6 @@
     }
   }
 
-  // Personalizar a exibição do formato de data
-  &[data-format="dd/mm/aaaa"] {
-    // Adicionar texto de placeholder personalizado
-    &::before {
-      content: attr(placeholder);
-      position: absolute;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #999;
-      pointer-events: none;
-      font-size: 14px;
-      z-index: 1;
-    }
-
-    // Esconder o placeholder quando há valor
-    &:not(:placeholder-shown)::before {
-      display: none;
-    }
-
-    // Ajustar o padding para o ícone do calendário
-    padding-right: 40px;
-  }
 
   // Para navegadores que suportam ::-webkit-datetime-edit
   &::-webkit-datetime-edit {
