@@ -110,6 +110,7 @@ export class DatePickerComponent implements OnInit {
     // Center modal in viewport when it opens
     setTimeout(() => {
       this.centerModalInViewport();
+      this.initializeDragPosition();
     }, 0);
 
     // Add click outside listener to close dropdowns
@@ -305,6 +306,24 @@ export class DatePickerComponent implements OnInit {
 
   onDragMoved(event: any): void {
     console.log('🔄 CDK Drag moved', event);
+  }
+
+  private initializeDragPosition(): void {
+    const dialog = document.querySelector('.date-picker-dialog') as HTMLElement;
+    if (dialog) {
+      const rect = dialog.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      
+      // Calculate center position
+      const centerX = (viewportWidth - rect.width) / 2;
+      const centerY = (viewportHeight - rect.height) / 2;
+      
+      // Set initial drag position (relative to center)
+      this.dragPosition.set({ x: 0, y: 0 });
+      
+      console.log('📍 Initialized drag position:', { centerX, centerY });
+    }
   }
 
 }
