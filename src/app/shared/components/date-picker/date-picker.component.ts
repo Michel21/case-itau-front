@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 import { takeUntil, take } from 'rxjs/operators';
+import { DragDropModule, CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 
 export interface DatePickerConfig {
   title?: string;
@@ -17,7 +18,7 @@ export interface DatePickerConfig {
 @Component({
   selector: 'app-date-picker',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DragDropModule],
   templateUrl: './date-picker.component.html',
   styleUrls: ['./date-picker.component.scss']
 })
@@ -96,11 +97,8 @@ export class DatePickerComponent implements OnInit {
     cursor: this.isDragging() ? 'grabbing' : 'grab'
   }));
 
-  // Drag and Drop properties using signals
-  private dragStartX = 0;
-  private dragStartY = 0;
-  private initialX = 0;
-  private initialY = 0;
+  // CDK Drag and Drop properties
+  readonly dragPosition = signal({ x: 0, y: 0 });
 
   ngOnInit(): void {
     if (this.selectedDate) {
@@ -186,9 +184,8 @@ export class DatePickerComponent implements OnInit {
         dialog.style.top = `${constrainedY}px`;
         dialog.style.transform = 'none';
         
-        // Store initial position for drag calculations
-        this.initialX = constrainedX;
-        this.initialY = constrainedY;
+        // Store initial position for CDK drag
+        this.dragPosition.set({ x: constrainedX - (viewportWidth / 2) + (rect.width / 2), y: constrainedY - (viewportHeight / 2) + (rect.height / 2) });
       });
     }
   }
@@ -289,169 +286,25 @@ export class DatePickerComponent implements OnInit {
     this.cancelled.emit();
   }
 
-  // Drag and Drop Methods for Modal - Simple approach
-  onHeaderMouseDown(event: MouseEvent): void {
-    console.log('🖱️ Mouse down event triggered');
-    
-    if (event.button !== 0) return;
-    
-    event.preventDefault();
-    event.stopPropagation();
-    
-    const dialog = document.querySelector('.date-picker-dialog') as HTMLElement;
-    if (!dialog) {
-      console.log('❌ Dialog not found');
-      return;
-    }
-    
-    console.log('✅ Starting drag');
+  // CDK Drag and Drop Methods
+  onDragStarted(): void {
+    console.log('🚀 CDK Drag started');
     this.isDragging.set(true);
-    
-    // Get current position
-    const rect = dialog.getBoundingClientRect();
-    this.initialX = rect.left;
-    this.initialY = rect.top;
-    this.dragStartX = event.clientX;
-    this.dragStartY = event.clientY;
-    
-    console.log('📍 Initial positions:', { 
-      initialX: this.initialX, 
-      initialY: this.initialY, 
-      dragStartX: this.dragStartX, 
-      dragStartY: this.dragStartY 
-    });
-    
-    // Force dialog positioning
-    dialog.style.position = 'fixed';
-    dialog.style.margin = '0';
-    dialog.style.left = `${this.initialX}px`;
-    dialog.style.top = `${this.initialY}px`;
-    dialog.style.transform = 'none';
-    dialog.style.zIndex = '1002';
-    dialog.classList.add('dragging');
-    
-    // Simple event handlers
-    const onMouseMove = (e: MouseEvent) => {
-      console.log('🔄 Mouse move');
-      if (!this.isDragging()) return;
-      
-      const deltaX = e.clientX - this.dragStartX;
-      const deltaY = e.clientY - this.dragStartY;
-      
-      const newX = this.initialX + deltaX;
-      const newY = this.initialY + deltaY;
-      
-      // Constrain to viewport
-      const maxX = window.innerWidth - rect.width;
-      const maxY = window.innerHeight - rect.height;
-      
-      const constrainedX = Math.max(0, Math.min(newX, maxX));
-      const constrainedY = Math.max(0, Math.min(newY, maxY));
-      
-      console.log('🎯 Moving to:', { constrainedX, constrainedY });
-      
-      dialog.style.left = `${constrainedX}px`;
-      dialog.style.top = `${constrainedY}px`;
-    };
-    
-    const onMouseUp = () => {
-      console.log('🛑 Mouse up');
-      this.isDragging.set(false);
-      dialog.classList.remove('dragging');
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-    };
-    
-    // Add listeners
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
   }
 
-  onHeaderTouchStart(event: TouchEvent): void {
-    if (event.touches.length !== 1) return;
-    
-    this.isDragging.set(true);
-    this.dragStartX = event.touches[0].clientX;
-    this.dragStartY = event.touches[0].clientY;
-    
-    const dialog = (event.target as HTMLElement).closest('.date-picker-dialog') as HTMLElement;
-    if (dialog) {
-      const rect = dialog.getBoundingClientRect();
-      this.initialX = rect.left;
-      this.initialY = rect.top;
-      
-      dialog.style.position = 'fixed';
-      dialog.style.left = `${this.initialX}px`;
-      dialog.style.top = `${this.initialY}px`;
-      dialog.style.margin = '0';
-      dialog.style.transform = 'none';
-    }
-    
-    // Angular Features: Use RxJS for touch events
-    const touchMove$ = new Observable<TouchEvent>(subscriber => {
-      const handler = (e: TouchEvent) => subscriber.next(e);
-      document.addEventListener('touchmove', handler, { passive: false });
-      return () => document.removeEventListener('touchmove', handler);
-    });
-    
-    const touchEnd$ = new Observable<TouchEvent>(subscriber => {
-      const handler = (e: TouchEvent) => subscriber.next(e);
-      document.addEventListener('touchend', handler);
-      return () => document.removeEventListener('touchend', handler);
-    });
-    
-    touchMove$.pipe(
-      takeUntilDestroyed(this.destroyRef),
-      takeUntil(touchEnd$)
-    ).subscribe(this.onTouchMove.bind(this));
-    
-    touchEnd$.pipe(
-      takeUntilDestroyed(this.destroyRef),
-      take(1)
-    ).subscribe(() => this.onTouchEnd());
-    
-    event.preventDefault();
-  }
-
-
-  private onTouchMove(event: TouchEvent): void {
-    if (!this.isDragging() || event.touches.length !== 1) return;
-    
-    const deltaX = event.touches[0].clientX - this.dragStartX;
-    const deltaY = event.touches[0].clientY - this.dragStartY;
-    
-    const newX = this.initialX + deltaX;
-    const newY = this.initialY + deltaY;
-    
-    // Constrain to viewport with smooth boundaries
-    const dialog = document.querySelector('.date-picker-dialog') as HTMLElement;
-    if (dialog) {
-      const rect = dialog.getBoundingClientRect();
-      const maxX = window.innerWidth - rect.width;
-      const maxY = window.innerHeight - rect.height;
-      
-      // Smooth constraint with easing
-      const constrainedX = Math.max(0, Math.min(newX, maxX));
-      const constrainedY = Math.max(0, Math.min(newY, maxY));
-      
-      // Use direct positioning for smoother movement
-      dialog.style.left = `${constrainedX}px`;
-      dialog.style.top = `${constrainedY}px`;
-    }
-    
-    event.preventDefault();
-  }
-
-
-  private onTouchEnd(): void {
+  onDragEnded(event: any): void {
+    console.log('🏁 CDK Drag ended', event);
     this.isDragging.set(false);
     
-    // Reset dialog styles for smooth transition
-    const dialog = document.querySelector('.date-picker-dialog') as HTMLElement;
-    if (dialog) {
-      dialog.classList.remove('dragging');
-      dialog.style.willChange = 'auto';
-      dialog.style.transform = '';
-    }
+    // Update position
+    this.dragPosition.set({
+      x: event.source.getFreeDragPosition().x,
+      y: event.source.getFreeDragPosition().y
+    });
   }
+
+  onDragMoved(event: any): void {
+    console.log('🔄 CDK Drag moved', event);
+  }
+
 }

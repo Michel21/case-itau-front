@@ -1,10 +1,13 @@
 <div class="date-picker-overlay" (click)="closeDialog()">
-  <div class="date-picker-dialog" (click)="$event.stopPropagation()">
+  <div class="date-picker-dialog" 
+       cdkDrag
+       [cdkDragFreeDragPosition]="dragPosition()"
+       (cdkDragStarted)="onDragStarted()"
+       (cdkDragEnded)="onDragEnded($event)"
+       (cdkDragMoved)="onDragMoved($event)"
+       (click)="$event.stopPropagation()">
     <!-- Header -->
-    <div class="date-picker-header" 
-         [style.cursor]="dragState().cursor"
-         (mousedown)="onHeaderMouseDown($event)"
-         (touchstart)="onHeaderTouchStart($event)">
+    <div class="date-picker-header" cdkDragHandle>
       <div class="drag-indicator">⋮⋮</div>
       <h3 class="date-picker-title">{{ config.title || 'Selecione a data' }}</h3>
       <button type="button" class="close-button" (click)="closeDialog()" aria-label="Fechar">
