@@ -101,6 +101,8 @@ export class DatePickerComponent implements OnInit {
   private dragStartY = 0;
   private initialX = 0;
   private initialY = 0;
+  private currentMouseMoveHandler?: (e: MouseEvent) => void;
+  private currentMouseUpHandler?: () => void;
 
   ngOnInit(): void {
     if (this.selectedDate) {
@@ -289,16 +291,22 @@ export class DatePickerComponent implements OnInit {
     this.cancelled.emit();
   }
 
-  // Drag and Drop Methods for Modal - Simplified approach
+  // Drag and Drop Methods for Modal - New approach
   onHeaderMouseDown(event: MouseEvent): void {
+    console.log('Mouse down event triggered'); // Debug log
+    
     if (event.button !== 0) return; // Only left mouse button
     
     event.preventDefault();
     event.stopPropagation();
     
     const dialog = (event.target as HTMLElement).closest('.date-picker-dialog') as HTMLElement;
-    if (!dialog) return;
+    if (!dialog) {
+      console.log('Dialog not found'); // Debug log
+      return;
+    }
     
+    console.log('Starting drag'); // Debug log
     this.isDragging.set(true);
     
     // Get current position
@@ -308,6 +316,8 @@ export class DatePickerComponent implements OnInit {
     this.dragStartX = event.clientX;
     this.dragStartY = event.clientY;
     
+    console.log('Initial positions:', { initialX: this.initialX, initialY: this.initialY, dragStartX: this.dragStartX, dragStartY: this.dragStartY }); // Debug log
+    
     // Prepare dialog for dragging
     dialog.style.position = 'fixed';
     dialog.style.margin = '0';
@@ -316,20 +326,21 @@ export class DatePickerComponent implements OnInit {
     dialog.style.transform = 'none';
     dialog.classList.add('dragging');
     
-    // Add event listeners directly
-    const handleMouseMove = (e: MouseEvent) => {
+    // Store references for cleanup
+    this.currentMouseMoveHandler = (e: MouseEvent) => {
+      console.log('Mouse move event'); // Debug log
       if (!this.isDragging()) return;
       this.onMouseMove(e);
     };
     
-    const handleMouseUp = () => {
+    this.currentMouseUpHandler = () => {
+      console.log('Mouse up event'); // Debug log
       this.onMouseUp();
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
     };
     
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+    // Add event listeners
+    document.addEventListener('mousemove', this.currentMouseMoveHandler);
+    document.addEventListener('mouseup', this.currentMouseUpHandler);
   }
 
   onHeaderTouchStart(event: TouchEvent): void {
@@ -387,6 +398,8 @@ export class DatePickerComponent implements OnInit {
     const newX = this.initialX + deltaX;
     const newY = this.initialY + deltaY;
     
+    console.log('Mouse move:', { deltaX, deltaY, newX, newY }); // Debug log
+    
     // Constrain to viewport
     const dialog = document.querySelector('.date-picker-dialog') as HTMLElement;
     if (dialog) {
@@ -396,6 +409,8 @@ export class DatePickerComponent implements OnInit {
       
       const constrainedX = Math.max(0, Math.min(newX, maxX));
       const constrainedY = Math.max(0, Math.min(newY, maxY));
+      
+      console.log('Updating position:', { constrainedX, constrainedY }); // Debug log
       
       // Update position
       dialog.style.left = `${constrainedX}px`;
@@ -432,7 +447,18 @@ export class DatePickerComponent implements OnInit {
   }
 
   private onMouseUp(): void {
+    console.log('onMouseUp called'); // Debug log
     this.isDragging.set(false);
+    
+    // Clean up event listeners
+    if (this.currentMouseMoveHandler) {
+      document.removeEventListener('mousemove', this.currentMouseMoveHandler);
+      this.currentMouseMoveHandler = undefined;
+    }
+    if (this.currentMouseUpHandler) {
+      document.removeEventListener('mouseup', this.currentMouseUpHandler);
+      this.currentMouseUpHandler = undefined;
+    }
     
     // Reset dialog styles for smooth transition
     const dialog = document.querySelector('.date-picker-dialog') as HTMLElement;
