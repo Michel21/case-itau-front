@@ -302,5 +302,12 @@ export class DatePickerComponent implements OnInit {
     console.log('🔄 CDK Drag moved', event);
   }
 
+  testDrag(): void {
+    console.log('🧪 Test drag clicked - CDK should be working');
+    console.log('CDK DragDropModule imported:', !!DragDropModule);
+    console.log('CDK CdkDrag imported:', !!CdkDrag);
+    console.log('CDK CdkDragHandle imported:', !!CdkDragHandle);
+  }
+
 
 }

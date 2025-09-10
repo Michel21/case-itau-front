@@ -7,7 +7,7 @@
        (cdkDragMoved)="onDragMoved($event)"
        (click)="$event.stopPropagation()">
     <!-- Header -->
-    <div class="date-picker-header" cdkDragHandle>
+    <div class="date-picker-header" cdkDragHandle (click)="testDrag()">
       <div class="drag-indicator">⋮⋮</div>
       <h3 class="date-picker-title">{{ config.title || 'Selecione a data' }}</h3>
       <button type="button" class="close-button" (click)="closeDialog()" aria-label="Fechar">
