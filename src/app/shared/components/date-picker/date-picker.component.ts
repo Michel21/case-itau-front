@@ -101,8 +101,6 @@ export class DatePickerComponent implements OnInit {
   private dragStartY = 0;
   private initialX = 0;
   private initialY = 0;
-  private currentMouseMoveHandler?: (e: MouseEvent) => void;
-  private currentMouseUpHandler?: () => void;
 
   ngOnInit(): void {
     if (this.selectedDate) {
@@ -291,22 +289,22 @@ export class DatePickerComponent implements OnInit {
     this.cancelled.emit();
   }
 
-  // Drag and Drop Methods for Modal - New approach
+  // Drag and Drop Methods for Modal - Simple approach
   onHeaderMouseDown(event: MouseEvent): void {
-    console.log('Mouse down event triggered'); // Debug log
+    console.log('🖱️ Mouse down event triggered');
     
-    if (event.button !== 0) return; // Only left mouse button
+    if (event.button !== 0) return;
     
     event.preventDefault();
     event.stopPropagation();
     
-    const dialog = (event.target as HTMLElement).closest('.date-picker-dialog') as HTMLElement;
+    const dialog = document.querySelector('.date-picker-dialog') as HTMLElement;
     if (!dialog) {
-      console.log('Dialog not found'); // Debug log
+      console.log('❌ Dialog not found');
       return;
     }
     
-    console.log('Starting drag'); // Debug log
+    console.log('✅ Starting drag');
     this.isDragging.set(true);
     
     // Get current position
@@ -316,31 +314,57 @@ export class DatePickerComponent implements OnInit {
     this.dragStartX = event.clientX;
     this.dragStartY = event.clientY;
     
-    console.log('Initial positions:', { initialX: this.initialX, initialY: this.initialY, dragStartX: this.dragStartX, dragStartY: this.dragStartY }); // Debug log
+    console.log('📍 Initial positions:', { 
+      initialX: this.initialX, 
+      initialY: this.initialY, 
+      dragStartX: this.dragStartX, 
+      dragStartY: this.dragStartY 
+    });
     
-    // Prepare dialog for dragging
+    // Force dialog positioning
     dialog.style.position = 'fixed';
     dialog.style.margin = '0';
     dialog.style.left = `${this.initialX}px`;
     dialog.style.top = `${this.initialY}px`;
     dialog.style.transform = 'none';
+    dialog.style.zIndex = '1002';
     dialog.classList.add('dragging');
     
-    // Store references for cleanup
-    this.currentMouseMoveHandler = (e: MouseEvent) => {
-      console.log('Mouse move event'); // Debug log
+    // Simple event handlers
+    const onMouseMove = (e: MouseEvent) => {
+      console.log('🔄 Mouse move');
       if (!this.isDragging()) return;
-      this.onMouseMove(e);
+      
+      const deltaX = e.clientX - this.dragStartX;
+      const deltaY = e.clientY - this.dragStartY;
+      
+      const newX = this.initialX + deltaX;
+      const newY = this.initialY + deltaY;
+      
+      // Constrain to viewport
+      const maxX = window.innerWidth - rect.width;
+      const maxY = window.innerHeight - rect.height;
+      
+      const constrainedX = Math.max(0, Math.min(newX, maxX));
+      const constrainedY = Math.max(0, Math.min(newY, maxY));
+      
+      console.log('🎯 Moving to:', { constrainedX, constrainedY });
+      
+      dialog.style.left = `${constrainedX}px`;
+      dialog.style.top = `${constrainedY}px`;
     };
     
-    this.currentMouseUpHandler = () => {
-      console.log('Mouse up event'); // Debug log
-      this.onMouseUp();
+    const onMouseUp = () => {
+      console.log('🛑 Mouse up');
+      this.isDragging.set(false);
+      dialog.classList.remove('dragging');
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
     };
     
-    // Add event listeners
-    document.addEventListener('mousemove', this.currentMouseMoveHandler);
-    document.addEventListener('mouseup', this.currentMouseUpHandler);
+    // Add listeners
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
   }
 
   onHeaderTouchStart(event: TouchEvent): void {
@@ -389,34 +413,6 @@ export class DatePickerComponent implements OnInit {
     event.preventDefault();
   }
 
-  private onMouseMove(event: MouseEvent): void {
-    if (!this.isDragging()) return;
-    
-    const deltaX = event.clientX - this.dragStartX;
-    const deltaY = event.clientY - this.dragStartY;
-    
-    const newX = this.initialX + deltaX;
-    const newY = this.initialY + deltaY;
-    
-    console.log('Mouse move:', { deltaX, deltaY, newX, newY }); // Debug log
-    
-    // Constrain to viewport
-    const dialog = document.querySelector('.date-picker-dialog') as HTMLElement;
-    if (dialog) {
-      const rect = dialog.getBoundingClientRect();
-      const maxX = window.innerWidth - rect.width;
-      const maxY = window.innerHeight - rect.height;
-      
-      const constrainedX = Math.max(0, Math.min(newX, maxX));
-      const constrainedY = Math.max(0, Math.min(newY, maxY));
-      
-      console.log('Updating position:', { constrainedX, constrainedY }); // Debug log
-      
-      // Update position
-      dialog.style.left = `${constrainedX}px`;
-      dialog.style.top = `${constrainedY}px`;
-    }
-  }
 
   private onTouchMove(event: TouchEvent): void {
     if (!this.isDragging() || event.touches.length !== 1) return;
@@ -446,28 +442,6 @@ export class DatePickerComponent implements OnInit {
     event.preventDefault();
   }
 
-  private onMouseUp(): void {
-    console.log('onMouseUp called'); // Debug log
-    this.isDragging.set(false);
-    
-    // Clean up event listeners
-    if (this.currentMouseMoveHandler) {
-      document.removeEventListener('mousemove', this.currentMouseMoveHandler);
-      this.currentMouseMoveHandler = undefined;
-    }
-    if (this.currentMouseUpHandler) {
-      document.removeEventListener('mouseup', this.currentMouseUpHandler);
-      this.currentMouseUpHandler = undefined;
-    }
-    
-    // Reset dialog styles for smooth transition
-    const dialog = document.querySelector('.date-picker-dialog') as HTMLElement;
-    if (dialog) {
-      dialog.classList.remove('dragging');
-      dialog.style.willChange = 'auto';
-      dialog.style.transform = '';
-    }
-  }
 
   private onTouchEnd(): void {
     this.isDragging.set(false);
