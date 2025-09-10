@@ -289,57 +289,47 @@ export class DatePickerComponent implements OnInit {
     this.cancelled.emit();
   }
 
-  // Drag and Drop Methods for Modal - Smooth positioning
+  // Drag and Drop Methods for Modal - Simplified approach
   onHeaderMouseDown(event: MouseEvent): void {
     if (event.button !== 0) return; // Only left mouse button
     
     event.preventDefault();
-    this.isDragging.set(true);
+    event.stopPropagation();
     
     const dialog = (event.target as HTMLElement).closest('.date-picker-dialog') as HTMLElement;
-    if (dialog) {
-      // Get current position without changing it
-      const rect = dialog.getBoundingClientRect();
-      
-      // Store initial positions
-      this.initialX = rect.left;
-      this.initialY = rect.top;
-      this.dragStartX = event.clientX;
-      this.dragStartY = event.clientY;
-      
-      // Ensure dialog is ready for dragging without changing position
-      dialog.style.position = 'fixed';
-      dialog.style.margin = '0';
-      dialog.style.willChange = 'transform';
-      
-      // Keep current position to avoid jumping
-      dialog.style.left = `${this.initialX}px`;
-      dialog.style.top = `${this.initialY}px`;
-      dialog.style.transform = 'none';
-    }
+    if (!dialog) return;
     
-    // Angular Features: Use takeUntilDestroyed for automatic cleanup
-    const mouseMove$ = new Observable<MouseEvent>(subscriber => {
-      const handler = (e: MouseEvent) => subscriber.next(e);
-      document.addEventListener('mousemove', handler, { passive: true });
-      return () => document.removeEventListener('mousemove', handler);
-    });
+    this.isDragging.set(true);
     
-    const mouseUp$ = new Observable<MouseEvent>(subscriber => {
-      const handler = (e: MouseEvent) => subscriber.next(e);
-      document.addEventListener('mouseup', handler, { passive: true });
-      return () => document.removeEventListener('mouseup', handler);
-    });
+    // Get current position
+    const rect = dialog.getBoundingClientRect();
+    this.initialX = rect.left;
+    this.initialY = rect.top;
+    this.dragStartX = event.clientX;
+    this.dragStartY = event.clientY;
     
-    mouseMove$.pipe(
-      takeUntilDestroyed(this.destroyRef),
-      takeUntil(mouseUp$.pipe(take(1)))
-    ).subscribe(this.onMouseMove.bind(this));
+    // Prepare dialog for dragging
+    dialog.style.position = 'fixed';
+    dialog.style.margin = '0';
+    dialog.style.left = `${this.initialX}px`;
+    dialog.style.top = `${this.initialY}px`;
+    dialog.style.transform = 'none';
+    dialog.classList.add('dragging');
     
-    mouseUp$.pipe(
-      takeUntilDestroyed(this.destroyRef),
-      take(1)
-    ).subscribe(() => this.onMouseUp());
+    // Add event listeners directly
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!this.isDragging()) return;
+      this.onMouseMove(e);
+    };
+    
+    const handleMouseUp = () => {
+      this.onMouseUp();
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
   }
 
   onHeaderTouchStart(event: TouchEvent): void {
@@ -397,18 +387,17 @@ export class DatePickerComponent implements OnInit {
     const newX = this.initialX + deltaX;
     const newY = this.initialY + deltaY;
     
-    // Constrain to viewport with smooth boundaries
+    // Constrain to viewport
     const dialog = document.querySelector('.date-picker-dialog') as HTMLElement;
     if (dialog) {
       const rect = dialog.getBoundingClientRect();
       const maxX = window.innerWidth - rect.width;
       const maxY = window.innerHeight - rect.height;
       
-      // Smooth constraint with easing
       const constrainedX = Math.max(0, Math.min(newX, maxX));
       const constrainedY = Math.max(0, Math.min(newY, maxY));
       
-      // Use direct positioning for smoother movement
+      // Update position
       dialog.style.left = `${constrainedX}px`;
       dialog.style.top = `${constrainedY}px`;
     }
@@ -448,6 +437,7 @@ export class DatePickerComponent implements OnInit {
     // Reset dialog styles for smooth transition
     const dialog = document.querySelector('.date-picker-dialog') as HTMLElement;
     if (dialog) {
+      dialog.classList.remove('dragging');
       dialog.style.willChange = 'auto';
       dialog.style.transform = '';
     }
@@ -459,6 +449,7 @@ export class DatePickerComponent implements OnInit {
     // Reset dialog styles for smooth transition
     const dialog = document.querySelector('.date-picker-dialog') as HTMLElement;
     if (dialog) {
+      dialog.classList.remove('dragging');
       dialog.style.willChange = 'auto';
       dialog.style.transform = '';
     }
