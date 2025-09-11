@@ -306,30 +306,28 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
   }
 
   // Métodos para obter datas (delegando para o serviço)
-  getDataMinima(): string {
+  getDataMinima(): Date {
     const dataMinima = this.selecaoPeriodoService.obterDataLimiteHistorico();
     // Parse evitando problemas de timezone
-    const data = new Date(dataMinima.getFullYear(), dataMinima.getMonth(), dataMinima.getDate());
-    return data.toISOString().split('T')[0];
+    return new Date(dataMinima.getFullYear(), dataMinima.getMonth(), dataMinima.getDate());
   }
 
-  getDataMaxima(): string {
+  getDataMaxima(): Date {
     const dataMaxima = this.selecaoPeriodoService.obterDataMaxima();
     // Parse evitando problemas de timezone
-    const data = new Date(dataMaxima.getFullYear(), dataMaxima.getMonth(), dataMaxima.getDate());
-    return data.toISOString().split('T')[0];
+    return new Date(dataMaxima.getFullYear(), dataMaxima.getMonth(), dataMaxima.getDate());
   }
 
   // Métodos para validação dinâmica de datas
-  getDataMinimaInicio(): string {
+  getDataMinimaInicio(): Date {
     return this.getDataMinima();
   }
 
-  getDataMaximaInicio(): string {
+  getDataMaximaInicio(): Date {
     return this.getDataMaxima();
   }
 
-  getDataMinimaFim(): string {
+  getDataMinimaFim(): Date {
     const dataInicio = this.dataInicio();
     if (!dataInicio) {
       return this.getDataMinima();
@@ -337,13 +335,13 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
     
     // Parse da data de início evitando problemas de timezone
     const inicio = new Date(dataInicio + 'T00:00:00');
-    const dataMinima = new Date(this.getDataMinima() + 'T00:00:00');
+    const dataMinima = this.getDataMinima();
     
     // A data fim não pode ser anterior à data início
-    return inicio > dataMinima ? dataInicio : this.getDataMinima();
+    return inicio > dataMinima ? inicio : dataMinima;
   }
 
-  getDataMaximaFim(): string {
+  getDataMaximaFim(): Date {
     const dataInicio = this.dataInicio();
     if (!dataInicio) {
       return this.getDataMaxima();
@@ -351,7 +349,7 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
     
     // Parse da data de início evitando problemas de timezone
     const inicio = new Date(dataInicio + 'T00:00:00');
-    const dataMaxima = new Date(this.getDataMaxima() + 'T00:00:00');
+    const dataMaxima = this.getDataMaxima();
     
     // Calcular data máxima baseada no limite de 90 dias
     const dataLimite90Dias = new Date(inicio);
@@ -359,8 +357,7 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
     
     // Retornar a menor entre a data máxima permitida e o limite de 90 dias
     // Isso garante que não permitimos datas futuras além do período histórico
-    const dataFinal = dataLimite90Dias < dataMaxima ? dataLimite90Dias : dataMaxima;
-    return dataFinal.toISOString().split('T')[0];
+    return dataLimite90Dias < dataMaxima ? dataLimite90Dias : dataMaxima;
   }
 
   onDateChange(event: string): void {

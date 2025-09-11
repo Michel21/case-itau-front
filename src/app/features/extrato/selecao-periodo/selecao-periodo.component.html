@@ -105,8 +105,8 @@
                   formControlName="dataInicio"
                   class="field-date"
                   [class.field-invalid]="isFieldInvalid('dataInicio')"
-                  [min]="getDataMinimaInicio()"
-                  [max]="getDataMaximaInicio()"
+                  [min]="getDataMinimaInicio() | date:'yyyy-MM-dd'"
+                  [max]="getDataMaximaInicio() | date:'yyyy-MM-dd'"
                   aria-label="Data de início do período"
                   tabindex="0"
                   placeholder="">
@@ -127,8 +127,8 @@
                   formControlName="dataFim"
                   class="field-date"
                   [class.field-invalid]="isFieldInvalid('dataFim')"
-                  [min]="getDataMinimaFim()"
-                  [max]="getDataMaximaFim()"
+                  [min]="getDataMinimaFim() | date:'yyyy-MM-dd'"
+                  [max]="getDataMaximaFim() | date:'yyyy-MM-dd'"
                   aria-label="Data de fim do período"
                   tabindex="0"
                   placeholder="">
@@ -146,7 +146,7 @@
             <div class="periodo-info">
               <div class="periodo-info-content">
                 <span class="periodo-info-text">
-                  Período disponível: até {{ getDataMaximaFim() }} (máximo 90 dias a partir de {{ dataInicio() }})
+                  Período disponível: até {{ getDataMaximaFim() | date:'dd/MM/yyyy' }} (máximo 90 dias a partir de {{ dataInicio() }})
                 </span>
               </div>
             </div>
