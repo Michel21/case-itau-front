@@ -1,13 +1,15 @@
 import { TestBed } from '@angular/core/testing';
 import { ValidacaoPeriodoService } from './validacao-periodo.service';
 import { SelecaoPeriodoService } from '../selecao-periodo.service';
+import { ValidadorPeriodoService } from './validador-periodo.service';
 
 describe('ValidacaoPeriodoService', () => {
   let service: ValidacaoPeriodoService;
   let mockSelecaoPeriodoService: jest.Mocked<SelecaoPeriodoService>;
+  let mockValidadorPeriodoService: jest.Mocked<ValidadorPeriodoService>;
 
   beforeEach(() => {
-    const mockService = {
+    const mockSelecaoService = {
       validarIntervaloDatas: jest.fn(),
       validarPeriodo: jest.fn(),
       validarLimiteHistorico: jest.fn(),
@@ -18,15 +20,24 @@ describe('ValidacaoPeriodoService', () => {
       obterPeriodoAtual: jest.fn()
     };
 
+    const mockValidadorService = {
+      validarPeriodoCompleto: jest.fn(),
+      validarLimiteHistorico: jest.fn(),
+      validarIntervaloDatas: jest.fn(),
+      validarDataNaoFutura: jest.fn()
+    };
+
     TestBed.configureTestingModule({
       providers: [
         ValidacaoPeriodoService,
-        { provide: SelecaoPeriodoService, useValue: mockService }
+        { provide: SelecaoPeriodoService, useValue: mockSelecaoService },
+        { provide: ValidadorPeriodoService, useValue: mockValidadorService }
       ]
     });
 
     service = TestBed.inject(ValidacaoPeriodoService);
     mockSelecaoPeriodoService = TestBed.inject(SelecaoPeriodoService) as jest.Mocked<SelecaoPeriodoService>;
+    mockValidadorPeriodoService = TestBed.inject(ValidadorPeriodoService) as jest.Mocked<ValidadorPeriodoService>;
   });
 
   it('should be created', () => {
@@ -83,7 +94,7 @@ describe('ValidacaoPeriodoService', () => {
 
   describe('Validação de Formulário', () => {
     it('deve retornar true para formulário válido com mês', () => {
-      mockSelecaoPeriodoService.validarPeriodo.mockReturnValue(true);
+      mockValidadorPeriodoService.validarPeriodoCompleto.mockReturnValue({ valido: true, mensagem: '' });
       
       service.definirTipoSelecao('mes');
       service.definirMes('03');
@@ -93,7 +104,11 @@ describe('ValidacaoPeriodoService', () => {
     });
 
     it('deve retornar false para formulário inválido com mês', () => {
-      mockSelecaoPeriodoService.validarPeriodo.mockReturnValue(false);
+      mockValidadorPeriodoService.validarPeriodoCompleto.mockReturnValue({ 
+        valido: false, 
+        mensagem: 'Período fora do histórico',
+        codigo: 'PERIODO_FORA_HISTORICO'
+      });
       
       service.definirTipoSelecao('mes');
       service.definirMes('03');
@@ -103,7 +118,7 @@ describe('ValidacaoPeriodoService', () => {
     });
 
     it('deve retornar true para formulário válido com intervalo', () => {
-      mockSelecaoPeriodoService.validarIntervaloDatas.mockReturnValue(true);
+      mockValidadorPeriodoService.validarPeriodoCompleto.mockReturnValue({ valido: true, mensagem: '' });
       
       service.definirTipoSelecao('intervalo');
       service.definirDataInicio('2024-01-01');
@@ -113,7 +128,11 @@ describe('ValidacaoPeriodoService', () => {
     });
 
     it('deve retornar false para formulário inválido com intervalo', () => {
-      mockSelecaoPeriodoService.validarIntervaloDatas.mockReturnValue(false);
+      mockValidadorPeriodoService.validarPeriodoCompleto.mockReturnValue({ 
+        valido: false, 
+        mensagem: 'Intervalo maior que 90 dias',
+        codigo: 'INTERVALO_MAIOR_90_DIAS'
+      });
       
       service.definirTipoSelecao('intervalo');
       service.definirDataInicio('2024-01-01');
@@ -125,7 +144,7 @@ describe('ValidacaoPeriodoService', () => {
 
   describe('Validação de Intervalo', () => {
     it('deve retornar false para intervalo válido', () => {
-      mockSelecaoPeriodoService.validarIntervaloDatas.mockReturnValue(true);
+      mockValidadorPeriodoService.validarPeriodoCompleto.mockReturnValue({ valido: true, mensagem: '' });
       
       service.definirTipoSelecao('intervalo');
       service.definirDataInicio('2024-01-01');
@@ -135,7 +154,11 @@ describe('ValidacaoPeriodoService', () => {
     });
 
     it('deve retornar true para intervalo inválido', () => {
-      mockSelecaoPeriodoService.validarIntervaloDatas.mockReturnValue(false);
+      mockValidadorPeriodoService.validarPeriodoCompleto.mockReturnValue({ 
+        valido: false, 
+        mensagem: 'Intervalo maior que 90 dias',
+        codigo: 'INTERVALO_MAIOR_90_DIAS'
+      });
       
       service.definirTipoSelecao('intervalo');
       service.definirDataInicio('2024-01-01');
@@ -153,7 +176,7 @@ describe('ValidacaoPeriodoService', () => {
 
   describe('Validação de Mês', () => {
     it('deve retornar false para mês válido', () => {
-      mockSelecaoPeriodoService.validarPeriodo.mockReturnValue(true);
+      mockValidadorPeriodoService.validarPeriodoCompleto.mockReturnValue({ valido: true, mensagem: '' });
       
       service.definirTipoSelecao('mes');
       service.definirMes('03');
@@ -163,7 +186,11 @@ describe('ValidacaoPeriodoService', () => {
     });
 
     it('deve retornar true para mês inválido', () => {
-      mockSelecaoPeriodoService.validarPeriodo.mockReturnValue(false);
+      mockValidadorPeriodoService.validarPeriodoCompleto.mockReturnValue({ 
+        valido: false, 
+        mensagem: 'Período fora do histórico',
+        codigo: 'PERIODO_FORA_HISTORICO'
+      });
       
       service.definirTipoSelecao('mes');
       service.definirMes('03');
@@ -181,7 +208,7 @@ describe('ValidacaoPeriodoService', () => {
 
   describe('Validação de Campo', () => {
     it('deve validar campo mês', () => {
-      mockSelecaoPeriodoService.validarPeriodo.mockReturnValue(true);
+      mockValidadorPeriodoService.validarPeriodoCompleto.mockReturnValue({ valido: true, mensagem: '' });
       
       service.definirMes('03');
       service.definirAno('2024');
@@ -190,7 +217,7 @@ describe('ValidacaoPeriodoService', () => {
     });
 
     it('deve validar campo ano', () => {
-      mockSelecaoPeriodoService.validarPeriodo.mockReturnValue(true);
+      mockValidadorPeriodoService.validarPeriodoCompleto.mockReturnValue({ valido: true, mensagem: '' });
       
       service.definirMes('03');
       service.definirAno('2024');
@@ -199,7 +226,7 @@ describe('ValidacaoPeriodoService', () => {
     });
 
     it('deve validar campo dataInicio', () => {
-      mockSelecaoPeriodoService.validarLimiteHistorico.mockReturnValue(true);
+      mockValidadorPeriodoService.validarLimiteHistorico.mockReturnValue(true);
       
       service.definirDataInicio('2024-01-01');
       
@@ -207,7 +234,7 @@ describe('ValidacaoPeriodoService', () => {
     });
 
     it('deve validar campo dataFim', () => {
-      mockSelecaoPeriodoService.validarLimiteHistorico.mockReturnValue(true);
+      mockValidadorPeriodoService.validarLimiteHistorico.mockReturnValue(true);
       
       service.definirDataFim('2024-01-31');
       
@@ -217,7 +244,7 @@ describe('ValidacaoPeriodoService', () => {
 
   describe('Validação de Data', () => {
     it('deve retornar true para data válida', () => {
-      mockSelecaoPeriodoService.validarLimiteHistorico.mockReturnValue(true);
+      mockValidadorPeriodoService.validarLimiteHistorico.mockReturnValue(true);
       
       const resultado = service.validarData('2024-01-01');
       
@@ -225,7 +252,7 @@ describe('ValidacaoPeriodoService', () => {
     });
 
     it('deve retornar false para data inválida', () => {
-      mockSelecaoPeriodoService.validarLimiteHistorico.mockReturnValue(false);
+      mockValidadorPeriodoService.validarLimiteHistorico.mockReturnValue(false);
       
       const resultado = service.validarData('2024-01-01');
       
@@ -269,23 +296,31 @@ describe('ValidacaoPeriodoService', () => {
 
   describe('Mensagens de Erro', () => {
     it('deve retornar mensagem de erro para mês inválido', () => {
-      mockSelecaoPeriodoService.validarPeriodo.mockReturnValue(false);
+      mockValidadorPeriodoService.validarPeriodoCompleto.mockReturnValue({ 
+        valido: false, 
+        mensagem: 'Período deve estar dentro de 12 meses (passado ou futuro)',
+        codigo: 'PERIODO_FORA_HISTORICO'
+      });
       
       service.definirTipoSelecao('mes');
       service.definirMes('03');
       service.definirAno('2024');
       
-      expect(service.mensagemErro()).toBe('O mês selecionado está fora do limite de 12 meses (passado ou futuro)');
+      expect(service.mensagemErro()).toBe('Período deve estar dentro de 12 meses (passado ou futuro)');
     });
 
     it('deve retornar mensagem de erro para intervalo inválido', () => {
-      mockSelecaoPeriodoService.validarIntervaloDatas.mockReturnValue(false);
+      mockValidadorPeriodoService.validarPeriodoCompleto.mockReturnValue({ 
+        valido: false, 
+        mensagem: 'Intervalo não pode ser superior a 90 dias',
+        codigo: 'INTERVALO_MAIOR_90_DIAS'
+      });
       
       service.definirTipoSelecao('intervalo');
       service.definirDataInicio('2024-01-01');
       service.definirDataFim('2024-01-31');
       
-      expect(service.mensagemErro()).toBe('O intervalo selecionado não pode ser superior a 90 dias');
+      expect(service.mensagemErro()).toBe('Intervalo não pode ser superior a 90 dias');
     });
 
     it('deve retornar mensagem padrão quando não há erros específicos', () => {
@@ -297,7 +332,7 @@ describe('ValidacaoPeriodoService', () => {
 
   describe('Estado Completo', () => {
     it('deve retornar estado completo', () => {
-      mockSelecaoPeriodoService.validarPeriodo.mockReturnValue(true);
+      mockValidadorPeriodoService.validarPeriodoCompleto.mockReturnValue({ valido: true, mensagem: '' });
       mockSelecaoPeriodoService.formatarPeriodo.mockReturnValue('Março/2024');
       
       service.definirTipoSelecao('mes');

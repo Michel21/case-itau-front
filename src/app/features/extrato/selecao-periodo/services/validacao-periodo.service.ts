@@ -1,5 +1,6 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { SelecaoPeriodoService } from '../selecao-periodo.service';
+import { ValidadorPeriodoService } from './validador-periodo.service';
 
 /**
  * Serviço de validação de período independente
@@ -15,7 +16,8 @@ import { SelecaoPeriodoService } from '../selecao-periodo.service';
   providedIn: 'root'
 })
 export class ValidacaoPeriodoService {
-  private readonly selecaoPeriodoService = new SelecaoPeriodoService();
+  private readonly selecaoPeriodoService = inject(SelecaoPeriodoService);
+  private readonly validadorPeriodoService = inject(ValidadorPeriodoService);
 
   // ==================== ESTADO DE VALIDAÇÃO ====================
   private readonly _tipoSelecao = signal<'intervalo' | 'mes'>('mes');
@@ -167,7 +169,16 @@ export class ValidacaoPeriodoService {
     const dataInicio = this.parsearDataString(inicio);
     const dataFim = this.parsearDataString(fim);
 
-    return !this.selecaoPeriodoService.validarIntervaloDatas(dataInicio, dataFim);
+    // Usar a mesma validação do sistema existente
+    const resultado = this.validadorPeriodoService.validarPeriodoCompleto(
+      'intervalo',
+      undefined,
+      undefined,
+      dataInicio,
+      dataFim
+    );
+
+    return !resultado.valido;
   }
 
   /**
@@ -180,7 +191,14 @@ export class ValidacaoPeriodoService {
     const ano = this.anoSelecionado();
     if (!mes || !ano) return false;
 
-    return !this.selecaoPeriodoService.validarPeriodo(mes, ano);
+    // Usar a mesma validação do sistema existente
+    const resultado = this.validadorPeriodoService.validarPeriodoCompleto(
+      'mes',
+      mes,
+      ano
+    );
+
+    return !resultado.valido;
   }
 
   /**
@@ -207,7 +225,7 @@ export class ValidacaoPeriodoService {
   validarData(data: string): boolean {
     if (!data) return false;
     const dataObj = this.parsearDataString(data);
-    return this.selecaoPeriodoService.validarLimiteHistorico(dataObj);
+    return this.validadorPeriodoService.validarLimiteHistorico(dataObj);
   }
 
   // ==================== MÉTODOS DE FORMATAÇÃO ====================
@@ -315,7 +333,16 @@ export class ValidacaoPeriodoService {
     const inicio = this.parsearDataString(dataInicio);
     const fim = this.parsearDataString(dataFim);
     
-    if (!this.selecaoPeriodoService.validarIntervaloDatas(inicio, fim)) {
+    // Usar a mesma validação do sistema existente
+    const resultado = this.validadorPeriodoService.validarPeriodoCompleto(
+      'intervalo',
+      undefined,
+      undefined,
+      inicio,
+      fim
+    );
+    
+    if (!resultado.valido) {
       this._dataFim.set('');
     }
   }
@@ -325,7 +352,7 @@ export class ValidacaoPeriodoService {
     if (!dataInicio) return false;
     
     const data = this.parsearDataString(dataInicio);
-    return this.selecaoPeriodoService.validarLimiteHistorico(data);
+    return this.validadorPeriodoService.validarLimiteHistorico(data);
   }
 
   private validarDataFim(): boolean {
@@ -333,15 +360,35 @@ export class ValidacaoPeriodoService {
     if (!dataFim) return false;
     
     const data = this.parsearDataString(dataFim);
-    return this.selecaoPeriodoService.validarLimiteHistorico(data);
+    return this.validadorPeriodoService.validarLimiteHistorico(data);
   }
 
   private obterMensagemErro(): string {
     if (this.tipoSelecao() === 'mes' && this.mesInvalido()) {
+      const mes = this.mesSelecionado();
+      const ano = this.anoSelecionado();
+      if (mes && ano) {
+        const resultado = this.validadorPeriodoService.validarPeriodoCompleto('mes', mes, ano);
+        return resultado.mensagem || 'O mês selecionado está fora do limite de 12 meses (passado ou futuro)';
+      }
       return 'O mês selecionado está fora do limite de 12 meses (passado ou futuro)';
     }
     
     if (this.tipoSelecao() === 'intervalo' && this.intervaloInvalido()) {
+      const inicio = this.dataInicio();
+      const fim = this.dataFim();
+      if (inicio && fim) {
+        const dataInicio = this.parsearDataString(inicio);
+        const dataFim = this.parsearDataString(fim);
+        const resultado = this.validadorPeriodoService.validarPeriodoCompleto(
+          'intervalo',
+          undefined,
+          undefined,
+          dataInicio,
+          dataFim
+        );
+        return resultado.mensagem || 'O intervalo selecionado não pode ser superior a 90 dias';
+      }
       return 'O intervalo selecionado não pode ser superior a 90 dias';
     }
     
