@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 import { takeUntil, take } from 'rxjs/operators';
-import { DragDropModule, CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 
 export interface DatePickerConfig {
   title?: string;
@@ -18,7 +17,7 @@ export interface DatePickerConfig {
 @Component({
   selector: 'app-date-picker',
   standalone: true,
-  imports: [CommonModule, FormsModule, DragDropModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './date-picker.component.html',
   styleUrls: ['./date-picker.component.scss']
 })
@@ -97,9 +96,10 @@ export class DatePickerComponent implements OnInit {
     cursor: this.isDragging() ? 'grabbing' : 'grab'
   }));
 
-  // CDK Drag and Drop properties
-  readonly dragPosition = signal({ x: 0, y: 0 });
-  private isDragEnabled = true;
+  // Manual Drag and Drop properties
+  readonly dialogPosition = signal({ x: 0, y: 0 });
+  private isDraggingManual = false;
+  private dragStart = { x: 0, y: 0, startX: 0, startY: 0 };
 
   ngOnInit(): void {
     if (this.selectedDate) {
@@ -185,8 +185,8 @@ export class DatePickerComponent implements OnInit {
         dialog.style.top = `${constrainedY}px`;
         dialog.style.transform = 'none';
         
-        // Store initial position for CDK drag
-        this.dragPosition.set({ x: constrainedX - (viewportWidth / 2) + (rect.width / 2), y: constrainedY - (viewportHeight / 2) + (rect.height / 2) });
+        // Store initial position for manual drag
+        this.dialogPosition.set({ x: constrainedX, y: constrainedY });
       });
     }
   }
@@ -287,26 +287,71 @@ export class DatePickerComponent implements OnInit {
     this.cancelled.emit();
   }
 
-  // CDK Drag and Drop Methods
-  onDragStarted(): void {
-    console.log('🚀 CDK Drag started');
+  // Manual Drag and Drop Methods
+  startDrag(event: MouseEvent | TouchEvent): void {
+    console.log('🚀 Manual drag started');
+    
+    if (event instanceof MouseEvent && event.button !== 0) return;
+    
+    event.preventDefault();
+    this.isDraggingManual = true;
     this.isDragging.set(true);
+    
+    const clientX = event instanceof MouseEvent ? event.clientX : event.touches[0].clientX;
+    const clientY = event instanceof MouseEvent ? event.clientY : event.touches[0].clientY;
+    
+    this.dragStart = {
+      x: clientX,
+      y: clientY,
+      startX: this.dialogPosition().x,
+      startY: this.dialogPosition().y
+    };
+    
+    // Add event listeners
+    document.addEventListener('mousemove', this.onDragMove.bind(this));
+    document.addEventListener('mouseup', this.onDragEnd.bind(this));
+    document.addEventListener('touchmove', this.onDragMove.bind(this), { passive: false });
+    document.addEventListener('touchend', this.onDragEnd.bind(this));
   }
 
-  onDragEnded(event: any): void {
-    console.log('🏁 CDK Drag ended', event);
+  private onDragMove(event: MouseEvent | TouchEvent): void {
+    if (!this.isDraggingManual) return;
+    
+    event.preventDefault();
+    
+    const clientX = event instanceof MouseEvent ? event.clientX : event.touches[0].clientX;
+    const clientY = event instanceof MouseEvent ? event.clientY : event.touches[0].clientY;
+    
+    const deltaX = clientX - this.dragStart.x;
+    const deltaY = clientY - this.dragStart.y;
+    
+    const newX = this.dragStart.startX + deltaX;
+    const newY = this.dragStart.startY + deltaY;
+    
+    // Constrain to viewport
+    const dialog = document.querySelector('.date-picker-dialog') as HTMLElement;
+    if (dialog) {
+      const rect = dialog.getBoundingClientRect();
+      const maxX = window.innerWidth - rect.width;
+      const maxY = window.innerHeight - rect.height;
+      
+      const constrainedX = Math.max(0, Math.min(newX, maxX));
+      const constrainedY = Math.max(0, Math.min(newY, maxY));
+      
+      this.dialogPosition.set({ x: constrainedX, y: constrainedY });
+    }
+  }
+
+  private onDragEnd(): void {
+    console.log('🏁 Manual drag ended');
+    this.isDraggingManual = false;
     this.isDragging.set(false);
-  }
-
-  onDragMoved(event: any): void {
-    console.log('🔄 CDK Drag moved', event);
-  }
-
-  testDrag(): void {
-    console.log('🧪 Test drag clicked - CDK should be working');
-    console.log('CDK DragDropModule imported:', !!DragDropModule);
-    console.log('CDK CdkDrag imported:', !!CdkDrag);
-    console.log('CDK CdkDragHandle imported:', !!CdkDragHandle);
+    
+    // Remove event listeners
+    document.removeEventListener('mousemove', this.onDragMove.bind(this));
+    document.removeEventListener('mouseup', this.onDragEnd.bind(this));
+    document.removeEventListener('touchmove', this.onDragMove.bind(this));
+    document.removeEventListener('touchend', this.onDragEnd.bind(this));
   }
 
 
