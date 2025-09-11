@@ -48,25 +48,15 @@ export class ValidadorPeriodoService implements IValidadorPeriodo {
       1
     );
     
-    // Verificar se a data está dentro do limite histórico
-    if (data < limiteHistorico) {
-      return false;
-    }
-    
-    // Se não permitir datas futuras, verificar se a data não é futura
-    if (!this.configuracao.permitirDatasFuturas) {
-      const ultimoDiaMesAtual = new Date(dataAtual.getFullYear(), dataAtual.getMonth() + 1, 0);
-      return data <= ultimoDiaMesAtual;
-    }
-    
-    // Se permitir datas futuras, verificar limite de 12 meses à frente
+    // Calcular limite futuro (12 meses para frente)
     const limiteFuturo = new Date(
       dataAtual.getFullYear(),
       dataAtual.getMonth() + this.configuracao.limiteMesesHistorico,
       1
     );
     
-    return data <= limiteFuturo;
+    // Verificar se a data está dentro dos limites (passado e futuro)
+    return data >= limiteHistorico && data <= limiteFuturo;
   }
 
   validarPeriodoCompleto(
@@ -93,10 +83,6 @@ export class ValidadorPeriodoService implements IValidadorPeriodo {
 
   validarDataNaoFutura(data: Date): boolean {
     if (!data) return false;
-    
-    if (this.configuracao.permitirDatasFuturas) {
-      return true;
-    }
     
     const dataAtual = new Date();
     
@@ -125,13 +111,10 @@ export class ValidadorPeriodoService implements IValidadorPeriodo {
 
     const dataPeriodo = new Date(parseInt(ano), parseInt(mes) - 1, 1);
     
-    // Validar apenas o limite de 12 meses (passado ou futuro)
-    if (!this.validarLimiteHistorico(dataPeriodo)) {
-      return { 
-        valido: false, 
-        mensagem: `Período deve estar dentro de ${this.configuracao.limiteMesesHistorico} meses (passado ou futuro)`,
-        codigo: 'PERIODO_FORA_HISTORICO'
-      };
+    // Aplicar validação de 90 dias e limite histórico
+    const validacao90Dias = this.validarPeriodo90DiasAPartirDoMes(dataPeriodo);
+    if (!validacao90Dias.valido) {
+      return validacao90Dias;
     }
 
     return { valido: true, mensagem: '' };
@@ -166,43 +149,30 @@ export class ValidadorPeriodoService implements IValidadorPeriodo {
   }
 
   /**
-   * Valida se o mês selecionado está dentro do período de 90 dias do mês atual
-   * Regra: O mês selecionado não pode estar a mais de 90 dias do mês atual
-   * Exemplo: Se estamos em setembro, maio está a mais de 90 dias → inválido
-   * NOVA REGRA: Permitir histórico até 12 meses à frente (ex: setembro 2024 → setembro 2025)
+   * Valida se o mês selecionado está dentro do período permitido
+   * Regra: O mês selecionado deve estar dentro de 12 meses (passado ou futuro)
+   * Exemplo: Se estamos em setembro 2024, permite de setembro 2023 a setembro 2025
    */
   private validarPeriodo90DiasAPartirDoMes(dataMes: Date): ResultadoValidacao {
     const dataAtual = new Date();
     const mesAtual = dataAtual.getMonth();
     const anoAtual = dataAtual.getFullYear();
     
-    // Se o mês selecionado for o mês atual, não aplicar validação de 90 dias
+    // Se o mês selecionado for o mês atual, é válido
     if (dataMes.getMonth() === mesAtual && dataMes.getFullYear() === anoAtual) {
       return { valido: true, mensagem: '' };
     }
     
-    // Calcular o primeiro dia do mês atual
-    const primeiroDiaMesAtual = new Date(anoAtual, mesAtual, 1);
-    
-    // Calcular o último dia do mês selecionado
-    const ultimoDiaMesSelecionado = new Date(dataMes.getFullYear(), dataMes.getMonth() + 1, 0);
-    
-    // Calcular a diferença em dias entre o último dia do mês selecionado e o primeiro dia do mês atual
-    const diferencaEmDias = Math.abs(ultimoDiaMesSelecionado.getTime() - primeiroDiaMesAtual.getTime()) / (1000 * 60 * 60 * 24);
-    
-    // Verificar se a diferença excede 90 dias (apenas para meses passados)
-    if (dataMes < primeiroDiaMesAtual && diferencaEmDias > 90) {
-      return {
-        valido: false,
-        mensagem: `O mês selecionado está fora do período de 90 dias do mês atual.`,
-        codigo: 'MES_FORA_PERIODO_90_DIAS'
-      };
-    }
-    
-    // Verificar se o mês selecionado está dentro do limite histórico (12 meses para trás)
+    // Calcular o primeiro dia do mês selecionado
     const primeiroDiaDoMes = new Date(dataMes.getFullYear(), dataMes.getMonth(), 1);
+    
+    // Calcular limite histórico (12 meses para trás)
     const dataLimiteHistorico = new Date(anoAtual, mesAtual - this.configuracao.limiteMesesHistorico, 1);
     
+    // Calcular limite futuro (12 meses para frente)
+    const dataLimiteFuturo = new Date(anoAtual, mesAtual + this.configuracao.limiteMesesHistorico, 1);
+    
+    // Verificar se está dentro dos limites
     if (primeiroDiaDoMes < dataLimiteHistorico) {
       return {
         valido: false,
@@ -210,9 +180,6 @@ export class ValidadorPeriodoService implements IValidadorPeriodo {
         codigo: 'MES_FORA_HISTORICO'
       };
     }
-    
-    // Verificar se o mês selecionado não está muito no futuro (12 meses para frente)
-    const dataLimiteFuturo = new Date(anoAtual, mesAtual + this.configuracao.limiteMesesHistorico, 1);
     
     if (primeiroDiaDoMes > dataLimiteFuturo) {
       return {
