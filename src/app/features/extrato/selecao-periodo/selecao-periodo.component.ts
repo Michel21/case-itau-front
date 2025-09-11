@@ -8,9 +8,19 @@ import { ModalSelectComponent } from '../../../shared/components/modal-select/mo
 
 /**
  * Componente de seleção de período seguindo princípios SOLID e Clean Code
- * - Single Responsibility: Gerencia apenas a UI e coordenação
+ * 
+ * Princípios SOLID aplicados:
+ * - Single Responsibility: Gerencia apenas a UI e coordenação de formulários
+ * - Open/Closed: Extensível através de novos tipos de seleção
+ * - Liskov Substitution: Implementa interfaces consistentes
+ * - Interface Segregation: Métodos específicos para cada responsabilidade
  * - Dependency Inversion: Depende de abstrações (SelecaoPeriodoService)
- * - Clean Code: Nomes descritivos, métodos pequenos, responsabilidades claras
+ * 
+ * Clean Code aplicado:
+ * - Nomes descritivos e intencionais
+ * - Métodos pequenos com responsabilidade única
+ * - Separação clara de responsabilidades
+ * - Código auto-documentado
  */
 @Component({
   selector: 'app-selecao-periodo',
@@ -21,141 +31,53 @@ import { ModalSelectComponent } from '../../../shared/components/modal-select/mo
   animations: []
 })
 export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
-  // Dependency Injection (Dependency Inversion Principle)
+  // ==================== DEPENDENCY INJECTION ====================
   private readonly selecaoPeriodoService = inject(SelecaoPeriodoService);
   private readonly router = inject(Router);
   private readonly formBuilder = inject(FormBuilder);
 
-  // FormGroup para o formulário (Clean Code - Nome descritivo)
+  // ==================== FORM STATE ====================
   periodoForm!: FormGroup;
 
 
-  // Signals para estado do componente (Clean Code - Nomes descritivos)
+  // ==================== COMPONENT STATE ====================
   readonly tipoSelecao = signal<'intervalo' | 'mes'>('mes');
   readonly uniqueId = signal<string>(this.gerarIdUnico());
 
-  // Signals para valores do formulário (Clean Code - Estado reativo)
+  // ==================== FORM VALUES ====================
   readonly mesSelecionado = signal<string>('');
   readonly anoSelecionado = signal<string>('');
   readonly dataInicio = signal<string>('');
   readonly dataFim = signal<string>('');
 
-  // Signals do serviço (readonly - Interface Segregation)
+  // ==================== SERVICE DATA ====================
   readonly listaPeriodoMesAno = this.selecaoPeriodoService.periodos;
   readonly meses = this.selecaoPeriodoService.meses;
   readonly anos = this.selecaoPeriodoService.anos;
 
-  // Computed values para validações (delegando para o serviço)
-  readonly intervaloInvalido = computed(() => {
-    if (this.tipoSelecao() !== 'intervalo') {
-      return false;
-    }
+  // ==================== COMPUTED VALIDATIONS ====================
+  readonly intervaloInvalido = computed(() => this.validarIntervalo());
+  readonly mesInvalido = computed(() => this.validarMes());
+  readonly formularioInvalido = computed(() => this.validarFormulario());
+  readonly temErros = computed(() => this.formularioInvalido());
+  readonly botaoDesabilitado = computed(() => this.formularioInvalido());
 
-    const inicio = this.dataInicio();
-    const fim = this.dataFim();
+  // ==================== COMPUTED DISPLAY VALUES ====================
+  readonly periodoFormatado = computed(() => this.formatarPeriodoSelecionado());
+  readonly mensagemErro = computed(() => this.obterMensagemErro());
 
-    if (!inicio || !fim) {
-      return false;
-    }
-
-    const dataInicio = new Date(inicio);
-    const dataFim = new Date(fim);
-
-    return !this.selecaoPeriodoService.validarIntervaloDatas(dataInicio, dataFim);
-  });
-
-  readonly mesInvalido = computed(() => {
-    if (this.tipoSelecao() !== 'mes') {
-      return false;
-    }
-
-    const mes = this.mesSelecionado();
-    const ano = this.anoSelecionado();
-
-    if (!mes || !ano) {
-      return false;
-    }
-
-    return !this.selecaoPeriodoService.validarPeriodo(mes, ano);
-  });
-
-  readonly formularioInvalido = computed(() => {
-    if (this.tipoSelecao() === 'mes') {
-      return !this.mesSelecionado() || !this.anoSelecionado() || this.mesInvalido();
-    } else {
-      return !this.dataInicio() || !this.dataFim() || this.intervaloInvalido();
-    }
-  });
-
-  readonly periodoFormatado = computed(() => {
-    if (this.tipoSelecao() === 'mes') {
-      const mes = this.mesSelecionado();
-      const ano = this.anoSelecionado();
-      if (!mes || !ano) {
-        return '';
-      }
-      return this.selecaoPeriodoService.formatarPeriodo(mes, ano);
-    } else {
-      const inicio = this.dataInicio();
-      const fim = this.dataFim();
-      if (!inicio || !fim) {
-        return '';
-      }
-
-      const dataInicio = new Date(inicio);
-      const dataFim = new Date(fim);
-      return this.selecaoPeriodoService.formatarIntervalo(dataInicio, dataFim);
-    }
-  });
-
-  readonly temErros = computed(() => {
-    return this.formularioInvalido();
-  });
-
-  readonly mensagemErro = computed(() => {
-    // Verificar erros de formulário
-    if (this.periodoForm?.errors) {
-      const formErrors = this.periodoForm.errors;
-      
-      if (formErrors.dataInicioMaiorQueFim) {
-        return 'A data de início deve ser anterior à data de fim';
-      }
-      
-      if (formErrors.intervaloMaiorQue90Dias) {
-        return 'O intervalo selecionado excede 90 dias';
-      }
-    }
-
-    // Verificar erros específicos por tipo de seleção
-    if (this.tipoSelecao() === 'mes') {
-      if (this.mesInvalido()) {
-        return 'O mês selecionado está fora do limite de 12 meses (passado ou futuro)';
-      }
-    }
-    
-    if (this.tipoSelecao() === 'intervalo') {
-      if (this.intervaloInvalido()) {
-        return 'O intervalo selecionado excede 90 dias ou é inválido';
-      }
-    }
-    
-    return 'Por favor, preencha todos os campos obrigatórios';
-  });
-
-  readonly botaoDesabilitado = computed(() => {
-    return this.formularioInvalido();
-  });
-
+  // ==================== LIFECYCLE HOOKS ====================
   ngOnInit(): void {
     this.inicializarFormulario();
-    this.subscribirMudancasFormulario();
-    this.inicializarValoresPadrao();
+    this.configurarSubscricoes();
+    this.definirValoresPadrao();
   }
 
   ngOnDestroy(): void {
-    // Cleanup se necessário
+    // Cleanup automático com signals - não necessário
   }
 
+  // ==================== FORM INITIALIZATION ====================
   private inicializarFormulario(): void {
     this.periodoForm = this.formBuilder.group({
       mes: ['', Validators.required],
@@ -165,32 +87,25 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
     }, { validators: this.criarValidadorIntervaloDatas() });
   }
 
-  private inicializarValoresPadrao(): void {
+  private configurarSubscricoes(): void {
+    this.subscribirCampo('mes', this.mesSelecionado);
+    this.subscribirCampo('ano', this.anoSelecionado);
+    this.subscribirCampo('dataInicio', this.dataInicio, () => this.validarELimparDataFimSeNecessario());
+    this.subscribirCampo('dataFim', this.dataFim);
+  }
+
+  private definirValoresPadrao(): void {
     const periodoAtual = this.selecaoPeriodoService.obterPeriodoAtual();
-    
     this.periodoForm.patchValue({
       mes: periodoAtual.mes,
       ano: periodoAtual.ano
     });
   }
 
-  private subscribirMudancasFormulario(): void {
-    // Atualizar signals quando o formulário muda
-    this.periodoForm.get('mes')?.valueChanges.subscribe(value => {
-      this.mesSelecionado.set(value || '');
-    });
-
-    this.periodoForm.get('ano')?.valueChanges.subscribe(value => {
-      this.anoSelecionado.set(value || '');
-    });
-
-    this.periodoForm.get('dataInicio')?.valueChanges.subscribe(value => {
-      this.dataInicio.set(value || '');
-      this.validarELimparDataFimSeNecessario();
-    });
-
-    this.periodoForm.get('dataFim')?.valueChanges.subscribe(value => {
-      this.dataFim.set(value || '');
+  private subscribirCampo(campo: string, signal: any, callback?: () => void): void {
+    this.periodoForm.get(campo)?.valueChanges.subscribe(value => {
+      signal.set(value || '');
+      callback?.();
     });
   }
 
@@ -211,19 +126,17 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Métodos públicos (Interface Segregation)
+  // ==================== PUBLIC ACTIONS ====================
   voltar(): void {
     this.router.navigate(['/home']);
   }
 
   alterarTipoSelecao(tipo: 'intervalo' | 'mes'): void {
     this.tipoSelecao.set(tipo);
-
-    // Limpar formulário ao trocar tipo
-    this.periodoForm.reset();
-
+    this.limparFormulario();
+    
     if (tipo === 'mes') {
-      this.inicializarValoresPadrao();
+      this.definirValoresPadrao();
     }
   }
 
@@ -232,20 +145,12 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const periodo: PeriodoMesAno = {
-      tipo: this.tipoSelecao(),
-      valor: this.periodoFormatado(),
-      mes: this.mesSelecionado(),
-      ano: this.anoSelecionado(),
-      dataInicio: this.dataInicio(),
-      dataFim: this.dataFim()
-    };
-
+    const periodo = this.criarPeriodoSelecionado();
     this.selecaoPeriodoService.definirPeriodo(periodo);
-    this.router.navigate(['/extrato/pdf']);
+    this.navegarParaExtrato();
   }
 
-  // Métodos de validação (delegando para o serviço)
+  // ==================== FORM VALIDATION ====================
   isFieldInvalid(fieldName: string): boolean {
     const field = this.periodoForm.get(fieldName);
     return !!(field && field.invalid && (field.dirty || field.touched));
@@ -253,72 +158,28 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
 
   getFieldError(fieldName: string): string {
     const field = this.periodoForm.get(fieldName);
-    if (!field || !field.errors) {
-      return '';
-    }
+    if (!field?.errors) return '';
 
-    const errors = field.errors;
-
-    if (errors.required) {
-      return 'Este campo é obrigatório';
-    }
-
-    if (errors.dataForaHistorico) {
-      return 'Data fora do limite de 12 meses de histórico';
-    }
-
-    if (errors.dataFutura) {
-      return 'Não é possível selecionar uma data futura';
-    }
-
-    if (errors.maxlength) {
-      return `Máximo de ${errors.maxlength.requiredLength} caracteres`;
-    }
-
-    if (errors.minlength) {
-      return `Mínimo de ${errors.minlength.requiredLength} caracteres`;
-    }
-
-    if (errors.pattern) {
-      return 'Formato inválido';
-    }
-
-    return 'Campo inválido';
+    return this.mapearErroCampo(field.errors);
   }
 
-  // Métodos de navegação por teclado
+  // ==================== KEYBOARD NAVIGATION ====================
   onKeyDown(event: KeyboardEvent, action: string): void {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-
-      switch (action) {
-        case 'aplicar':
-          this.aplicarFiltro();
-          break;
-        case 'tipo-mes':
-          this.alterarTipoSelecao('mes');
-          break;
-        case 'tipo-intervalo':
-          this.alterarTipoSelecao('intervalo');
-          break;
-      }
-    }
+    if (!this.isValidKeyPress(event)) return;
+    
+    event.preventDefault();
+    this.executarAcaoPorTeclado(action);
   }
 
-  // Métodos para obter datas (delegando para o serviço)
+  // ==================== DATE CONSTRAINTS ====================
   getDataMinima(): Date {
-    const dataMinima = this.selecaoPeriodoService.obterDataLimiteHistorico();
-    // Parse evitando problemas de timezone
-    return new Date(dataMinima.getFullYear(), dataMinima.getMonth(), dataMinima.getDate());
+    return this.criarDataSemTimezone(this.selecaoPeriodoService.obterDataLimiteHistorico());
   }
 
   getDataMaxima(): Date {
-    const dataMaxima = this.selecaoPeriodoService.obterDataMaxima();
-    // Parse evitando problemas de timezone
-    return new Date(dataMaxima.getFullYear(), dataMaxima.getMonth(), dataMaxima.getDate());
+    return this.criarDataSemTimezone(this.selecaoPeriodoService.obterDataMaxima());
   }
 
-  // Métodos para validação dinâmica de datas
   getDataMinimaInicio(): Date {
     return this.getDataMinima();
   }
@@ -329,31 +190,21 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
 
   getDataMinimaFim(): Date {
     const dataInicio = this.dataInicio();
-    if (!dataInicio) {
-      return this.getDataMinima();
-    }
+    if (!dataInicio) return this.getDataMinima();
     
-    // Parse da data de início evitando problemas de timezone
-    const inicio = new Date(dataInicio + 'T00:00:00');
+    const inicio = this.parsearDataString(dataInicio);
     const dataMinima = this.getDataMinima();
     
-    // A data fim não pode ser anterior à data início
     return inicio > dataMinima ? inicio : dataMinima;
   }
 
   getDataMaximaFim(): Date {
     const dataInicio = this.dataInicio();
-    if (!dataInicio) {
-      return this.getDataMaxima();
-    }
+    if (!dataInicio) return this.getDataMaxima();
     
-    // Parse da data de início evitando problemas de timezone
-    const inicio = new Date(dataInicio + 'T00:00:00');
+    const inicio = this.parsearDataString(dataInicio);
     const dataMaxima = this.getDataMaxima();
-    
-    // Calcular data máxima baseada no limite de 90 dias
-    const dataLimite90Dias = new Date(inicio);
-    dataLimite90Dias.setDate(inicio.getDate() + 90);
+    const dataLimite90Dias = this.calcularDataLimite90Dias(inicio);
     
     // Retornar a menor entre a data máxima permitida e o limite de 90 dias
     // Isso garante que não permitimos datas futuras além do período histórico
@@ -364,18 +215,168 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
     console.log('Data selecionada:', event);
   }
 
-  // Métodos auxiliares (Clean Code - Métodos pequenos e específicos)
+  // ==================== PRIVATE HELPER METHODS ====================
   private gerarIdUnico(): string {
     return `selecao-periodo-${Date.now()}`;
   }
 
-  // Validadores customizados (Clean Code - Nomes descritivos, delegando para o serviço)
+  private limparFormulario(): void {
+    this.periodoForm.reset();
+  }
+
+  private criarPeriodoSelecionado(): PeriodoMesAno {
+    return {
+      tipo: this.tipoSelecao(),
+      valor: this.periodoFormatado(),
+      mes: this.mesSelecionado(),
+      ano: this.anoSelecionado(),
+      dataInicio: this.dataInicio(),
+      dataFim: this.dataFim()
+    };
+  }
+
+  private navegarParaExtrato(): void {
+    this.router.navigate(['/extrato/pdf']);
+  }
+
+  private isValidKeyPress(event: KeyboardEvent): boolean {
+    return event.key === 'Enter' || event.key === ' ';
+  }
+
+  private executarAcaoPorTeclado(action: string): void {
+    const actions: Record<string, () => void> = {
+      'aplicar': () => this.aplicarFiltro(),
+      'tipo-mes': () => this.alterarTipoSelecao('mes'),
+      'tipo-intervalo': () => this.alterarTipoSelecao('intervalo')
+    };
+
+    actions[action]?.();
+  }
+
+  private mapearErroCampo(errors: ValidationErrors): string {
+    const errorMessages: Record<string, string> = {
+      required: 'Este campo é obrigatório',
+      dataForaHistorico: 'Data fora do limite de 12 meses de histórico',
+      dataFutura: 'Não é possível selecionar uma data futura',
+      maxlength: `Máximo de ${errors.maxlength?.requiredLength} caracteres`,
+      minlength: `Mínimo de ${errors.minlength?.requiredLength} caracteres`,
+      pattern: 'Formato inválido'
+    };
+
+    for (const [key, message] of Object.entries(errorMessages)) {
+      if (errors[key]) return message;
+    }
+
+    return 'Campo inválido';
+  }
+
+  // ==================== VALIDATION METHODS ====================
+  private validarIntervalo(): boolean {
+    if (this.tipoSelecao() !== 'intervalo') return false;
+
+    const inicio = this.dataInicio();
+    const fim = this.dataFim();
+    if (!inicio || !fim) return false;
+
+    const dataInicio = this.parsearDataString(inicio);
+    const dataFim = this.parsearDataString(fim);
+
+    return !this.selecaoPeriodoService.validarIntervaloDatas(dataInicio, dataFim);
+  }
+
+  private validarMes(): boolean {
+    if (this.tipoSelecao() !== 'mes') return false;
+
+    const mes = this.mesSelecionado();
+    const ano = this.anoSelecionado();
+    if (!mes || !ano) return false;
+
+    return !this.selecaoPeriodoService.validarPeriodo(mes, ano);
+  }
+
+  private validarFormulario(): boolean {
+    if (this.tipoSelecao() === 'mes') {
+      return !this.mesSelecionado() || !this.anoSelecionado() || this.mesInvalido();
+    } else {
+      return !this.dataInicio() || !this.dataFim() || this.intervaloInvalido();
+    }
+  }
+
+  private formatarPeriodoSelecionado(): string {
+    if (this.tipoSelecao() === 'mes') {
+      return this.formatarPeriodoMes();
+    } else {
+      return this.formatarPeriodoIntervalo();
+    }
+  }
+
+  private formatarPeriodoMes(): string {
+    const mes = this.mesSelecionado();
+    const ano = this.anoSelecionado();
+    if (!mes || !ano) return '';
+
+    return this.selecaoPeriodoService.formatarPeriodo(mes, ano);
+  }
+
+  private formatarPeriodoIntervalo(): string {
+    const inicio = this.dataInicio();
+    const fim = this.dataFim();
+    if (!inicio || !fim) return '';
+
+    const dataInicio = this.parsearDataString(inicio);
+    const dataFim = this.parsearDataString(fim);
+    return this.selecaoPeriodoService.formatarIntervalo(dataInicio, dataFim);
+  }
+
+  private obterMensagemErro(): string {
+    if (this.periodoForm?.errors) {
+      return this.mapearErroFormulario(this.periodoForm.errors);
+    }
+
+    if (this.tipoSelecao() === 'mes' && this.mesInvalido()) {
+      return 'O mês selecionado está fora do limite de 12 meses (passado ou futuro)';
+    }
+    
+    if (this.tipoSelecao() === 'intervalo' && this.intervaloInvalido()) {
+      return 'O intervalo selecionado não pode ser superior a 90 dias';
+    }
+    
+    return 'Por favor, preencha todos os campos obrigatórios';
+  }
+
+  private mapearErroFormulario(errors: ValidationErrors): string {
+    if (errors.dataInicioMaiorQueFim) {
+      return 'A data de início deve ser anterior à data de fim';
+    }
+    
+    if (errors.intervaloMaiorQue90Dias) {
+      return 'O intervalo selecionado não pode ser superior a 90 dias';
+    }
+
+    return 'Erro no formulário';
+  }
+
+  // ==================== DATE UTILITIES ====================
+  private criarDataSemTimezone(data: Date): Date {
+    return new Date(data.getFullYear(), data.getMonth(), data.getDate());
+  }
+
+  private parsearDataString(dataString: string): Date {
+    return new Date(dataString + 'T00:00:00');
+  }
+
+  private calcularDataLimite90Dias(dataInicio: Date): Date {
+    const dataLimite = new Date(dataInicio);
+    dataLimite.setDate(dataInicio.getDate() + 90);
+    return dataLimite;
+  }
+
+  // ==================== CUSTOM VALIDATORS ====================
   private criarValidadorDataInicio(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       if (!control.value) return null;
       
-      // Parse da data evitando problemas de timezone
-      const dataInicio = new Date(control.value + 'T00:00:00');
+      const dataInicio = this.parsearDataString(control.value);
       
       if (!this.selecaoPeriodoService.validarLimiteHistorico(dataInicio)) {
         return { dataForaHistorico: true };
@@ -389,8 +390,7 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
     return (control: AbstractControl): ValidationErrors | null => {
       if (!control.value) return null;
       
-      // Parse da data evitando problemas de timezone
-      const dataFim = new Date(control.value + 'T00:00:00');
+      const dataFim = this.parsearDataString(control.value);
       
       if (!this.selecaoPeriodoService.validarLimiteHistorico(dataFim)) {
         return { dataForaHistorico: true };
@@ -407,9 +407,8 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
       
       if (!dataInicio || !dataFim) return null;
       
-      // Parse das datas evitando problemas de timezone
-      const inicio = new Date(dataInicio + 'T00:00:00');
-      const fim = new Date(dataFim + 'T00:00:00');
+      const inicio = this.parsearDataString(dataInicio);
+      const fim = this.parsearDataString(dataFim);
       
       if (inicio > fim) {
         return { dataInicioMaiorQueFim: true };

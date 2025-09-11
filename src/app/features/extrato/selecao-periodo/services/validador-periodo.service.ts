@@ -31,6 +31,8 @@ export class ValidadorPeriodoService implements IValidadorPeriodo {
     const fim = new Date(dataFim.getFullYear(), dataFim.getMonth(), dataFim.getDate());
     
     const diferencaDias = Math.ceil((fim.getTime() - inicio.getTime()) / (1000 * 60 * 60 * 24));
+    
+    // Permitir exatamente 90 dias, mas bloquear se passar
     return diferencaDias <= this.configuracao.limiteDiasIntervalo;
   }
 
