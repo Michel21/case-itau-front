@@ -31,6 +31,10 @@ export const routes: Routes = [
     loadChildren: () => import('./shared/components/demo.routes').then(m => m.demoRoutes)
   },
   {
+    path: 'validacao-periodo-demo',
+    loadChildren: () => import('./features/extrato/selecao-periodo/demo/validacao-periodo-demo.routes').then(m => m.VALIDACAO_PERIODO_DEMO_ROUTES)
+  },
+  {
     path: '',
     pathMatch: 'full',
     redirectTo: 'home'
