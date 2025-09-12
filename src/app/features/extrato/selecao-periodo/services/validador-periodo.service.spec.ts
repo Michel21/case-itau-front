@@ -313,6 +313,102 @@ describe('ValidadorPeriodoService', () => {
     });
   });
 
+  describe('calcular90DiasComDatasInicialEFinal', () => {
+    it('deve retornar data inicial e final calculada corretamente', () => {
+      const dataInicial = new Date('2024-01-01');
+      const resultado = service.calcular90DiasComDatasInicialEFinal(dataInicial);
+      
+      // 01/01/2024 + 90 dias = 31/03/2024
+      const dataEsperada = new Date('2024-03-31');
+      
+      expect(resultado.dataInicial).toEqual(new Date('2024-01-01'));
+      expect(resultado.dataFinal).toEqual(dataEsperada);
+    });
+
+    it('deve retornar data atual como final se a data calculada for futura', () => {
+      // Simular data atual como 15/01/2024
+      const dataAtualOriginal = Date;
+      const mockDate = new Date('2024-01-15');
+      jest.spyOn(global, 'Date').mockImplementation(() => mockDate as any);
+      
+      const dataInicial = new Date('2024-01-01');
+      const resultado = service.calcular90DiasComDatasInicialEFinal(dataInicial);
+      
+      // Como 01/01/2024 + 90 dias = 31/03/2024 > 15/01/2024, deve retornar data atual
+      expect(resultado.dataInicial).toEqual(new Date('2024-01-01'));
+      expect(resultado.dataFinal).toEqual(mockDate);
+      
+      // Restaurar Date original
+      (global as any).Date = dataAtualOriginal;
+    });
+
+    it('deve normalizar datas para evitar problemas de timezone', () => {
+      const dataInicial = new Date('2024-01-01T23:59:59.999Z');
+      const resultado = service.calcular90DiasComDatasInicialEFinal(dataInicial);
+      
+      // Deve ignorar horas e considerar apenas a data
+      expect(resultado.dataInicial).toEqual(new Date('2024-01-01'));
+      expect(resultado.dataFinal).toEqual(new Date('2024-03-31'));
+    });
+
+    it('deve lançar erro se data inicial for nula', () => {
+      expect(() => {
+        service.calcular90DiasComDatasInicialEFinal(null as any);
+      }).toThrow('Data inicial é obrigatória');
+    });
+
+    it('deve lançar erro se data inicial for undefined', () => {
+      expect(() => {
+        service.calcular90DiasComDatasInicialEFinal(undefined as any);
+      }).toThrow('Data inicial é obrigatória');
+    });
+
+    it('deve funcionar com datas de diferentes meses', () => {
+      const dataInicial = new Date('2024-02-15');
+      const resultado = service.calcular90DiasComDatasInicialEFinal(dataInicial);
+      
+      // 15/02/2024 + 90 dias = 15/05/2024
+      expect(resultado.dataInicial).toEqual(new Date('2024-02-15'));
+      expect(resultado.dataFinal).toEqual(new Date('2024-05-15'));
+    });
+
+    it('deve funcionar com datas de diferentes anos', () => {
+      const dataInicial = new Date('2023-12-01');
+      const resultado = service.calcular90DiasComDatasInicialEFinal(dataInicial);
+      
+      // 01/12/2023 + 90 dias = 29/02/2024 (ano bissexto)
+      expect(resultado.dataInicial).toEqual(new Date('2023-12-01'));
+      expect(resultado.dataFinal).toEqual(new Date('2024-02-29'));
+    });
+
+    it('deve retornar objeto com propriedades corretas', () => {
+      const dataInicial = new Date('2024-01-01');
+      const resultado = service.calcular90DiasComDatasInicialEFinal(dataInicial);
+      
+      expect(resultado.dataInicial).toBeDefined();
+      expect(resultado.dataFinal).toBeDefined();
+      expect(resultado.dataInicial).toBeInstanceOf(Date);
+      expect(resultado.dataFinal).toBeInstanceOf(Date);
+    });
+
+    it('deve funcionar com data inicial igual à data atual', () => {
+      // Simular data atual como 15/01/2024
+      const dataAtualOriginal = Date;
+      const mockDate = new Date('2024-01-15');
+      jest.spyOn(global, 'Date').mockImplementation(() => mockDate as any);
+      
+      const dataInicial = new Date('2024-01-15');
+      const resultado = service.calcular90DiasComDatasInicialEFinal(dataInicial);
+      
+      // Como 15/01/2024 + 90 dias = 14/04/2024 > 15/01/2024, deve retornar data atual
+      expect(resultado.dataInicial).toEqual(new Date('2024-01-15'));
+      expect(resultado.dataFinal).toEqual(mockDate);
+      
+      // Restaurar Date original
+      (global as any).Date = dataAtualOriginal;
+    });
+  });
+
   describe('validarDataNaoFutura', () => {
     it('deve retornar false para data nula ou indefinida', () => {
       expect(service.validarDataNaoFutura(null as any)).toBe(false);
