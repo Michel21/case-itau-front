@@ -100,6 +100,43 @@ export class ValidadorPeriodoService implements IValidadorPeriodo {
     return { ...this.configuracao };
   }
 
+  /**
+   * Calcula 90 dias a partir de uma data inicial, garantindo que não seja futura
+   * @param dataInicial - Data inicial para o cálculo
+   * @returns Data final (dataInicial + 90 dias) ou data atual se a data final for futura
+   */
+  calcular90DiasNaoFuturas(dataInicial: Date): Date {
+    if (!dataInicial) {
+      throw new Error('Data inicial é obrigatória');
+    }
+
+    // Normalizar a data inicial para evitar problemas de timezone
+    const dataInicialNormalizada = new Date(
+      dataInicial.getFullYear(),
+      dataInicial.getMonth(),
+      dataInicial.getDate()
+    );
+
+    // Calcular 90 dias a partir da data inicial
+    const dataFinal = new Date(dataInicialNormalizada);
+    dataFinal.setDate(dataInicialNormalizada.getDate() + this.configuracao.limiteDiasIntervalo);
+
+    // Obter data atual normalizada
+    const dataAtual = new Date();
+    const dataAtualNormalizada = new Date(
+      dataAtual.getFullYear(),
+      dataAtual.getMonth(),
+      dataAtual.getDate()
+    );
+
+    // Se a data final for futura, retornar a data atual
+    if (dataFinal > dataAtualNormalizada) {
+      return dataAtualNormalizada;
+    }
+
+    return dataFinal;
+  }
+
   private validarPeriodoMesAno(mes?: string, ano?: string): ResultadoValidacao {
     if (!mes || !ano) {
       return { 
