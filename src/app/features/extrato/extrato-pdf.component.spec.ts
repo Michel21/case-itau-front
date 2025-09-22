@@ -52,6 +52,9 @@ describe('ExtratoPdfComponent', () => {
       downloadHTML: jest.fn()
     };
 
+    // Configurar DOM para testes
+    document.body.innerHTML = '<div id="root"></div>';
+
     await TestBed.configureTestingModule({
       imports: [ExtratoPdfComponent],
       providers: [
@@ -64,6 +67,12 @@ describe('ExtratoPdfComponent', () => {
     component = fixture.componentInstance;
     mockRouter = TestBed.inject(Router) as jest.Mocked<Router>;
     mockWebViewDownloadService = TestBed.inject(WebViewDownloadService) as jest.Mocked<WebViewDownloadService>;
+  });
+
+  afterEach(() => {
+    // Limpar DOM após cada teste
+    document.body.innerHTML = '';
+    jest.clearAllMocks();
   });
 
   describe('Inicialização', () => {

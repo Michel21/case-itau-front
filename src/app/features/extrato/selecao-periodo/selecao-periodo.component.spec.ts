@@ -30,7 +30,8 @@ describe('SelecaoPeriodoComponent', () => {
       obterDataMaxima: jest.fn(),
       periodos: signal([]),
       meses: signal([]),
-      anos: signal([])
+      anos: signal([]),
+      periodosDropdown: signal([])
     };
 
     mockRouter = {
@@ -159,7 +160,7 @@ describe('SelecaoPeriodoComponent', () => {
       component.dataFim.set('2024-09-30');
       mockSelecaoPeriodoService.validarIntervaloDatas.mockReturnValue(false);
 
-      expect(component.mensagemErro()).toBe('O intervalo selecionado excede 90 dias ou é inválido');
+      expect(component.mensagemErro()).toBe('O intervalo selecionado não pode ser superior a 90 dias');
     });
 
     it('deve retornar mensagem padrão quando não há erros específicos', () => {
@@ -306,46 +307,46 @@ describe('SelecaoPeriodoComponent', () => {
   describe('métodos de data', () => {
     it('deve retornar data mínima formatada', () => {
       const dataMinima = component.getDataMinima();
-      expect(dataMinima).toBe('2023-08-31'); // Timezone UTC
+      expect(dataMinima).toEqual(new Date('2023-08-31T03:00:00.000Z'));
     });
 
     it('deve retornar data máxima formatada', () => {
       const dataMaxima = component.getDataMaxima();
-      expect(dataMaxima).toBe('2024-09-07'); // Timezone UTC
+      expect(dataMaxima).toEqual(new Date('2024-09-07T03:00:00.000Z'));
     });
 
     it('deve retornar data mínima de início', () => {
       const dataMinimaInicio = component.getDataMinimaInicio();
-      expect(dataMinimaInicio).toBe('2023-08-31');
+      expect(dataMinimaInicio).toEqual(new Date('2023-08-31T03:00:00.000Z'));
     });
 
     it('deve retornar data máxima de início', () => {
       const dataMaximaInicio = component.getDataMaximaInicio();
-      expect(dataMaximaInicio).toBe('2024-09-07');
+      expect(dataMaximaInicio).toEqual(new Date('2024-09-07T03:00:00.000Z'));
     });
 
     it('deve retornar data mínima de fim baseada na data de início', () => {
       component.dataInicio.set('2024-09-01');
       const dataMinimaFim = component.getDataMinimaFim();
-      expect(dataMinimaFim).toBe('2024-09-01');
+      expect(dataMinimaFim).toEqual(new Date('2024-09-01T03:00:00.000Z'));
     });
 
     it('deve retornar data mínima padrão quando data início está vazia', () => {
       component.dataInicio.set('');
       const dataMinimaFim = component.getDataMinimaFim();
-      expect(dataMinimaFim).toBe('2023-08-31');
+      expect(dataMinimaFim).toEqual(new Date('2023-08-31T03:00:00.000Z'));
     });
 
     it('deve retornar data máxima de fim baseada no limite de 90 dias', () => {
       component.dataInicio.set('2024-09-01');
       const dataMaximaFim = component.getDataMaximaFim();
-      expect(dataMaximaFim).toBe('2024-09-07'); // Limitado pela data máxima
+      expect(dataMaximaFim).toEqual(new Date('2024-09-07T03:00:00.000Z'));
     });
 
     it('deve retornar data máxima padrão quando data início está vazia', () => {
       component.dataInicio.set('');
       const dataMaximaFim = component.getDataMaximaFim();
-      expect(dataMaximaFim).toBe('2024-09-07');
+      expect(dataMaximaFim).toEqual(new Date('2024-09-07T03:00:00.000Z'));
     });
 
     it('deve logar data selecionada', () => {
