@@ -34,7 +34,7 @@ export interface IGeradorPeriodo {
   /**
    * Gera períodos no formato "Ano | Mês" para dropdown único
    */
-  gerarPeriodosDropdown(): Array<{ valor: string; label: string; mes: string; ano: string }>;
+  gerarPeriodosDropdown(): Array<{ valor: string; nome: string; mes: string; ano: string }>;
 }
 
 /**

@@ -76,9 +76,9 @@ export class GeradorPeriodoService implements IGeradorPeriodo {
    * Gera períodos no formato "Ano | Mês" para dropdown único
    * Retorna lista ordenada do mais recente para o mais antigo
    */
-  gerarPeriodosDropdown(): Array<{ valor: string; label: string; mes: string; ano: string }> {
+  gerarPeriodosDropdown(): Array<{ valor: string; nome: string; mes: string; ano: string }> {
     const dataAtual = new Date();
-    const periodos: Array<{ valor: string; label: string; mes: string; ano: string }> = [];
+    const periodos: Array<{ valor: string; nome: string; mes: string; ano: string }> = [];
     
     // Gerar os últimos 12 meses incluindo futuro conforme imagem
     for (let i = -3; i < 12; i++) { // -3 para incluir 3 meses futuros
@@ -89,18 +89,23 @@ export class GeradorPeriodoService implements IGeradorPeriodo {
       
       periodos.push({
         valor: `${mes}/${ano}`,
-        label: `${ano} | ${nomeMes}`,
+        nome: `${ano} | ${nomeMes}`,
         mes: mes.toString(),
         ano: ano.toString()
       });
     }
     
     // Ordenar do mais recente para o mais antigo
-    return periodos.sort((a, b) => {
+    const periodosOrdenados = periodos.sort((a, b) => {
       const dataA = new Date(parseInt(a.ano), parseInt(a.mes) - 1);
       const dataB = new Date(parseInt(b.ano), parseInt(b.mes) - 1);
       return dataB.getTime() - dataA.getTime();
     });
+    
+    // Debug temporário
+    console.log('🗓️ Períodos gerados:', periodosOrdenados);
+    
+    return periodosOrdenados;
   }
 
   gerarPeriodoAtual(): { mes: string; ano: string } {

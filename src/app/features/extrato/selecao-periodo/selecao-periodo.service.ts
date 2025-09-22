@@ -34,7 +34,7 @@ export class SelecaoPeriodoService {
   private readonly _periodos = signal<PeriodoMesAno[]>([]);
   private readonly _meses = signal<Mes[]>([]);
   private readonly _anos = signal<string[]>([]);
-  private readonly _periodosDropdown = signal<Array<{ valor: string; label: string; mes: string; ano: string }>>([]);
+  private readonly _periodosDropdown = signal<Array<{ valor: string; nome: string; mes: string; ano: string }>>([]);
   private readonly _periodoAtual = signal<PeriodoAtual>({ mes: '', ano: '' });
   private readonly _periodoSelecionado = signal<PeriodoMesAno | null>(null);
   private readonly _estadoFormulario = signal<EstadoFormulario>({
