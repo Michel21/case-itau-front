@@ -73,9 +73,6 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
     this.inicializarFormulario();
     this.configurarSubscricoes();
     this.definirValoresPadrao();
-    
-    // Debug temporário
-    console.log('📋 Períodos dropdown carregados:', this.periodosDropdown());
   }
 
   ngOnDestroy(): void {

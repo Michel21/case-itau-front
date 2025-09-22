@@ -80,8 +80,8 @@ export class GeradorPeriodoService implements IGeradorPeriodo {
     const dataAtual = new Date();
     const periodos: Array<{ valor: string; nome: string; mes: string; ano: string }> = [];
     
-    // Gerar os últimos 12 meses incluindo futuro conforme imagem
-    for (let i = -3; i < 12; i++) { // -3 para incluir 3 meses futuros
+    // Gerar os últimos 12 meses (incluindo o mês atual, sem meses futuros)
+    for (let i = 0; i < this.LIMITE_MESES_HISTORICO; i++) {
       const data = new Date(dataAtual.getFullYear(), dataAtual.getMonth() - i, 1);
       const mes = data.getMonth() + 1;
       const ano = data.getFullYear();
@@ -96,16 +96,11 @@ export class GeradorPeriodoService implements IGeradorPeriodo {
     }
     
     // Ordenar do mais recente para o mais antigo
-    const periodosOrdenados = periodos.sort((a, b) => {
+    return periodos.sort((a, b) => {
       const dataA = new Date(parseInt(a.ano), parseInt(a.mes) - 1);
       const dataB = new Date(parseInt(b.ano), parseInt(b.mes) - 1);
       return dataB.getTime() - dataA.getTime();
     });
-    
-    // Debug temporário
-    console.log('🗓️ Períodos gerados:', periodosOrdenados);
-    
-    return periodosOrdenados;
   }
 
   gerarPeriodoAtual(): { mes: string; ano: string } {
