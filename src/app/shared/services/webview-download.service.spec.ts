@@ -30,9 +30,7 @@ describe('WebViewDownloadService', () => {
     // Reset mocks
     jest.clearAllMocks();
     
-    // Mock console methods
-    jest.spyOn(console, 'warn').mockImplementation(() => {});
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    // Console methods não são mockados - removidos conforme solicitado
     
     // Mock global objects
     global.URL = {
@@ -336,10 +334,6 @@ describe('WebViewDownloadService', () => {
 
         // Aguardar resolução da Promise
         setTimeout(() => {
-        expect(console.warn).toHaveBeenCalled();
-        const warnCalls = (console.warn as jest.Mock).mock.calls;
-        expect(warnCalls[0][0]).toBe('Compartilhamento falhou, usando download:');
-        expect(warnCalls[0][1]).toBeInstanceOf(Error);
           expect(mockWebViewUtils.downloadFile).toHaveBeenCalledWith('test content', 'test.txt', 'text/plain');
         }, 0);
       });
