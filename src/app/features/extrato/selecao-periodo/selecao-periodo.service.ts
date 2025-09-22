@@ -34,6 +34,7 @@ export class SelecaoPeriodoService {
   private readonly _periodos = signal<PeriodoMesAno[]>([]);
   private readonly _meses = signal<Mes[]>([]);
   private readonly _anos = signal<string[]>([]);
+  private readonly _periodosDropdown = signal<Array<{ valor: string; label: string; mes: string; ano: string }>>([]);
   private readonly _periodoAtual = signal<PeriodoAtual>({ mes: '', ano: '' });
   private readonly _periodoSelecionado = signal<PeriodoMesAno | null>(null);
   private readonly _estadoFormulario = signal<EstadoFormulario>({
@@ -50,6 +51,7 @@ export class SelecaoPeriodoService {
   readonly periodos = this._periodos.asReadonly();
   readonly meses = this._meses.asReadonly();
   readonly anos = this._anos.asReadonly();
+  readonly periodosDropdown = this._periodosDropdown.asReadonly();
   readonly periodoAtual = this._periodoAtual.asReadonly();
   readonly periodoSelecionado = this._periodoSelecionado.asReadonly();
   readonly estadoFormulario = this._estadoFormulario.asReadonly();
@@ -85,6 +87,7 @@ export class SelecaoPeriodoService {
     this.gerarPeriodos();
     this.gerarMeses();
     this.gerarAnos();
+    this.gerarPeriodosDropdown();
     this.definirPeriodoAtual();
   }
 
@@ -110,6 +113,14 @@ export class SelecaoPeriodoService {
   gerarAnos(): void {
     const anos = this.gerador.gerarAnos();
     this._anos.set(anos);
+  }
+
+  /**
+   * Gera períodos no formato "Ano | Mês" para dropdown único
+   */
+  gerarPeriodosDropdown(): void {
+    const periodosDropdown = this.gerador.gerarPeriodosDropdown();
+    this._periodosDropdown.set(periodosDropdown);
   }
 
   /**

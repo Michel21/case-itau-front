@@ -53,38 +53,19 @@
           <div class="field-group">
             <div class="field">
               <app-modal-select 
-                [id]="'select-mes'"
-                [label]="'Mês'"
-                type="Mês"
-                [placeholder]="'Selecione o mês'"
-                formControlName="mes"
-                [prefix]="'MES'"
-                [optionsSelect]="meses()"
-                [helperText]="'Escolha um mês válido'"
-                [class.field-invalid]="isFieldInvalid('mes')">
+                [id]="'select-periodo'"
+                [label]="'Período'"
+                type="Período"
+                [placeholder]="'Selecione o período'"
+                formControlName="periodo"
+                [prefix]="'PERIODO'"
+                [optionsSelect]="periodosDropdown()"
+                [helperText]="'Escolha um período válido'"
+                [class.field-invalid]="isFieldInvalid('periodo')">
               </app-modal-select>
-              @if (isFieldInvalid('mes')) {
+              @if (isFieldInvalid('periodo')) {
                 <span class="field-error" role="alert">
-                  {{ getFieldError('mes') }}
-                </span>
-              }
-            </div>
-
-            <div class="field">
-              <app-modal-select 
-                [id]="'select-ano'"
-                [label]="'Ano'"
-                formControlName="ano"
-                type="Ano"
-                [placeholder]="'Selecione o ano'"
-                [prefix]="'ANO'"
-                [optionsSelect]="anos()"
-                [helperText]="'Escolha um ano válido'"
-                [class.field-invalid]="isFieldInvalid('ano')">
-              </app-modal-select>
-              @if (isFieldInvalid('ano')) {
-                <span class="field-error" role="alert">
-                  {{ getFieldError('ano') }}
+                  {{ getFieldError('periodo') }}
                 </span>
               }
             </div>

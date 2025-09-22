@@ -30,6 +30,11 @@ export interface IGeradorPeriodo {
    * Gera lista de períodos baseada em configuração
    */
   gerarPeriodosComConfiguracao(configuracao: ConfiguracaoPeriodo): PeriodoMesAno[];
+  
+  /**
+   * Gera períodos no formato "Ano | Mês" para dropdown único
+   */
+  gerarPeriodosDropdown(): Array<{ valor: string; label: string; mes: string; ano: string }>;
 }
 
 /**

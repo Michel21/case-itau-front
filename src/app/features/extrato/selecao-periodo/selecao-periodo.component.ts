@@ -47,6 +47,7 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
   // ==================== FORM VALUES ====================
   readonly mesSelecionado = signal<string>('');
   readonly anoSelecionado = signal<string>('');
+  readonly periodoSelecionado = signal<string>('');
   readonly dataInicio = signal<string>('');
   readonly dataFim = signal<string>('');
 
@@ -54,6 +55,7 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
   readonly listaPeriodoMesAno = this.selecaoPeriodoService.periodos;
   readonly meses = this.selecaoPeriodoService.meses;
   readonly anos = this.selecaoPeriodoService.anos;
+  readonly periodosDropdown = this.selecaoPeriodoService.periodosDropdown;
 
   // ==================== COMPUTED VALIDATIONS ====================
   readonly intervaloInvalido = computed(() => this.validarIntervalo());
@@ -82,6 +84,7 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
     this.periodoForm = this.formBuilder.group({
       mes: ['', Validators.required],
       ano: ['', Validators.required],
+      periodo: ['', Validators.required],
       dataInicio: ['', [Validators.required, this.criarValidadorDataInicio()]],
       dataFim: ['', [Validators.required, this.criarValidadorDataFim()]]
     }, { validators: this.criarValidadorIntervaloDatas() });
@@ -90,15 +93,19 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
   private configurarSubscricoes(): void {
     this.subscribirCampo('mes', this.mesSelecionado);
     this.subscribirCampo('ano', this.anoSelecionado);
+    this.subscribirCampo('periodo', this.periodoSelecionado, () => this.extrairMesEAnoDoPerido());
     this.subscribirCampo('dataInicio', this.dataInicio, () => this.validarELimparDataFimSeNecessario());
     this.subscribirCampo('dataFim', this.dataFim);
   }
 
   private definirValoresPadrao(): void {
     const periodoAtual = this.selecaoPeriodoService.obterPeriodoAtual();
+    const periodoDropdownAtual = `${periodoAtual.mes}/${periodoAtual.ano}`;
+    
     this.periodoForm.patchValue({
       mes: periodoAtual.mes,
-      ano: periodoAtual.ano
+      ano: periodoAtual.ano,
+      periodo: periodoDropdownAtual
     });
   }
 
@@ -123,6 +130,28 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
     // Usar o serviço para validar o intervalo
     if (!this.selecaoPeriodoService.validarIntervaloDatas(inicio, fim)) {
       this.periodoForm.get('dataFim')?.setValue('');
+    }
+  }
+
+  private extrairMesEAnoDoPerido(): void {
+    const periodo = this.periodoSelecionado();
+    
+    if (!periodo) {
+      return;
+    }
+    
+    // Formato esperado: "mes/ano" (ex: "9/2024")
+    const [mes, ano] = periodo.split('/');
+    
+    if (mes && ano) {
+      this.periodoForm.patchValue({
+        mes,
+        ano
+      }, { emitEvent: false }); // emitEvent: false para evitar loops
+      
+      // Atualizar os signals também
+      this.mesSelecionado.set(mes);
+      this.anoSelecionado.set(ano);
     }
   }
 
