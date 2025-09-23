@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { ExtratoGeneratorService, ExtratoConfig, GeracaoOptions, ExtratoSimples, ExtratoItemSimples } from './extrato-generator.service';
 import { WebViewDownloadService } from '../../../shared/services/webview-download.service';
+import { DocumentFormatterService } from './formatters/document-formatter.service';
 import { RENDA_FIXA_DATA } from '../../../../../data/mock-extrato.data';
 
 // Mock para jsPDF
@@ -62,10 +63,24 @@ describe('ExtratoGeneratorService', () => {
       downloadHTML: jest.fn().mockResolvedValue(true)
     };
 
+    const mockDocumentFormatterService = {
+      formatCurrency: jest.fn((value: number) => value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })),
+      formatDate: jest.fn((date: Date) => date.toLocaleDateString('pt-BR')),
+      formatDateTime: jest.fn((date: Date) => date.toLocaleString('pt-BR')),
+      formatPercentage: jest.fn((value: number) => `${value.toFixed(2)}%`),
+      formatTime: jest.fn((date: Date) => date.toLocaleTimeString('pt-BR')),
+      formatNumber: jest.fn((value: number) => value.toLocaleString('pt-BR')),
+      formatTemplate: jest.fn((template: string, data: any) => template),
+      capitalize: jest.fn((text: string) => text.charAt(0).toUpperCase() + text.slice(1).toLowerCase()),
+      capitalizeWords: jest.fn((text: string) => text),
+      clearCache: jest.fn()
+    };
+
     TestBed.configureTestingModule({
       providers: [
         ExtratoGeneratorService,
-        { provide: WebViewDownloadService, useValue: mockWebViewService }
+        { provide: WebViewDownloadService, useValue: mockWebViewService },
+        { provide: DocumentFormatterService, useValue: mockDocumentFormatterService }
       ]
     });
 
@@ -128,17 +143,31 @@ describe('ExtratoGeneratorService', () => {
   });
 
   describe('gerarHTML', () => {
-    it('deve gerar HTML com opções customizadas', async () => {
-      mockWebViewDownloadService.downloadHTML.mockResolvedValue(true);
-
+    it('deve gerar HTML corretamente', () => {
       const options: GeracaoOptions = {
         fileName: 'extrato-customizado.html',
         includeRendaFixa: true
       };
 
-      const resultado = await service.gerarHTML(mockExtratoData, mockConfig, options);
+      const resultado = service.gerarHTML(mockExtratoData, mockConfig, options);
 
-      expect(resultado).toBe(true);
+      expect(typeof resultado).toBe('string');
+      expect(resultado).toContain('<!DOCTYPE html>');
+      expect(resultado).toContain('bradesco');
+      expect(resultado).toContain('Saldo e extrato');
+    });
+
+    it('deve gerar HTML com renda fixa quando solicitado', () => {
+      const options: GeracaoOptions = {
+        includeRendaFixa: true
+      };
+
+      const resultado = service.gerarHTML(mockExtratoData, mockConfig, options);
+
+      expect(resultado).toContain('Saldo anterior');
+      expect(resultado).toContain('Aplicações');
+      expect(resultado).toContain('Resgates/Vencimentos');
+      expect(resultado).toContain('Saldo final');
     });
 
   });
@@ -158,33 +187,6 @@ describe('ExtratoGeneratorService', () => {
       const resultado = (service as any).formatarMoeda(-1234.56);
       expect(resultado).toBe('-1.234,56');
     });
-
-    it('deve formatar data corretamente', () => {
-      const data = new Date('2024-09-23T12:00:00Z');
-      const resultado = (service as any).formatarData(data);
-      expect(resultado).toMatch(/\d{2}\/\d{2}\/2024/);
-    });
-
-    it('deve formatar data e hora corretamente', () => {
-      const data = new Date('2024-09-23T10:30:00');
-      const resultado = (service as any).formatarDataHora(data);
-      expect(resultado).toContain('23/09/2024');
-    });
-
-    it('deve formatar percentual corretamente', () => {
-      const resultado = (service as any).formatarPercentual(5.5);
-      expect(resultado).toBe('5,50%');
-    });
-
-    it('deve formatar percentual com valor zero', () => {
-      const resultado = (service as any).formatarPercentual(0);
-      expect(resultado).toBe('0,00%');
-    });
-
-    it('deve formatar percentual com valor negativo', () => {
-      const resultado = (service as any).formatarPercentual(-2.5);
-      expect(resultado).toBe('-2,50%');
-    });
   });
 
   describe('Métodos Privados - Geração de Conteúdo', () => {
@@ -192,8 +194,8 @@ describe('ExtratoGeneratorService', () => {
       const resultado = (service as any).gerarHTMLDoExtrato(mockExtratoData, mockConfig, {});
       
       expect(resultado).toContain('<!DOCTYPE html>');
-      expect(resultado).toContain(mockConfig.titulo);
-      expect(resultado).toContain(mockConfig.empresa);
+      expect(resultado).toContain('bradesco');
+      expect(resultado).toContain('Saldo e extrato');
     });
 
     it('deve gerar HTML com renda fixa', () => {
@@ -201,7 +203,10 @@ describe('ExtratoGeneratorService', () => {
       
       const resultado = (service as any).gerarHTMLDoExtrato(mockExtratoData, mockConfig, options);
       
-      expect(resultado).toContain('Renda Fixa');
+      expect(resultado).toContain('Saldo anterior');
+      expect(resultado).toContain('Aplicações');
+      expect(resultado).toContain('Resgates/Vencimentos');
+      expect(resultado).toContain('Saldo final');
     });
 
     it('deve gerar CSS', () => {
@@ -215,53 +220,33 @@ describe('ExtratoGeneratorService', () => {
     it('deve gerar header', () => {
       const resultado = (service as any).gerarHeader(mockConfig);
       
-      expect(resultado).toContain(mockConfig.titulo);
-      expect(resultado).toContain(mockConfig.empresa);
-      expect(resultado).toContain(mockConfig.agencia);
-      expect(resultado).toContain(mockConfig.conta);
+      expect(resultado).toContain('bradesco');
+      expect(resultado).toContain('corporate');
+      expect(resultado).toContain('Saldo e extrato');
     });
 
     it('deve gerar body', () => {
       const resultado = (service as any).gerarBody(mockExtratoData, mockConfig, {});
       
-      expect(resultado).toContain('extrato-container');
-    });
-
-    it('deve gerar seção de itens', () => {
-      const resultado = (service as any).gerarSecaoItens(mockExtratoData.itens);
-      
-      expect(resultado).toContain('Extrato de Movimentações');
-      expect(resultado).toContain('Data');
-      expect(resultado).toContain('Descrição');
-      expect(resultado).toContain('Valor');
-      expect(resultado).toContain('Saldo');
-    });
-
-    it('deve gerar seção de renda fixa', () => {
-      const resultado = (service as any).gerarSecaoRendaFixa(mockRendaFixaData.rendaFixa);
-      
-      expect(resultado).toContain('Renda Fixa');
-    });
-
-    it('deve gerar tabela de renda fixa', () => {
-      const resultado = (service as any).gerarTabelaRendaFixa('Teste', mockRendaFixaData.rendaFixa.saldoAnterior);
-      
-      expect(resultado).toContain('Teste');
-      expect(resultado).toContain('table');
+      expect(resultado).toContain('search-details');
+      expect(resultado).toContain('table-section');
     });
 
     it('deve gerar footer', () => {
       const resultado = (service as any).gerarFooter(mockConfig);
       
       expect(resultado).toContain(mockConfig.numeroControle);
+      expect(resultado).toContain('Documento gerado');
     });
 
-    it('deve gerar conteúdo CSV', () => {
+    it('deve gerar conteúdo CSV com RENDA_FIXA_DATA', () => {
       const resultado = (service as any).gerarConteudoCSV(mockExtratoData, mockConfig, {});
       
-      expect(resultado).toContain('Data,Descrição,Valor,Saldo');
-      expect(resultado).toContain('Depósito');
-      expect(resultado).toContain('Saque');
+      expect(resultado).toContain('Seção,Data Aplicação,Data Vencimento');
+      expect(resultado).toContain('Saldo Anterior');
+      expect(resultado).toContain('Aplicações');
+      expect(resultado).toContain('Resgates/Vencimentos');
+      expect(resultado).toContain('Saldo Final');
     });
   });
 
