@@ -290,102 +290,174 @@ export class ExtratoGeneratorService {
       }
       
       .search-details {
-        margin-bottom: 25px;
-        padding: 15px;
-        background: #f4f4f9;
-        border-radius: 5px;
-        border: 1px solid #dbdbdb;
+        background-color: #fff;
+        padding: 8px 0;
+        border: none;
+        margin-bottom: 12px;
+        border-radius: 0;
       }
       
       .search-details h3 {
-        font-size: 16px;
+        color: #000;
+        margin-bottom: 6px;
+        font-size: 14px;
         font-weight: bold;
-        color: #001e61;
-        margin-bottom: 15px;
-        border-bottom: 2px solid #001e61;
-        padding-bottom: 5px;
       }
       
       .detail-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
       }
       
       .detail-item {
         display: flex;
-        justify-content: space-between;
-        padding: 8px 0;
-        border-bottom: 1px solid #dbdbdb;
-        font-size: 12px;
+        align-items: center;
+        padding: 1px 0;
+        border-bottom: none;
+        font-size: 11px;
+        margin-bottom: 1px;
       }
       
       .detail-label {
         font-weight: bold;
-        color: #555;
-        min-width: 180px;
+        color: #000;
+        display: inline;
+        min-width: 120px;
+        margin-right: 8px;
+        text-align: right;
       }
       
       .detail-value {
         color: #000;
-        text-align: right;
-        flex: 1;
-        font-weight: normal;
+        display: inline;
       }
       
       .table-section {
-        margin-bottom: 30px;
-      }
-      
-      .table-section h3 {
-        font-size: 16px;
-        font-weight: bold;
-        color: #001e61;
-        margin-bottom: 15px;
-        border-bottom: 2px solid #001e61;
-        padding-bottom: 5px;
+        margin-bottom: 25px;
       }
       
       .table-container {
-        overflow-x: auto;
-        border: 1px solid #dbdbdb;
-        border-radius: 5px;
+        margin-bottom: 25px;
         background: #fff;
+        padding: 0;
       }
       
       .financial-table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 11px;
-        margin: 0;
+        background-color: #fff;
+        font-size: 10px;
+        border: none;
+      }
+      
+      .table-header {
+        background-color: #ddd;
+        padding: 12px 0;
       }
       
       .financial-table th {
-        background: #001e61;
-        color: #fff;
-        padding: 10px 6px;
+        background-color: transparent;
+        color: #000;
+        padding: 8px 4px;
         text-align: center;
+        border: none;
         font-weight: bold;
-        border: 1px solid #001e61;
-        font-size: 10px;
-        white-space: nowrap;
+        font-size: 11px;
       }
       
       .financial-table td {
-        padding: 8px 6px;
-        border: 1px solid #dbdbdb;
+        padding: 8px 4px;
         text-align: center;
-        vertical-align: middle;
+        border: none;
         font-size: 10px;
-        white-space: nowrap;
+        color: #000;
       }
       
-      .financial-table tr:nth-child(even) {
-        background: #f8f9fa;
+      .section-title th {
+        background-color: transparent;
+        color: #000;
+        font-weight: bold;
+        text-align: left;
+        padding: 8px 4px;
+        font-size: 11px;
       }
       
-      .financial-table tr:hover {
-        background: #e8f4f8;
+      .data-row td {
+        background-color: #fff;
+        color: #000;
+      }
+      
+      .total-row td {
+        background-color: #fff;
+        color: #000;
+        font-weight: bold;
+      }
+      
+      /* Alinhamento específico baseado no componente original */
+      .financial-table th:nth-child(1),
+      .financial-table td:nth-child(1) {
+        text-align: left !important;
+        padding-left: 20px !important;
+      }
+      
+      .financial-table th:nth-child(2),
+      .financial-table td:nth-child(2) {
+        text-align: left !important;
+        padding-left: 3px !important;
+      }
+      
+      .financial-table th:nth-child(3),
+      .financial-table td:nth-child(3) {
+        text-align: left !important;
+        padding-left: 3px !important;
+      }
+      
+      .financial-table th:nth-child(4),
+      .financial-table td:nth-child(4) {
+        text-align: center !important;
+      }
+      
+      .financial-table th:nth-child(5),
+      .financial-table td:nth-child(5) {
+        text-align: right !important;
+        padding-right: 3px !important;
+      }
+      
+      .financial-table th:nth-child(6),
+      .financial-table td:nth-child(6) {
+        text-align: right !important;
+        padding-right: 3px !important;
+      }
+      
+      .financial-table th:nth-child(7),
+      .financial-table td:nth-child(7) {
+        text-align: right !important;
+        padding-right: 3px !important;
+      }
+      
+      .financial-table th:nth-child(8),
+      .financial-table td:nth-child(8) {
+        text-align: right !important;
+        padding-right: 3px !important;
+      }
+      
+      .financial-table th:nth-child(9),
+      .financial-table td:nth-child(9) {
+        text-align: right !important;
+        padding-right: 3px !important;
+      }
+      
+      .financial-table th:nth-child(10),
+      .financial-table td:nth-child(10) {
+        text-align: right !important;
+        padding-right: 3px !important;
+      }
+      
+      .financial-table th:nth-child(11),
+      .financial-table td:nth-child(11) {
+        text-align: right !important;
+        padding-right: 10px !important;
       }
       
       .text-right {
@@ -492,7 +564,7 @@ export class ExtratoGeneratorService {
   }
 
   /**
-   * Gera body do extrato (replicando exatamente o layout da imagem)
+   * Gera body do extrato (replicando exatamente o layout do app-extrato-pdf)
    */
   private gerarBody(extratoData: ExtratoSimples, config: ExtratoConfig, options: GeracaoOptions): string {
     let body = '';
@@ -500,13 +572,10 @@ export class ExtratoGeneratorService {
     // Seção de detalhes da pesquisa
     body += this.gerarSecaoDetalhesPesquisa(config);
 
-    // Seções específicas do Bradesco (como na imagem)
-    body += this.gerarSecaoSaldoAnterior();
-    body += this.gerarSecaoAplicacoes();
-    body += this.gerarSecaoResgates();
-    body += this.gerarSecaoSaldoFinal();
+    // Tabela principal (como no app-extrato-pdf)
+    body += this.gerarTabelaPrincipal();
 
-    return `<div class="extrato-container">${body}</div>`;
+    return body;
   }
 
   /**
@@ -537,6 +606,175 @@ export class ExtratoGeneratorService {
             <span class="detail-label">Tipo de Produto:</span>
             <span class="detail-value">Invest Facil Bradesco</span>
           </div>
+        </div>
+      </section>
+    `;
+  }
+
+  /**
+   * Gera tabela principal (replicando exatamente o layout do app-extrato-pdf)
+   */
+  private gerarTabelaPrincipal(): string {
+    return `
+      <section class="table-section">
+        <div class="table-container">
+          <table class="financial-table">
+            <thead>
+              <tr class="table-header">
+                <th>Data aplic.</th>
+                <th>Data vencto.</th>
+                <th>Resgate/Carência</th>
+                <th>Taxa (%)</th>
+                <th>Valor princ. (BRL)</th>
+                <th>Valor Bruto (BRL)</th>
+                <th>Renda total (BRL)</th>
+                <th>IOF (BRL)</th>
+                <th>IRRF (BRL)</th>
+                <th>Valor Líquido (BRL)</th>
+                <th>Renda bruta per</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Saldo Anterior -->
+              <tr class="section-title">
+                <th colspan="11" style="padding-left: 35px !important;">Saldo anterior em 31/07/2025</th>
+              </tr>
+              <tr class="data-row">
+                <td>10/03/2025</td>
+                <td>01/03/2027</td>
+                <td></td>
+                <td></td>
+                <td>58,22</td>
+                <td>58,37</td>
+                <td>0,15</td>
+                <td>0,00</td>
+                <td>0,03</td>
+                <td>58,34</td>
+                <td></td>
+              </tr>
+              <tr class="total-row">
+                <td><strong>Total</strong></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><strong>1.153,74</strong></td>
+                <td><strong>1.154,17</strong></td>
+                <td><strong>0,43</strong></td>
+                <td><strong>0,00</strong></td>
+                <td><strong>0,36</strong></td>
+                <td><strong>1.063,45</strong></td>
+                <td style="padding-right: 10px !important;"><strong></strong></td>
+              </tr>
+
+              <!-- Aplicações -->
+              <tr class="section-title">
+                <th colspan="11" style="padding-left: 35px !important;">Aplicações</th>
+              </tr>
+              <tr class="data-row">
+                <td>04/08/2025</td>
+                <td>26/07/2027</td>
+                <td>-</td>
+                <td></td>
+                <td>850,00</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr class="total-row">
+                <td><strong>Total</strong></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><strong>850,00</strong></td>
+                <td><strong></strong></td>
+                <td><strong></strong></td>
+                <td><strong></strong></td>
+                <td><strong></strong></td>
+                <td><strong></strong></td>
+                <td><strong></strong></td>
+              </tr>
+
+              <!-- Header repetido -->
+              <tr class="table-header">
+                <th>Data aplic.</th>
+                <th>Data vencto.</th>
+                <th>Resgate/Carência</th>
+                <th>Taxa (%)</th>
+                <th>Valor princ. (BRL)</th>
+                <th>Valor Bruto (BRL)</th>
+                <th>Renda total (BRL)</th>
+                <th>IOF (BRL)</th>
+                <th>IRRF (BRL)</th>
+                <th>Valor Líquido (BRL)</th>
+                <th>Renda bruta per</th>
+              </tr>
+
+              <!-- Resgates -->
+              <tr class="section-title">
+                <th colspan="11" style="padding-left: 35px !important;">Resgates/Vencimentos</th>
+              </tr>
+              <tr class="data-row">
+                <td>10/03/2025</td>
+                <td>01/03/2027</td>
+                <td>05/08/2025</td>
+                <td>5,00</td>
+                <td>58,22</td>
+                <td>58,37</td>
+                <td>0,15</td>
+                <td>0,00</td>
+                <td>0,03</td>
+                <td>58,34</td>
+                <td>0,00</td>
+              </tr>
+              <tr class="total-row">
+                <td><strong>Total</strong></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><strong>932,09</strong></td>
+                <td><strong>932,91</strong></td>
+                <td><strong>0,82</strong></td>
+                <td><strong>0,00</strong></td>
+                <td><strong>0,18</strong></td>
+                <td><strong>932,73</strong></td>
+                <td style="padding-right: 10px !important;"><strong>0,09</strong></td>
+              </tr>
+
+              <!-- Saldo Final -->
+              <tr class="section-title">
+                <th colspan="11" style="padding-left: 35px !important;">Saldo final em 25/08/2025</th>
+              </tr>
+              <tr class="data-row">
+                <td>28/08/2025</td>
+                <td>07/06/2027</td>
+                <td></td>
+                <td>5,00</td>
+                <td>44,56</td>
+                <td>44,61</td>
+                <td>0,05</td>
+                <td>0,00</td>
+                <td>0,01</td>
+                <td>44,60</td>
+                <td>0,02</td>
+              </tr>
+              <tr class="total-row">
+                <td><strong>Total</strong></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><strong>194,56</strong></td>
+                <td><strong>194,61</strong></td>
+                <td><strong>0,05</strong></td>
+                <td><strong>0,00</strong></td>
+                <td><strong>0,01</strong></td>
+                <td><strong>194,60</strong></td>
+                <td style="padding-right: 10px !important;"><strong>0,02</strong></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </section>
     `;
