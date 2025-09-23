@@ -13,12 +13,12 @@ import { RENDA_FIXA_DATA } from '../../../../../data/mock-extrato.data';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="demo-container">
+    <div style="padding: 20px; background: #f9f9f9; min-height: 100vh;">
       <h2>🚀 Demo ExtratoGeneratorService</h2>
       
-      <div class="demo-section">
+      <div style="margin: 20px 0; padding: 15px; background: white; border: 1px solid #ddd; border-radius: 8px;">
         <h3>📊 Dados do Extrato</h3>
-        <div class="data-preview">
+        <div style="background: #f8f9fa; padding: 10px; border-radius: 5px;">
           <p><strong>Itens:</strong> {{ extratoData.itens.length }}</p>
           <p><strong>Período:</strong> {{ config.periodo }}</p>
           <p><strong>Empresa:</strong> {{ config.empresa }}</p>

@@ -6,7 +6,7 @@ import { ExtratoGeneratorDemoComponent } from './extrato-generator-demo.componen
  */
 export const EXTRATO_GENERATOR_DEMO_ROUTES: Routes = [
   {
-    path: 'extrato-generator-demo',
+    path: '',
     component: ExtratoGeneratorDemoComponent,
     title: 'Demo ExtratoGeneratorService'
   }

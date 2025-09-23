@@ -2,8 +2,15 @@ import { Injectable } from '@angular/core';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { WebViewDownloadService } from '../../../shared/services/webview-download.service';
-import { ExtratoDados, RendaFixaData } from '../../../../../types/extrato.types';
+import { RendaFixaData } from '../../../../../types/extrato.types';
 import { RENDA_FIXA_DATA } from '../../../../../data/mock-extrato.data';
+
+// Importações dos novos serviços modulares
+import { DocumentFormatterService } from './formatters/document-formatter.service';
+import { HtmlBuilderService, TableBuilderService } from './builders/html-builder.service';
+import { TemplateEngineService } from './templates/template-engine.service';
+import { DocumentFactoryService } from './factories/document-factory.service';
+import { IExtratoGenerator } from './interfaces/extrato-generator.interfaces';
 
 /**
  * Interface para configuração do extrato
@@ -54,72 +61,108 @@ export interface ExtratoSimples {
 @Injectable({
   providedIn: 'root'
 })
-export class ExtratoGeneratorService {
-  private readonly webViewDownloadService = new WebViewDownloadService();
+export class ExtratoGeneratorService implements IExtratoGenerator {
   
-  // Cache para otimização de performance
+  constructor(
+    private readonly webViewDownloadService: WebViewDownloadService,
+    private readonly formatter: DocumentFormatterService,
+    private readonly htmlBuilder: HtmlBuilderService,
+    private readonly tableBuilder: TableBuilderService,
+    private readonly templateEngine: TemplateEngineService,
+    private readonly documentFactory: DocumentFactoryService
+  ) {}
+  
+  // Cache simples para otimização
   private cssCache: string | null = null;
-  private htmlTemplateCache = new Map<string, string>();
-  private formatacaoCache = new Map<string, string>();
   
-  // Pool de elementos temporários para reutilização
-  private tempElementPool: HTMLElement[] = [];
-  private readonly MAX_POOL_SIZE = 3;
-  
-  // Performance tracking
-  private performanceMetrics = {
-    htmlGenerationTime: 0,
-    pdfGenerationTime: 0,
-    cacheHits: 0,
-    cacheMisses: 0
-  };
-  
-  /**
-   * Obtém métricas de performance do serviço
-   */
-  getPerformanceMetrics() {
-    return { ...this.performanceMetrics };
-  }
   
   /**
    * Limpa cache e pool para liberar memória
    */
   clearCache(): void {
     this.cssCache = null;
-    this.htmlTemplateCache.clear();
-    this.formatacaoCache.clear();
-    this.tempElementPool.forEach(element => element.remove());
-    this.tempElementPool = [];
-    
-    // Reset metrics
-    this.performanceMetrics = {
-      htmlGenerationTime: 0,
-      pdfGenerationTime: 0,
-      cacheHits: 0,
-      cacheMisses: 0
+    this.formatter.clearCache();
+  }
+  
+  /**
+   * Cria configuração usando factory
+   */
+  createDefaultConfig(overrides: Partial<ExtratoConfig> = {}): ExtratoConfig {
+    const defaultConfig = this.documentFactory.createDocumentConfig();
+    return {
+      titulo: defaultConfig.title,
+      empresa: defaultConfig.company,
+      agencia: defaultConfig.agency,
+      conta: defaultConfig.account,
+      periodo: defaultConfig.period,
+      dataGeracao: defaultConfig.generationDate,
+      numeroControle: defaultConfig.controlNumber,
+      itens: [],
+      ...overrides
     };
+  }
+  
+  /**
+   * Cria opções usando factory
+   */
+  createDefaultOptions(overrides: Partial<GeracaoOptions> = {}): GeracaoOptions {
+    return this.documentFactory.createGenerationOptions(overrides);
+  }
+  
+  /**
+   * Gera documento usando templates
+   */
+  generateDocumentWithTemplate(templateName: string, data: any): string {
+    if (!this.templateEngine.hasTemplate(templateName)) {
+      throw new Error(`Template '${templateName}' não encontrado`);
+    }
+    
+    return this.templateEngine.render(templateName, data);
+  }
+  
+  /**
+   * Registra template personalizado
+   */
+  registerCustomTemplate(name: string, template: string): void {
+    this.templateEngine.registerTemplate(name, template);
+  }
+  
+
+  /**
+   * Gera PDF do extrato (implementação da interface IExtratoGenerator)
+   */
+  async generatePDF(data: any, config: any, options?: any): Promise<boolean> {
+    return this.gerarPDF(data, config, options);
+  }
+  
+  /**
+   * Gera CSV do extrato (implementação da interface IExtratoGenerator)
+   */
+  async generateCSV(data: any, config: any, options?: any): Promise<boolean> {
+    return this.gerarCSV(data, config, options);
+  }
+  
+  /**
+   * Gera HTML do extrato (implementação da interface IExtratoGenerator)
+   */
+  generateHTML(data: any, config: any, options?: any): string {
+    return this.gerarHTMLDoExtrato(data, config, options);
   }
 
   /**
-   * Gera PDF do extrato
+   * Gera PDF do extrato (método legado mantido para compatibilidade)
    */
   async gerarPDF(
     extratoData: ExtratoSimples,
     config: ExtratoConfig,
     options: GeracaoOptions = {}
   ): Promise<boolean> {
-    const startTime = performance.now();
-    
     try {
       const fileName = options.fileName || `extrato-${this.formatarData(config.dataGeracao).replace(/\//g, '-')}.pdf`;
-      
-      // Gerar HTML do extrato com timing
-      const htmlStartTime = performance.now();
       const htmlContent = this.gerarHTMLDoExtrato(extratoData, config, options);
-      this.performanceMetrics.htmlGenerationTime = performance.now() - htmlStartTime;
       
-      // Criar elemento temporário otimizado
-      const tempElement = this.obterElementoTemporario(htmlContent);
+      // Criar elemento temporário
+      const tempElement = this.criarElementoTemporario(htmlContent);
       document.body.appendChild(tempElement);
 
       // Aguardar renderização
@@ -167,18 +210,12 @@ export class ExtratoGeneratorService {
         heightLeft -= pageHeight;
       }
 
-      // Remover elemento temporário e retornar ao pool
+      // Remover elemento temporário
       document.body.removeChild(tempElement);
-      this.retornarElementoTemporario(tempElement);
 
       // Download
       const pdfBlob = pdf.output('blob');
-      const result = await this.webViewDownloadService.downloadPDF(pdfBlob, fileName);
-      
-      // Registrar métricas de performance
-      this.performanceMetrics.pdfGenerationTime = performance.now() - startTime;
-      
-      return result;
+      return await this.webViewDownloadService.downloadPDF(pdfBlob, fileName);
 
     } catch (error) {
       console.error('Erro ao gerar PDF:', error);
@@ -879,19 +916,10 @@ export class ExtratoGeneratorService {
   }
 
   /**
-   * Gera header repetido (com cache)
+   * Gera header repetido
    */
   private gerarHeaderRepetido(): string {
-    const cacheKey = 'header-repetido';
-    
-    // Verificar cache
-    if (this.htmlTemplateCache.has(cacheKey)) {
-      this.performanceMetrics.cacheHits++;
-      return this.htmlTemplateCache.get(cacheKey)!;
-    }
-    
-    // Gerar template
-    const headerTemplate = [
+    return [
       '<tr class="table-header">',
       '<th>Data aplic.</th>',
       '<th>Data vencto.</th>',
@@ -906,12 +934,6 @@ export class ExtratoGeneratorService {
       '<th>Renda bruta per</th>',
       '</tr>'
     ].join('');
-    
-    // Armazenar no cache
-    this.htmlTemplateCache.set(cacheKey, headerTemplate);
-    this.performanceMetrics.cacheMisses++;
-    
-    return headerTemplate;
   }
 
   /**
@@ -1055,77 +1077,6 @@ export class ExtratoGeneratorService {
     return csv;
   }
 
-  /**
-   * Obtém elemento temporário do pool ou cria um novo (otimizado)
-   */
-  private obterElementoTemporario(htmlContent: string): HTMLElement {
-    let tempDiv: HTMLElement;
-    
-    // Tentar reutilizar elemento do pool
-    if (this.tempElementPool.length > 0) {
-      tempDiv = this.tempElementPool.pop()!;
-      this.performanceMetrics.cacheHits++;
-    } else {
-      // Criar novo elemento se pool estiver vazio
-      tempDiv = this.criarNovoElementoTemporario();
-      this.performanceMetrics.cacheMisses++;
-    }
-    
-    // Definir conteúdo HTML
-    tempDiv.innerHTML = htmlContent;
-    
-    return tempDiv;
-  }
-  
-  /**
-   * Retorna elemento ao pool para reutilização
-   */
-  private retornarElementoTemporario(element: HTMLElement): void {
-    if (this.tempElementPool.length < this.MAX_POOL_SIZE) {
-      // Limpar conteúdo mas manter estilos
-      element.innerHTML = '';
-      this.tempElementPool.push(element);
-    }
-    // Se pool estiver cheio, deixa GC limpar o elemento
-  }
-  
-  /**
-   * Cria novo elemento temporário com estilos otimizados
-   */
-  private criarNovoElementoTemporario(): HTMLElement {
-    const tempDiv = document.createElement('div');
-    this.aplicarEstilosTemporarios(tempDiv);
-    return tempDiv;
-  }
-  
-  /**
-   * Aplica estilos otimizados ao elemento temporário
-   */
-  private aplicarEstilosTemporarios(element: HTMLElement): void {
-    // Aplicar estilos em lote para melhor performance
-    Object.assign(element.style, {
-      position: 'absolute',
-      left: '-9999px',
-      top: '0',
-      width: '1000px',
-      maxWidth: '1000px',
-      minWidth: '1000px',
-      backgroundColor: '#ffffff',
-      color: '#000000',
-      fontFamily: 'Arial, sans-serif',
-      fontSize: '12px',
-      lineHeight: '1.4',
-      margin: '0',
-      padding: '5px',
-      border: 'none',
-      boxShadow: 'none',
-      visibility: 'visible',
-      display: 'block',
-      overflow: 'visible',
-      transform: 'none',
-      transformOrigin: 'top left'
-    });
-  }
 
   /**
    * Cria elemento temporário para renderização (método legado - mantido para compatibilidade)
@@ -1197,62 +1148,24 @@ export class ExtratoGeneratorService {
   }
 
   /**
-   * Formata moeda (com cache para valores frequentes)
+   * Formata moeda usando o serviço modular
    */
   private formatarMoeda(valor: number): string {
-    const cacheKey = `moeda_${valor}`;
-    
-    // Verificar cache
-    if (this.formatacaoCache.has(cacheKey)) {
-      return this.formatacaoCache.get(cacheKey)!;
-    }
-    
-    // Formatar valor
-    const valorFormatado = valor.toLocaleString('pt-BR', { 
-      minimumFractionDigits: 2, 
-      maximumFractionDigits: 2 
-    });
-    
-    // Armazenar no cache (limitando tamanho do cache)
-    if (this.formatacaoCache.size < 100) {
-      this.formatacaoCache.set(cacheKey, valorFormatado);
-    }
-    
-    return valorFormatado;
+    return this.formatter.formatCurrency(valor);
   }
 
   /**
-   * Formata data
+   * Formata data usando o serviço modular
    */
   private formatarData(data: Date): string {
-    return data.toLocaleDateString('pt-BR');
+    return this.formatter.formatDate(data);
   }
 
   /**
-   * Formata data e hora
+   * Formata data e hora usando o serviço modular
    */
   private formatarDataHora(data: Date): string {
-    return data.toLocaleString('pt-BR');
-  }
-
-  /**
-   * Formata percentual
-   */
-  private formatarPercentual(valor: number): string {
-    return valor.toLocaleString('pt-BR', { 
-      minimumFractionDigits: 2, 
-      maximumFractionDigits: 2 
-    }) + '%';
-  }
-
-  /**
-   * Formata hora
-   */
-  private formatarHora(data: Date): string {
-    return data.toLocaleTimeString('pt-BR', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
+    return this.formatter.formatDateTime(data);
   }
 
   /**

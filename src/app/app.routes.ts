@@ -35,6 +35,10 @@ export const routes: Routes = [
     loadChildren: () => import('./features/extrato/selecao-periodo/demo/validacao-periodo-demo.routes').then(m => m.VALIDACAO_PERIODO_DEMO_ROUTES)
   },
   {
+    path: 'extrato-generator-demo',
+    loadChildren: () => import('./features/extrato/services/extrato-generator-demo.routes').then(m => m.EXTRATO_GENERATOR_DEMO_ROUTES)
+  },
+  {
     path: '',
     pathMatch: 'full',
     redirectTo: 'home'
