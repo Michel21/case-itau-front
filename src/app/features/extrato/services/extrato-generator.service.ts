@@ -66,7 +66,7 @@ export class ExtratoGeneratorService {
     options: GeracaoOptions = {}
   ): Promise<boolean> {
     try {
-      const fileName = options.fileName || `extrato-${this.formatarData(config.dataGeracao)}.pdf`;
+      const fileName = options.fileName || `extrato-${this.formatarData(config.dataGeracao).replace(/\//g, '-')}.pdf`;
       
       // Gerar HTML do extrato
       const htmlContent = this.gerarHTMLDoExtrato(extratoData, config, options);
@@ -78,17 +78,17 @@ export class ExtratoGeneratorService {
       // Aguardar renderização
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Capturar com html2canvas
+      // Capturar com html2canvas (configurações do gerarPDFCorporativo)
       const canvas = await html2canvas(tempElement, {
-        scale: options.quality === 'high' ? 3 : options.quality === 'medium' ? 2 : 1,
+        scale: 2, // Scale fixo para qualidade consistente
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff',
-        width: 1000,
+        width: 1000, // Largura fixa
         height: tempElement.offsetHeight,
         scrollX: 0,
         scrollY: 0,
-        windowWidth: 1000,
+        windowWidth: 1000, // Largura fixa
         windowHeight: tempElement.offsetHeight,
         foreignObjectRendering: false,
         removeContainer: true,
@@ -294,6 +294,7 @@ export class ExtratoGeneratorService {
         padding: 15px;
         background: #f4f4f9;
         border-radius: 5px;
+        border: 1px solid #dbdbdb;
       }
       
       .search-details h3 {
@@ -301,31 +302,35 @@ export class ExtratoGeneratorService {
         font-weight: bold;
         color: #001e61;
         margin-bottom: 15px;
+        border-bottom: 2px solid #001e61;
+        padding-bottom: 5px;
       }
       
       .detail-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 10px;
+        gap: 15px;
       }
       
       .detail-item {
         display: flex;
         justify-content: space-between;
-        padding: 5px 0;
+        padding: 8px 0;
         border-bottom: 1px solid #dbdbdb;
+        font-size: 12px;
       }
       
       .detail-label {
         font-weight: bold;
         color: #555;
-        min-width: 200px;
+        min-width: 180px;
       }
       
       .detail-value {
         color: #000;
         text-align: right;
         flex: 1;
+        font-weight: normal;
       }
       
       .table-section {
@@ -472,7 +477,7 @@ export class ExtratoGeneratorService {
   }
 
   /**
-   * Gera body do extrato (replicando o layout do Bradesco)
+   * Gera body do extrato (replicando exatamente o layout da imagem)
    */
   private gerarBody(extratoData: ExtratoSimples, config: ExtratoConfig, options: GeracaoOptions): string {
     let body = '';
@@ -480,15 +485,11 @@ export class ExtratoGeneratorService {
     // Seção de detalhes da pesquisa
     body += this.gerarSecaoDetalhesPesquisa(config);
 
-    // Seção de itens do extrato
-    if (extratoData.itens && extratoData.itens.length > 0) {
-      body += this.gerarSecaoItens(extratoData.itens);
-    }
-
-    // Seção de renda fixa (se habilitada)
-    if (options.includeRendaFixa) {
-      body += this.gerarSecaoRendaFixa(RENDA_FIXA_DATA.rendaFixa);
-    }
+    // Seções específicas do Bradesco (como na imagem)
+    body += this.gerarSecaoSaldoAnterior();
+    body += this.gerarSecaoAplicacoes();
+    body += this.gerarSecaoResgates();
+    body += this.gerarSecaoSaldoFinal();
 
     return `<div class="extrato-container">${body}</div>`;
   }
@@ -521,6 +522,234 @@ export class ExtratoGeneratorService {
             <span class="detail-label">Tipo de Produto:</span>
             <span class="detail-value">Invest Facil Bradesco</span>
           </div>
+        </div>
+      </section>
+    `;
+  }
+
+  /**
+   * Gera seção de saldo anterior (como na imagem)
+   */
+  private gerarSecaoSaldoAnterior(): string {
+    return `
+      <section class="table-section">
+        <h3>Saldo anterior em 31/07/2025</h3>
+        <div class="table-container">
+          <table class="financial-table">
+            <thead>
+              <tr>
+                <th>Data aplic.</th>
+                <th>Data vencto.</th>
+                <th>Resgate/Carência</th>
+                <th>Taxa (%)</th>
+                <th>Valor princ. (BRL)</th>
+                <th>Valor Bruto (BRL)</th>
+                <th>Renda total (BRL)</th>
+                <th>IOF (BRL)</th>
+                <th>IRRF (BRL)</th>
+                <th>Valor Líquido (BRL)</th>
+                <th>Renda bruta per</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>10/03/2025</td>
+                <td>01/03/2027</td>
+                <td></td>
+                <td></td>
+                <td class="text-right">58,22</td>
+                <td class="text-right">58,37</td>
+                <td class="text-right">0,15</td>
+                <td class="text-right">0,00</td>
+                <td class="text-right">0,03</td>
+                <td class="text-right">58,34</td>
+                <td class="text-right"></td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="total-row">
+                <td colspan="4"><strong>Total</strong></td>
+                <td class="text-right"><strong>1.153,74</strong></td>
+                <td class="text-right"><strong>1.154,17</strong></td>
+                <td class="text-right"><strong>0,43</strong></td>
+                <td class="text-right"><strong>0,00</strong></td>
+                <td class="text-right"><strong>0,36</strong></td>
+                <td class="text-right"><strong>1.063,45</strong></td>
+                <td class="text-right"><strong></strong></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+    `;
+  }
+
+  /**
+   * Gera seção de aplicações (como na imagem)
+   */
+  private gerarSecaoAplicacoes(): string {
+    return `
+      <section class="table-section">
+        <h3>Aplicações</h3>
+        <div class="table-container">
+          <table class="financial-table">
+            <thead>
+              <tr>
+                <th>Data aplic.</th>
+                <th>Data vencto.</th>
+                <th>Resgate/Carência</th>
+                <th>Taxa (%)</th>
+                <th>Valor princ. (BRL)</th>
+                <th>Valor Bruto (BRL)</th>
+                <th>Renda total (BRL)</th>
+                <th>IOF (BRL)</th>
+                <th>IRRF (BRL)</th>
+                <th>Valor Líquido (BRL)</th>
+                <th>Renda bruta per</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>04/08/2025</td>
+                <td>26/07/2027</td>
+                <td></td>
+                <td></td>
+                <td class="text-right">850,00</td>
+                <td class="text-right">750,00</td>
+                <td class="text-right">0,00</td>
+                <td class="text-right">0,00</td>
+                <td class="text-right">0,00</td>
+                <td class="text-right">750,00</td>
+                <td class="text-right"></td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="total-row">
+                <td colspan="4"><strong>Total</strong></td>
+                <td class="text-right"><strong></strong></td>
+                <td class="text-right"><strong></strong></td>
+                <td class="text-right"><strong></strong></td>
+                <td class="text-right"><strong></strong></td>
+                <td class="text-right"><strong></strong></td>
+                <td class="text-right"><strong></strong></td>
+                <td class="text-right"><strong></strong></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+    `;
+  }
+
+  /**
+   * Gera seção de resgates (como na imagem)
+   */
+  private gerarSecaoResgates(): string {
+    return `
+      <section class="table-section">
+        <h3>Resgates/Vencimentos</h3>
+        <div class="table-container">
+          <table class="financial-table">
+            <thead>
+              <tr>
+                <th>Data aplic.</th>
+                <th>Data vencto.</th>
+                <th>Resgate/Carência</th>
+                <th>Taxa (%)</th>
+                <th>Valor princ. (BRL)</th>
+                <th>Valor Bruto (BRL)</th>
+                <th>Renda total (BRL)</th>
+                <th>IOF (BRL)</th>
+                <th>IRRF (BRL)</th>
+                <th>Valor Líquido (BRL)</th>
+                <th>Renda bruta per</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>10/03/2025</td>
+                <td>01/03/2027</td>
+                <td>05/08/2025</td>
+                <td class="text-right">5,00</td>
+                <td class="text-right">58,22</td>
+                <td class="text-right">58,37</td>
+                <td class="text-right">0,15</td>
+                <td class="text-right">0,00</td>
+                <td class="text-right">0,03</td>
+                <td class="text-right">58,34</td>
+                <td class="text-right">0,00</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="total-row">
+                <td colspan="4"><strong>Total</strong></td>
+                <td class="text-right"><strong>932,09</strong></td>
+                <td class="text-right"><strong>932,91</strong></td>
+                <td class="text-right"><strong>0,82</strong></td>
+                <td class="text-right"><strong>0,00</strong></td>
+                <td class="text-right"><strong>0,18</strong></td>
+                <td class="text-right"><strong>932,73</strong></td>
+                <td class="text-right"><strong>0,09</strong></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+    `;
+  }
+
+  /**
+   * Gera seção de saldo final (como na imagem)
+   */
+  private gerarSecaoSaldoFinal(): string {
+    return `
+      <section class="table-section">
+        <h3>Saldo final em 25/08/2025</h3>
+        <div class="table-container">
+          <table class="financial-table">
+            <thead>
+              <tr>
+                <th>Data aplic.</th>
+                <th>Data vencto.</th>
+                <th>Resgate/Carência</th>
+                <th>Taxa (%)</th>
+                <th>Valor princ. (BRL)</th>
+                <th>Valor Bruto (BRL)</th>
+                <th>Renda total (BRL)</th>
+                <th>IOF (BRL)</th>
+                <th>IRRF (BRL)</th>
+                <th>Valor Líquido (BRL)</th>
+                <th>Renda bruta per</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>28/08/2025</td>
+                <td>07/06/2027</td>
+                <td></td>
+                <td class="text-right">5,00</td>
+                <td class="text-right">44,56</td>
+                <td class="text-right">44,61</td>
+                <td class="text-right">0,05</td>
+                <td class="text-right">0,00</td>
+                <td class="text-right">0,01</td>
+                <td class="text-right">44,60</td>
+                <td class="text-right">0,02</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="total-row">
+                <td colspan="4"><strong>Total</strong></td>
+                <td class="text-right"><strong>194,56</strong></td>
+                <td class="text-right"><strong>194,61</strong></td>
+                <td class="text-right"><strong>0,05</strong></td>
+                <td class="text-right"><strong>0,00</strong></td>
+                <td class="text-right"><strong>0,01</strong></td>
+                <td class="text-right"><strong>194,60</strong></td>
+                <td class="text-right"><strong>0,02</strong></td>
+              </tr>
+            </tfoot>
+          </table>
         </div>
       </section>
     `;
@@ -695,10 +924,12 @@ export class ExtratoGeneratorService {
   private criarElementoTemporario(htmlContent: string): HTMLElement {
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = htmlContent;
+    
+    // Aplicar estilos específicos do PDF (replicando gerarPDFCorporativo)
     tempDiv.style.position = 'absolute';
     tempDiv.style.left = '-9999px';
     tempDiv.style.top = '0';
-    tempDiv.style.width = '1000px';
+    tempDiv.style.width = '1000px'; // Largura fixa para garantir consistência
     tempDiv.style.maxWidth = '1000px';
     tempDiv.style.minWidth = '1000px';
     tempDiv.style.backgroundColor = '#ffffff';
@@ -713,8 +944,45 @@ export class ExtratoGeneratorService {
     tempDiv.style.visibility = 'visible';
     tempDiv.style.display = 'block';
     tempDiv.style.overflow = 'visible';
-    tempDiv.style.transform = 'none';
+    tempDiv.style.transform = 'none'; // Remover transformações
     tempDiv.style.transformOrigin = 'top left';
+
+    // Garantir que as tabelas tenham largura fixa
+    const tableElements = tempDiv.querySelectorAll('table');
+    tableElements.forEach(table => {
+      (table as HTMLElement).style.width = '100%';
+      (table as HTMLElement).style.minWidth = '990px'; // 1000px - 10px de padding
+      (table as HTMLElement).style.maxWidth = '990px';
+      (table as HTMLElement).style.tableLayout = 'fixed';
+    });
+
+    // Garantir que as células tenham larguras consistentes
+    const thElements = tempDiv.querySelectorAll('th');
+    thElements.forEach((th, index) => {
+      const colWidth = this.getColumnWidth(index);
+      (th as HTMLElement).style.width = colWidth;
+      (th as HTMLElement).style.minWidth = colWidth;
+      (th as HTMLElement).style.maxWidth = colWidth;
+    });
+
+    const tdElements = tempDiv.querySelectorAll('td');
+    tdElements.forEach((td, index) => {
+      const colWidth = this.getColumnWidth(index);
+      (td as HTMLElement).style.width = colWidth;
+      (td as HTMLElement).style.minWidth = colWidth;
+      (td as HTMLElement).style.maxWidth = colWidth;
+    });
+
+    // Ocultar apenas elementos desnecessários no PDF
+    const buttons = tempDiv.querySelectorAll('button');
+    buttons.forEach(button => {
+      (button as HTMLElement).style.display = 'none';
+    });
+
+    const icons = tempDiv.querySelectorAll('i');
+    icons.forEach(icon => {
+      (icon as HTMLElement).style.display = 'none';
+    });
     
     return tempDiv;
   }
@@ -761,5 +1029,25 @@ export class ExtratoGeneratorService {
       hour: '2-digit', 
       minute: '2-digit' 
     });
+  }
+
+  /**
+   * Retorna largura da coluna (replicando do ExtratoPdfComponent)
+   */
+  private getColumnWidth(index: number): string {
+    switch (index) {
+      case 0: return '80px';  // Data Aplicação
+      case 1: return '80px';  // Data Vencimento
+      case 2: return '80px';  // Data Resgate
+      case 3: return '60px';  // Taxa
+      case 4: return '70px';  // Valor Principal
+      case 5: return '70px';  // Valor Bruto
+      case 6: return '70px';  // Renda Total
+      case 7: return '50px';  // IOF
+      case 8: return '50px';  // IRRF
+      case 9: return '70px';  // Valor Líquido
+      case 10: return '70px'; // Renda Bruta
+      default: return '70px';
+    }
   }
 }
