@@ -334,39 +334,54 @@ export class ExtratoGeneratorService {
       }
       
       .table-section {
-        margin-bottom: 25px;
+        margin-bottom: 30px;
+      }
+      
+      .table-section h3 {
+        font-size: 16px;
+        font-weight: bold;
+        color: #001e61;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #001e61;
+        padding-bottom: 5px;
       }
       
       .table-container {
         overflow-x: auto;
         border: 1px solid #dbdbdb;
         border-radius: 5px;
+        background: #fff;
       }
       
       .financial-table {
         width: 100%;
         border-collapse: collapse;
         font-size: 11px;
+        margin: 0;
       }
       
       .financial-table th {
         background: #001e61;
         color: #fff;
-        padding: 12px 8px;
+        padding: 10px 6px;
         text-align: center;
         font-weight: bold;
         border: 1px solid #001e61;
+        font-size: 10px;
+        white-space: nowrap;
       }
       
       .financial-table td {
-        padding: 8px;
+        padding: 8px 6px;
         border: 1px solid #dbdbdb;
         text-align: center;
         vertical-align: middle;
+        font-size: 10px;
+        white-space: nowrap;
       }
       
       .financial-table tr:nth-child(even) {
-        background: #f4f4f9;
+        background: #f8f9fa;
       }
       
       .financial-table tr:hover {
@@ -528,7 +543,7 @@ export class ExtratoGeneratorService {
   }
 
   /**
-   * Gera seção de saldo anterior (como na imagem)
+   * Gera seção de saldo anterior (exatamente como na imagem)
    */
   private gerarSecaoSaldoAnterior(): string {
     return `
@@ -574,7 +589,7 @@ export class ExtratoGeneratorService {
                 <td class="text-right"><strong>0,43</strong></td>
                 <td class="text-right"><strong>0,00</strong></td>
                 <td class="text-right"><strong>0,36</strong></td>
-                <td class="text-right"><strong>1.063,45</strong></td>
+                <td class="text-right"><strong>1.153,81</strong></td>
                 <td class="text-right"><strong></strong></td>
               </tr>
             </tfoot>
@@ -585,7 +600,7 @@ export class ExtratoGeneratorService {
   }
 
   /**
-   * Gera seção de aplicações (como na imagem)
+   * Gera seção de aplicações (exatamente como na imagem)
    */
   private gerarSecaoAplicacoes(): string {
     return `
@@ -642,7 +657,7 @@ export class ExtratoGeneratorService {
   }
 
   /**
-   * Gera seção de resgates (como na imagem)
+   * Gera seção de resgates (exatamente como na imagem)
    */
   private gerarSecaoResgates(): string {
     return `
@@ -699,7 +714,7 @@ export class ExtratoGeneratorService {
   }
 
   /**
-   * Gera seção de saldo final (como na imagem)
+   * Gera seção de saldo final (exatamente como na imagem)
    */
   private gerarSecaoSaldoFinal(): string {
     return `
