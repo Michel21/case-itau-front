@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ExtratoGeneratorService, ExtratoConfig, GeracaoOptions, ExtratoSimples } from './extrato-generator.service';
 import { RENDA_FIXA_DATA } from '../../../../../data/mock-extrato.data';
 
@@ -10,7 +11,7 @@ import { RENDA_FIXA_DATA } from '../../../../../data/mock-extrato.data';
 @Component({
   selector: 'app-extrato-generator-demo',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   template: `
     <div class="demo-container">
       <h2>🚀 Demo ExtratoGeneratorService</h2>
