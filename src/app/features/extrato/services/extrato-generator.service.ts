@@ -5,12 +5,8 @@ import { WebViewDownloadService } from '../../../shared/services/webview-downloa
 import { RendaFixaData } from '../../../../../types/extrato.types';
 import { RENDA_FIXA_DATA } from '../../../../../data/mock-extrato.data';
 
-// Importações dos novos serviços modulares
+// Importações dos serviços modulares essenciais
 import { DocumentFormatterService } from './formatters/document-formatter.service';
-import { HtmlBuilderService, TableBuilderService } from './builders/html-builder.service';
-import { TemplateEngineService } from './templates/template-engine.service';
-import { DocumentFactoryService } from './factories/document-factory.service';
-import { IExtratoGenerator } from './interfaces/extrato-generator.interfaces';
 
 /**
  * Interface para configuração do extrato
@@ -61,96 +57,22 @@ export interface ExtratoSimples {
 @Injectable({
   providedIn: 'root'
 })
-export class ExtratoGeneratorService implements IExtratoGenerator {
+export class ExtratoGeneratorService {
   
   constructor(
     private readonly webViewDownloadService: WebViewDownloadService,
-    private readonly formatter: DocumentFormatterService,
-    private readonly htmlBuilder: HtmlBuilderService,
-    private readonly tableBuilder: TableBuilderService,
-    private readonly templateEngine: TemplateEngineService,
-    private readonly documentFactory: DocumentFactoryService
+    private readonly formatter: DocumentFormatterService
   ) {}
   
-  // Cache simples para otimização
-  private cssCache: string | null = null;
-  
-  
   /**
-   * Limpa cache e pool para liberar memória
+   * Método para compatibilidade (vazio)
    */
   clearCache(): void {
-    this.cssCache = null;
-    this.formatter.clearCache();
-  }
-  
-  /**
-   * Cria configuração usando factory
-   */
-  createDefaultConfig(overrides: Partial<ExtratoConfig> = {}): ExtratoConfig {
-    const defaultConfig = this.documentFactory.createDocumentConfig();
-    return {
-      titulo: defaultConfig.title,
-      empresa: defaultConfig.company,
-      agencia: defaultConfig.agency,
-      conta: defaultConfig.account,
-      periodo: defaultConfig.period,
-      dataGeracao: defaultConfig.generationDate,
-      numeroControle: defaultConfig.controlNumber,
-      itens: [],
-      ...overrides
-    };
-  }
-  
-  /**
-   * Cria opções usando factory
-   */
-  createDefaultOptions(overrides: Partial<GeracaoOptions> = {}): GeracaoOptions {
-    return this.documentFactory.createGenerationOptions(overrides);
-  }
-  
-  /**
-   * Gera documento usando templates
-   */
-  generateDocumentWithTemplate(templateName: string, data: any): string {
-    if (!this.templateEngine.hasTemplate(templateName)) {
-      throw new Error(`Template '${templateName}' não encontrado`);
-    }
-    
-    return this.templateEngine.render(templateName, data);
-  }
-  
-  /**
-   * Registra template personalizado
-   */
-  registerCustomTemplate(name: string, template: string): void {
-    this.templateEngine.registerTemplate(name, template);
-  }
-  
-
-  /**
-   * Gera PDF do extrato (implementação da interface IExtratoGenerator)
-   */
-  async generatePDF(data: any, config: any, options?: any): Promise<boolean> {
-    return this.gerarPDF(data, config, options);
-  }
-  
-  /**
-   * Gera CSV do extrato (implementação da interface IExtratoGenerator)
-   */
-  async generateCSV(data: any, config: any, options?: any): Promise<boolean> {
-    return this.gerarCSV(data, config, options);
-  }
-  
-  /**
-   * Gera HTML do extrato (implementação da interface IExtratoGenerator)
-   */
-  generateHTML(data: any, config: any, options?: any): string {
-    return this.gerarHTMLDoExtrato(data, config, options);
+    // Removido: cache não é mais necessário
   }
 
   /**
-   * Gera PDF do extrato (método legado mantido para compatibilidade)
+   * Gera PDF do extrato
    */
   async gerarPDF(
     extratoData: ExtratoSimples,
@@ -295,23 +217,9 @@ export class ExtratoGeneratorService implements IExtratoGenerator {
   }
 
   /**
-   * Gera CSS para o extrato (replicando o layout do ExtratoPdfComponent)
+   * Gera CSS para o extrato
    */
   private gerarCSS(): string {
-    // Retorna do cache se já foi gerado
-    if (this.cssCache) {
-      return this.cssCache;
-    }
-    
-    // Gera CSS apenas uma vez e armazena no cache
-    this.cssCache = this.buildCSS();
-    return this.cssCache;
-  }
-  
-  /**
-   * Constrói o CSS do extrato
-   */
-  private buildCSS(): string {
     return `
       * {
         margin: 0;
@@ -1064,14 +972,61 @@ export class ExtratoGeneratorService implements IExtratoGenerator {
   private gerarConteudoCSV(extratoData: ExtratoSimples, config: ExtratoConfig, options: GeracaoOptions): string {
     let csv = '';
     
-    // Header do CSV
-    csv += 'Data,Descrição,Valor,Saldo\n';
+    // Header do CSV com colunas da renda fixa
+    csv += 'Seção,Data Aplicação,Data Vencimento,Data Resgate,Taxa (%),Valor Principal (BRL),Valor Bruto (BRL),Renda Total (BRL),IOF (BRL),IRRF (BRL),Valor Líquido (BRL),Renda Bruta (%)\n';
     
-    // Itens do extrato
-    if (extratoData.itens && extratoData.itens.length > 0) {
-      extratoData.itens.forEach((item: any) => {
-        csv += `"${item.data || ''}","${item.descricao || ''}","${this.formatarMoeda(item.valor || 0)}","${this.formatarMoeda(item.saldo || 0)}"\n`;
+    const rendaFixa = RENDA_FIXA_DATA.rendaFixa;
+    
+    // Saldo Anterior
+    if (rendaFixa.saldoAnterior && rendaFixa.saldoAnterior.length > 0) {
+      rendaFixa.saldoAnterior.forEach((item: any) => {
+        csv += `"Saldo Anterior","${item.dataAplicacao || ''}","${item.dataVencimento || ''}","${item.datasResgate || ''}","${item.taxa || ''}","${this.formatarMoeda(item.valorPrincipal || 0)}","${this.formatarMoeda(item.valorBruto || 0)}","${this.formatarMoeda(item.rendaTotal || 0)}","${this.formatarMoeda(item.iof || 0)}","${this.formatarMoeda(item.irrf || 0)}","${this.formatarMoeda(item.valoLiquido || 0)}","${this.formatarMoeda(item.rendaBruta || 0)}"\n`;
       });
+      
+      // Total do Saldo Anterior
+      const total = rendaFixa.saldoAteriorTotal;
+      if (total) {
+        csv += `"Total Saldo Anterior","","","","","${this.formatarMoeda(total.valorPrincipal || 0)}","${this.formatarMoeda(total.valorBruto || 0)}","${this.formatarMoeda(total.rendaTotal || 0)}","${this.formatarMoeda(total.iof || 0)}","${this.formatarMoeda(total.irrf || 0)}","${this.formatarMoeda(total.valoLiquido || 0)}","${this.formatarMoeda(total.rendaBruta || 0)}"\n`;
+      }
+    }
+    
+    // Aplicações
+    if (rendaFixa.aplicacao && rendaFixa.aplicacao.length > 0) {
+      rendaFixa.aplicacao.forEach((item: any) => {
+        csv += `"Aplicações","${item.dataAplicacao || ''}","${item.dataVencimento || ''}","-","${item.taxa || ''}","${this.formatarMoeda(item.valorPrincipal || 0)}","","","","","",""\n`;
+      });
+      
+      // Total das Aplicações
+      const total = rendaFixa.aplicacaoTotal;
+      if (total) {
+        csv += `"Total Aplicações","","","","","${this.formatarMoeda(total.valorPrincipal || 0)}","","","","","",""\n`;
+      }
+    }
+    
+    // Resgates/Vencimentos
+    if (rendaFixa.resgate && rendaFixa.resgate.length > 0) {
+      rendaFixa.resgate.forEach((item: any) => {
+        csv += `"Resgates/Vencimentos","${item.dataAplicacao || ''}","${item.dataVencimento || ''}","${item.datasResgate || ''}","${item.taxa || ''}","${this.formatarMoeda(item.valorPrincipal || 0)}","${this.formatarMoeda(item.valorBruto || 0)}","${this.formatarMoeda(item.rendaTotal || 0)}","${this.formatarMoeda(item.iof || 0)}","${this.formatarMoeda(item.irrf || 0)}","${this.formatarMoeda(item.valoLiquido || 0)}","${this.formatarMoeda(item.rendaBruta || 0)}"\n`;
+      });
+      
+      // Total dos Resgates
+      const total = rendaFixa.resgateTotal;
+      if (total) {
+        csv += `"Total Resgates","","","","","${this.formatarMoeda(total.valorPrincipal || 0)}","${this.formatarMoeda(total.valorBruto || 0)}","${this.formatarMoeda(total.rendaTotal || 0)}","${this.formatarMoeda(total.iof || 0)}","${this.formatarMoeda(total.irrf || 0)}","${this.formatarMoeda(total.valoLiquido || 0)}","${this.formatarMoeda(total.rendaBruta || 0)}"\n`;
+      }
+    }
+    
+    // Saldo Final
+    if (rendaFixa.saldoFinal && rendaFixa.saldoFinal.length > 0) {
+      rendaFixa.saldoFinal.forEach((item: any) => {
+        csv += `"Saldo Final","${item.dataAplicacao || ''}","${item.dataVencimento || ''}","${item.datasResgate || ''}","${item.taxa || ''}","${this.formatarMoeda(item.valorPrincipal || 0)}","${this.formatarMoeda(item.valorBruto || 0)}","${this.formatarMoeda(item.rendaTotal || 0)}","${this.formatarMoeda(item.iof || 0)}","${this.formatarMoeda(item.irrf || 0)}","${this.formatarMoeda(item.valoLiquido || 0)}","${this.formatarMoeda(item.rendaBruta || 0)}"\n`;
+      });
+      
+      // Total do Saldo Final
+      const total = rendaFixa.saldoFinalTotal;
+      if (total) {
+        csv += `"Total Saldo Final","","","","","${this.formatarMoeda(total.valorPrincipal || 0)}","${this.formatarMoeda(total.valorBruto || 0)}","${this.formatarMoeda(total.rendaTotal || 0)}","${this.formatarMoeda(total.iof || 0)}","${this.formatarMoeda(total.irrf || 0)}","${this.formatarMoeda(total.valoLiquido || 0)}","${this.formatarMoeda(total.rendaBruta || 0)}"\n`;
+      }
     }
     
     return csv;
