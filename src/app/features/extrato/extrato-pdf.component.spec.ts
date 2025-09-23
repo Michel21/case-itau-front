@@ -74,6 +74,11 @@ describe('ExtratoPdfComponent', () => {
   beforeEach(() => {
     // Limpar mocks antes de cada teste
     jest.clearAllMocks();
+    
+    // Mock console para suprimir logs durante testes
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    jest.spyOn(console, 'log').mockImplementation(() => {});
   });
 
   afterAll(() => {

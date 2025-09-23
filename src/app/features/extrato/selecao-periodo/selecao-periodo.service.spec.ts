@@ -29,7 +29,8 @@ describe('SelecaoPeriodoService', () => {
       gerarMeses: jest.fn(),
       gerarAnos: jest.fn(),
       gerarPeriodoAtual: jest.fn(),
-      gerarPeriodosComConfiguracao: jest.fn()
+      gerarPeriodosComConfiguracao: jest.fn(),
+      gerarPeriodosDropdown: jest.fn()
     };
 
     const formatadorSpyObj = {
@@ -66,6 +67,7 @@ describe('SelecaoPeriodoService', () => {
     geradorSpy.gerarMeses.mockReturnValue([]);
     geradorSpy.gerarAnos.mockReturnValue([]);
     geradorSpy.gerarPeriodoAtual.mockReturnValue({ mes: '1', ano: '2024' });
+    geradorSpy.gerarPeriodosDropdown.mockReturnValue([]);
 
     formatadorSpy.formatarPeriodo.mockReturnValue('Janeiro de 2024');
     formatadorSpy.formatarIntervalo.mockReturnValue('01/01/2024 a 31/01/2024');
@@ -413,6 +415,19 @@ describe('SelecaoPeriodoService', () => {
       service.atualizarAnos();
 
       expect(geradorSpy.gerarAnos).toHaveBeenCalled();
+    });
+
+    it('deve gerar períodos dropdown', () => {
+      const mockPeriodosDropdown = [
+        { valor: '1/2024', nome: '2024 | Janeiro', mes: '1', ano: '2024' },
+        { valor: '2/2024', nome: '2024 | Fevereiro', mes: '2', ano: '2024' }
+      ];
+      geradorSpy.gerarPeriodosDropdown.mockReturnValue(mockPeriodosDropdown);
+
+      service.gerarPeriodosDropdown();
+
+      expect(geradorSpy.gerarPeriodosDropdown).toHaveBeenCalled();
+      expect(service.periodosDropdown()).toEqual(mockPeriodosDropdown);
     });
   });
 

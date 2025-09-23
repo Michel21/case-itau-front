@@ -119,7 +119,7 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
       this.error.set(null);
       window.print();
     } catch (error) {
-      console.error('Erro ao gerar PDF:', error);
+      // console.error removido por questões de segurança
       this.error.set('Erro ao gerar PDF. Tente novamente.');
     } finally {
       this.isLoading.set(false);
@@ -264,7 +264,7 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
 
       this.isLoading.set(false);
     } catch (error) {
-      console.error('Erro ao gerar PDF corporativo:', error);
+      // console.error removido por questões de segurança
       this.error.set('Erro ao gerar PDF corporativo. Tente novamente.');
       this.isLoading.set(false);
     }
@@ -294,7 +294,7 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
 
       this.isLoading.set(false);
     } catch (error) {
-      console.error('Erro ao gerar CSV:', error);
+      // console.error removido por questões de segurança
       this.error.set('Erro ao gerar CSV. Tente novamente.');
       this.isLoading.set(false);
     }
@@ -345,7 +345,7 @@ export class ExtratoPdfComponent implements OnInit, OnDestroy {
 
       this.isLoading.set(false);
     } catch (error) {
-      console.error('Erro ao gerar HTML:', error);
+      // console.error removido por questões de segurança
       this.error.set('Erro ao gerar HTML. Tente novamente.');
       this.isLoading.set(false);
     }

@@ -58,7 +58,7 @@ export class WebViewDownloadService {
         resolve(false);
 
       } catch (error) {
-        console.error('Erro no download:', error);
+       
         resolve(false);
       }
     });
@@ -97,7 +97,6 @@ export class WebViewDownloadService {
         resolve(true);
 
       } catch (error) {
-        console.error('Erro no download do PDF:', error);
         resolve(false);
       }
     });
@@ -148,11 +147,9 @@ export class WebViewDownloadService {
         text: `Compartilhando ${options.fileName}`,
         files: [file]
       }).catch(error => {
-        console.warn('Compartilhamento falhou, usando download:', error);
         WebViewUtils.downloadFile(content, options.fileName, options.mimeType);
       });
     } catch (error) {
-      console.error('Erro ao compartilhar arquivo:', error);
       // Fallback para download
       WebViewUtils.downloadFile(content, options.fileName, options.mimeType);
     }
@@ -178,7 +175,6 @@ export class WebViewDownloadService {
         URL.revokeObjectURL(url);
       }, 1000);
     } catch (error) {
-      console.error('Erro ao fazer download do blob:', error);
       // Fallback: abrir em nova aba
       const url = URL.createObjectURL(blob);
       window.open(url, '_blank');
@@ -200,9 +196,7 @@ export class WebViewDownloadService {
         printWindow.document.close();
         printWindow.print();
       }
-    } catch (error) {
-      console.error('Erro ao imprimir conteúdo:', error);
-    }
+    } catch (error) {}
   }
 
   /**

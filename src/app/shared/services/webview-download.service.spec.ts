@@ -27,6 +27,11 @@ describe('WebViewDownloadService', () => {
     mockWebViewUtils = WebViewUtils as jest.Mocked<typeof WebViewUtils>;
     mockDetectWebViewType = detectWebViewType as jest.MockedFunction<typeof detectWebViewType>;
     
+    // Mock console para suprimir logs durante testes
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+    
     // Reset mocks
     jest.clearAllMocks();
     

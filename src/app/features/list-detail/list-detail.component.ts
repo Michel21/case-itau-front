@@ -61,7 +61,7 @@ export class ListDetailComponent implements OnInit, OnDestroy {
 
       const details$ = this.listDetailService.getCatsId(catId).pipe(
         catchError(error => {
-          console.error('Error fetching cat details:', error);
+          // console.error removido por questões de segurança
           return of(null);
         })
       );

@@ -349,11 +349,9 @@ describe('SelecaoPeriodoComponent', () => {
       expect(dataMaximaFim).toEqual(new Date('2024-09-07T03:00:00.000Z'));
     });
 
-    it('deve logar data selecionada', () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-      component.onDateChange('2024-09-01');
-      expect(consoleSpy).toHaveBeenCalledWith('Data selecionada:', '2024-09-01');
-      consoleSpy.mockRestore();
+    it('deve processar data selecionada sem logar', () => {
+      // Teste que o método onDateChange executa sem erros
+      expect(() => component.onDateChange('2024-09-01')).not.toThrow();
     });
   });
 

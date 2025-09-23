@@ -218,7 +218,7 @@ export class SelecaoPeriodoService {
     };
     
     // Aqui você pode implementar um sistema de eventos se necessário
-    console.log('Evento de mudança:', evento);
+    // console.log removido por questões de segurança
   }
 
   /**

@@ -101,6 +101,21 @@ export class DatePickerComponent implements OnInit {
   private isDraggingManual = false;
   private dragStart = { x: 0, y: 0, startX: 0, startY: 0 };
 
+  constructor() {
+    // Angular Features: Effect for reactive updates (moved from ngOnInit to constructor)
+    effect(() => {
+      const dragging = this.isDragging();
+      const dialog = document.querySelector('.date-picker-dialog') as HTMLElement;
+      if (dialog) {
+        if (dragging) {
+          dialog.classList.add('dragging');
+        } else {
+          dialog.classList.remove('dragging');
+        }
+      }
+    });
+  }
+
   ngOnInit(): void {
     if (this.selectedDate) {
       this.selectedDateSignal.set(this.selectedDate);
@@ -115,19 +130,6 @@ export class DatePickerComponent implements OnInit {
 
     // Add click outside listener to close dropdowns
     this.addClickOutsideListener();
-
-    // Angular Features: Effect for reactive updates
-    effect(() => {
-      const dragging = this.isDragging();
-      const dialog = document.querySelector('.date-picker-dialog') as HTMLElement;
-      if (dialog) {
-        if (dragging) {
-          dialog.classList.add('dragging');
-        } else {
-          dialog.classList.remove('dragging');
-        }
-      }
-    });
   }
 
   private addClickOutsideListener(): void {
@@ -289,7 +291,7 @@ export class DatePickerComponent implements OnInit {
 
   // Manual Drag and Drop Methods
   startDrag(event: MouseEvent | TouchEvent): void {
-    console.log('🚀 Manual drag started');
+    // console.log removido por questões de segurança
     
     if (event instanceof MouseEvent && event.button !== 0) return;
     
@@ -343,7 +345,7 @@ export class DatePickerComponent implements OnInit {
   }
 
   private onDragEnd(): void {
-    console.log('🏁 Manual drag ended');
+    // console.log removido por questões de segurança
     this.isDraggingManual = false;
     this.isDragging.set(false);
     

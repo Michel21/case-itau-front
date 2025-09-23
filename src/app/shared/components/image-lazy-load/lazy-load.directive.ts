@@ -245,7 +245,7 @@ export class LazyLoadDirective implements OnInit, AfterViewInit, OnDestroy {
 
       // Log de sucesso em desenvolvimento
       if (!this.isProduction()) {
-        console.log(`✅ Image loaded successfully: ${this.src}`);
+        // console.log removido por questões de segurança
       }
     });
   }

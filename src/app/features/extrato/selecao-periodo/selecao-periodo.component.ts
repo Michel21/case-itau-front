@@ -241,7 +241,7 @@ export class SelecaoPeriodoComponent implements OnInit, OnDestroy {
   }
 
   onDateChange(event: string): void {
-    console.log('Data selecionada:', event);
+    // console.log removido por questões de segurança
   }
 
   // ==================== PRIVATE HELPER METHODS ====================

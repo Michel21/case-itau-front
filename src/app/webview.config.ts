@@ -238,7 +238,7 @@ export const WebViewUtils = {
       
       return true;
     } catch (error) {
-      console.warn('Download padrão falhou, tentando método alternativo:', error);
+      // console.warn removido por questões de segurança
       
       // Método alternativo para WebView
       try {
@@ -254,7 +254,7 @@ export const WebViewUtils = {
         
         return true;
       } catch (fallbackError) {
-        console.error('Método alternativo também falhou:', fallbackError);
+
         return false;
       }
     }
@@ -283,7 +283,7 @@ export const WebViewUtils = {
         text: 'Compartilhando extrato bancário',
         files: [file]
       }).catch(error => {
-        console.warn('Compartilhamento falhou, usando download:', error);
+        // console.warn removido por questões de segurança
         WebViewUtils.downloadFile(content, fileName, mimeType);
       });
     } else {

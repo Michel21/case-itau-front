@@ -18,6 +18,11 @@ describe('WebView Configuration', () => {
     // Limpar DOM antes de cada teste
     document.head.innerHTML = '';
     document.body.innerHTML = '';
+    
+    // Mock console para suprimir logs durante testes
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(console, 'log').mockImplementation(() => {});
   });
 
   afterEach(() => {
