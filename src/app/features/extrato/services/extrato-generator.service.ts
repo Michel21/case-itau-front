@@ -367,31 +367,70 @@ export class ExtratoGeneratorService {
       }
       
       .financial-table td {
-        padding: 8px 4px;
+        padding: 6px 4px;
         text-align: center;
         border: none;
-        font-size: 10px;
         color: #000;
-      }
-      
-      .section-title th {
-        background-color: transparent;
-        color: #000;
-        font-weight: bold;
-        text-align: left;
-        padding: 8px 4px;
         font-size: 11px;
       }
       
-      .data-row td {
-        background-color: #fff;
+      .section-title {
+        background-color: #eee;
+        padding: 12px 0;
+      }
+      
+      .section-title th {
+        background-color: #eee;
         color: #000;
+        padding: 12px 35px;
+        text-align: left;
+        font-weight: bold;
+        font-size: 12px;
+      }
+      
+      .data-row {
+        background-color: transparent;
+      }
+      
+      .data-row:nth-child(even) {
+        background-color: transparent;
+      }
+      
+      .total-row {
+        background-color: transparent !important;
+        color: #000 !important;
+        font-weight: bold;
+        padding: 8px 0 !important;
+        margin-bottom: 10px;
       }
       
       .total-row td {
-        background-color: #fff;
-        color: #000;
-        font-weight: bold;
+        color: #000 !important;
+        border-color: transparent !important;
+        border-bottom: none !important;
+        padding: 8px 4px;
+      }
+      
+      .total-row td:first-child {
+        text-align: left !important;
+        padding-left: 0px !important;
+      }
+      
+      .total-row td:nth-child(2),
+      .total-row td:nth-child(3),
+      .total-row td:nth-child(4) {
+        text-align: center !important;
+      }
+      
+      .total-row td:nth-child(5),
+      .total-row td:nth-child(6),
+      .total-row td:nth-child(7),
+      .total-row td:nth-child(8),
+      .total-row td:nth-child(9),
+      .total-row td:nth-child(10),
+      .total-row td:nth-child(11) {
+        text-align: right !important;
+        padding-right: 3px !important;
       }
       
       /* Alinhamento específico baseado no componente original */
@@ -635,149 +674,257 @@ export class ExtratoGeneratorService {
               </tr>
             </thead>
             <tbody>
-              <!-- Saldo Anterior -->
-              <tr class="section-title">
-                <th colspan="11" style="padding-left: 35px !important;">Saldo anterior em 31/07/2025</th>
-              </tr>
-              <tr class="data-row">
-                <td>10/03/2025</td>
-                <td>01/03/2027</td>
-                <td></td>
-                <td></td>
-                <td>58,22</td>
-                <td>58,37</td>
-                <td>0,15</td>
-                <td>0,00</td>
-                <td>0,03</td>
-                <td>58,34</td>
-                <td></td>
-              </tr>
-              <tr class="total-row">
-                <td><strong>Total</strong></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td><strong>1.153,74</strong></td>
-                <td><strong>1.154,17</strong></td>
-                <td><strong>0,43</strong></td>
-                <td><strong>0,00</strong></td>
-                <td><strong>0,36</strong></td>
-                <td><strong>1.063,45</strong></td>
-                <td style="padding-right: 10px !important;"><strong></strong></td>
-              </tr>
-
-              <!-- Aplicações -->
-              <tr class="section-title">
-                <th colspan="11" style="padding-left: 35px !important;">Aplicações</th>
-              </tr>
-              <tr class="data-row">
-                <td>04/08/2025</td>
-                <td>26/07/2027</td>
-                <td>-</td>
-                <td></td>
-                <td>850,00</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-              <tr class="total-row">
-                <td><strong>Total</strong></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td><strong>850,00</strong></td>
-                <td><strong></strong></td>
-                <td><strong></strong></td>
-                <td><strong></strong></td>
-                <td><strong></strong></td>
-                <td><strong></strong></td>
-                <td><strong></strong></td>
-              </tr>
-
-              <!-- Header repetido -->
-              <tr class="table-header">
-                <th>Data aplic.</th>
-                <th>Data vencto.</th>
-                <th>Resgate/Carência</th>
-                <th>Taxa (%)</th>
-                <th>Valor princ. (BRL)</th>
-                <th>Valor Bruto (BRL)</th>
-                <th>Renda total (BRL)</th>
-                <th>IOF (BRL)</th>
-                <th>IRRF (BRL)</th>
-                <th>Valor Líquido (BRL)</th>
-                <th>Renda bruta per</th>
-              </tr>
-
-              <!-- Resgates -->
-              <tr class="section-title">
-                <th colspan="11" style="padding-left: 35px !important;">Resgates/Vencimentos</th>
-              </tr>
-              <tr class="data-row">
-                <td>10/03/2025</td>
-                <td>01/03/2027</td>
-                <td>05/08/2025</td>
-                <td>5,00</td>
-                <td>58,22</td>
-                <td>58,37</td>
-                <td>0,15</td>
-                <td>0,00</td>
-                <td>0,03</td>
-                <td>58,34</td>
-                <td>0,00</td>
-              </tr>
-              <tr class="total-row">
-                <td><strong>Total</strong></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td><strong>932,09</strong></td>
-                <td><strong>932,91</strong></td>
-                <td><strong>0,82</strong></td>
-                <td><strong>0,00</strong></td>
-                <td><strong>0,18</strong></td>
-                <td><strong>932,73</strong></td>
-                <td style="padding-right: 10px !important;"><strong>0,09</strong></td>
-              </tr>
-
-              <!-- Saldo Final -->
-              <tr class="section-title">
-                <th colspan="11" style="padding-left: 35px !important;">Saldo final em 25/08/2025</th>
-              </tr>
-              <tr class="data-row">
-                <td>28/08/2025</td>
-                <td>07/06/2027</td>
-                <td></td>
-                <td>5,00</td>
-                <td>44,56</td>
-                <td>44,61</td>
-                <td>0,05</td>
-                <td>0,00</td>
-                <td>0,01</td>
-                <td>44,60</td>
-                <td>0,02</td>
-              </tr>
-              <tr class="total-row">
-                <td><strong>Total</strong></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td><strong>194,56</strong></td>
-                <td><strong>194,61</strong></td>
-                <td><strong>0,05</strong></td>
-                <td><strong>0,00</strong></td>
-                <td><strong>0,01</strong></td>
-                <td><strong>194,60</strong></td>
-                <td style="padding-right: 10px !important;"><strong>0,02</strong></td>
-              </tr>
+              ${this.gerarSecaoSaldoAnteriorDados()}
+              ${this.gerarSecaoAplicacoesDados()}
+              ${this.gerarHeaderRepetido()}
+              ${this.gerarSecaoResgatesDados()}
+              ${this.gerarSecaoSaldoFinalDados()}
             </tbody>
           </table>
         </div>
       </section>
     `;
+  }
+
+  /**
+   * Gera seção de saldo anterior usando dados reais do mock
+   */
+  private gerarSecaoSaldoAnteriorDados(): string {
+    const rendaFixa = RENDA_FIXA_DATA.rendaFixa;
+    let html = `
+      <tr class="section-title">
+        <th colspan="11" style="padding-left: 35px !important;">Saldo anterior em ${rendaFixa.dataSaldoAnterior}</th>
+      </tr>
+    `;
+    
+    // Dados do saldo anterior
+    if (rendaFixa.saldoAnterior && rendaFixa.saldoAnterior.length > 0) {
+      rendaFixa.saldoAnterior.forEach((item: any) => {
+        html += `
+          <tr class="data-row">
+            <td>${item.dataAplicacao || ''}</td>
+            <td>${item.dataVencimento || ''}</td>
+            <td>${item.datasResgate || ''}</td>
+            <td>${item.taxa ? item.taxa.toFixed(2) : ''}</td>
+            <td>${this.formatarMoeda(item.valorPrincipal || 0)}</td>
+            <td>${this.formatarMoeda(item.valorBruto || 0)}</td>
+            <td>${this.formatarMoeda(item.rendaTotal || 0)}</td>
+            <td>${this.formatarMoeda(item.iof || 0)}</td>
+            <td>${this.formatarMoeda(item.irrf || 0)}</td>
+            <td>${this.formatarMoeda(item.valoLiquido || 0)}</td>
+            <td>${this.formatarMoeda(item.rendaBruta || 0)}</td>
+          </tr>
+        `;
+      });
+    }
+    
+    // Total do saldo anterior
+    const total = rendaFixa.saldoAteriorTotal;
+    if (total) {
+      html += `
+        <tr class="total-row">
+          <td><strong>Total</strong></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td><strong>${this.formatarMoeda(total.valorPrincipal || 0)}</strong></td>
+          <td><strong>${this.formatarMoeda(total.valorBruto || 0)}</strong></td>
+          <td><strong>${this.formatarMoeda(total.rendaTotal || 0)}</strong></td>
+          <td><strong>${this.formatarMoeda(total.iof || 0)}</strong></td>
+          <td><strong>${this.formatarMoeda(total.irrf || 0)}</strong></td>
+          <td><strong>${this.formatarMoeda(total.valoLiquido || 0)}</strong></td>
+          <td style="padding-right: 10px !important;"><strong>${this.formatarMoeda(total.rendaBruta || 0)}</strong></td>
+        </tr>
+      `;
+    }
+    
+    return html;
+  }
+
+  /**
+   * Gera seção de aplicações usando dados reais do mock
+   */
+  private gerarSecaoAplicacoesDados(): string {
+    const rendaFixa = RENDA_FIXA_DATA.rendaFixa;
+    let html = `
+      <tr class="section-title">
+        <th colspan="11" style="padding-left: 35px !important;">Aplicações</th>
+      </tr>
+    `;
+    
+    // Dados das aplicações
+    if (rendaFixa.aplicacao && rendaFixa.aplicacao.length > 0) {
+      rendaFixa.aplicacao.forEach((item: any) => {
+        html += `
+          <tr class="data-row">
+            <td>${item.dataAplicacao || ''}</td>
+            <td>${item.dataVencimento || ''}</td>
+            <td>-</td>
+            <td>${item.taxa ? item.taxa.toFixed(2) : ''}</td>
+            <td>${this.formatarMoeda(item.valorPrincipal || 0)}</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+        `;
+      });
+    }
+    
+    // Total das aplicações
+    const total = rendaFixa.aplicacaoTotal;
+    if (total) {
+      html += `
+        <tr class="total-row">
+          <td><strong>Total</strong></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td><strong>${this.formatarMoeda(total.valorPrincipal || 0)}</strong></td>
+          <td><strong></strong></td>
+          <td><strong></strong></td>
+          <td><strong></strong></td>
+          <td><strong></strong></td>
+          <td><strong></strong></td>
+          <td><strong></strong></td>
+        </tr>
+      `;
+    }
+    
+    return html;
+  }
+
+  /**
+   * Gera header repetido
+   */
+  private gerarHeaderRepetido(): string {
+    return `
+      <tr class="table-header">
+        <th>Data aplic.</th>
+        <th>Data vencto.</th>
+        <th>Resgate/Carência</th>
+        <th>Taxa (%)</th>
+        <th>Valor princ. (BRL)</th>
+        <th>Valor Bruto (BRL)</th>
+        <th>Renda total (BRL)</th>
+        <th>IOF (BRL)</th>
+        <th>IRRF (BRL)</th>
+        <th>Valor Líquido (BRL)</th>
+        <th>Renda bruta per</th>
+      </tr>
+    `;
+  }
+
+  /**
+   * Gera seção de resgates usando dados reais do mock
+   */
+  private gerarSecaoResgatesDados(): string {
+    const rendaFixa = RENDA_FIXA_DATA.rendaFixa;
+    let html = `
+      <tr class="section-title">
+        <th colspan="11" style="padding-left: 35px !important;">Resgates/Vencimentos</th>
+      </tr>
+    `;
+    
+    // Dados dos resgates
+    if (rendaFixa.resgate && rendaFixa.resgate.length > 0) {
+      rendaFixa.resgate.forEach((item: any) => {
+        html += `
+          <tr class="data-row">
+            <td>${item.dataAplicacao || ''}</td>
+            <td>${item.dataVencimento || ''}</td>
+            <td>${item.datasResgate || ''}</td>
+            <td>${item.taxa ? item.taxa.toFixed(2) : ''}</td>
+            <td>${this.formatarMoeda(item.valorPrincipal || 0)}</td>
+            <td>${this.formatarMoeda(item.valorBruto || 0)}</td>
+            <td>${this.formatarMoeda(item.rendaTotal || 0)}</td>
+            <td>${this.formatarMoeda(item.iof || 0)}</td>
+            <td>${this.formatarMoeda(item.irrf || 0)}</td>
+            <td>${this.formatarMoeda(item.valoLiquido || 0)}</td>
+            <td>${this.formatarMoeda(item.rendaBruta || 0)}</td>
+          </tr>
+        `;
+      });
+    }
+    
+    // Total dos resgates
+    const total = rendaFixa.resgateTotal;
+    if (total) {
+      html += `
+        <tr class="total-row">
+          <td><strong>Total</strong></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td><strong>${this.formatarMoeda(total.valorPrincipal || 0)}</strong></td>
+          <td><strong>${this.formatarMoeda(total.valorBruto || 0)}</strong></td>
+          <td><strong>${this.formatarMoeda(total.rendaTotal || 0)}</strong></td>
+          <td><strong>${this.formatarMoeda(total.iof || 0)}</strong></td>
+          <td><strong>${this.formatarMoeda(total.irrf || 0)}</strong></td>
+          <td><strong>${this.formatarMoeda(total.valoLiquido || 0)}</strong></td>
+          <td style="padding-right: 10px !important;"><strong>${this.formatarMoeda(total.rendaBruta || 0)}</strong></td>
+        </tr>
+      `;
+    }
+    
+    return html;
+  }
+
+  /**
+   * Gera seção de saldo final usando dados reais do mock
+   */
+  private gerarSecaoSaldoFinalDados(): string {
+    const rendaFixa = RENDA_FIXA_DATA.rendaFixa;
+    let html = `
+      <tr class="section-title">
+        <th colspan="11" style="padding-left: 35px !important;">Saldo final em ${rendaFixa.dataSaldoFinal}</th>
+      </tr>
+    `;
+    
+    // Dados do saldo final
+    if (rendaFixa.saldoFinal && rendaFixa.saldoFinal.length > 0) {
+      rendaFixa.saldoFinal.forEach((item: any) => {
+        html += `
+          <tr class="data-row">
+            <td>${item.dataAplicacao || ''}</td>
+            <td>${item.dataVencimento || ''}</td>
+            <td>${item.datasResgate || ''}</td>
+            <td>${item.taxa ? item.taxa.toFixed(2) : ''}</td>
+            <td>${this.formatarMoeda(item.valorPrincipal || 0)}</td>
+            <td>${this.formatarMoeda(item.valorBruto || 0)}</td>
+            <td>${this.formatarMoeda(item.rendaTotal || 0)}</td>
+            <td>${this.formatarMoeda(item.iof || 0)}</td>
+            <td>${this.formatarMoeda(item.irrf || 0)}</td>
+            <td>${this.formatarMoeda(item.valoLiquido || 0)}</td>
+            <td>${this.formatarMoeda(item.rendaBruta || 0)}</td>
+          </tr>
+        `;
+      });
+    }
+    
+    // Total do saldo final
+    const total = rendaFixa.saldoFinalTotal;
+    if (total) {
+      html += `
+        <tr class="total-row">
+          <td><strong>Total</strong></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td><strong>${this.formatarMoeda(total.valorPrincipal || 0)}</strong></td>
+          <td><strong>${this.formatarMoeda(total.valorBruto || 0)}</strong></td>
+          <td><strong>${this.formatarMoeda(total.rendaTotal || 0)}</strong></td>
+          <td><strong>${this.formatarMoeda(total.iof || 0)}</strong></td>
+          <td><strong>${this.formatarMoeda(total.irrf || 0)}</strong></td>
+          <td><strong>${this.formatarMoeda(total.valoLiquido || 0)}</strong></td>
+          <td style="padding-right: 10px !important;"><strong>${this.formatarMoeda(total.rendaBruta || 0)}</strong></td>
+        </tr>
+      `;
+    }
+    
+    return html;
   }
 
   /**
