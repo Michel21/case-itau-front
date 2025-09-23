@@ -239,6 +239,16 @@ export class ExtratoGeneratorService {
         position: relative;
       }
       
+      .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        width: 100%;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        position: relative;
+      }
+      
       .header-left {
         display: flex;
         flex-direction: column;
@@ -274,6 +284,8 @@ export class ExtratoGeneratorService {
         flex-direction: column;
         align-items: flex-end;
         text-align: right;
+        margin-left: auto;
+        min-width: 300px;
       }
       
       .report-title {
@@ -512,7 +524,6 @@ export class ExtratoGeneratorService {
       }
       
       .total-row {
-        background: #001e61 !important;
         color: #fff !important;
         font-weight: bold;
       }
