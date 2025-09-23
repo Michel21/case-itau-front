@@ -482,8 +482,8 @@ export class ExtratoGeneratorService {
           <div class="header-right">
             <div class="report-title">Saldo e extrato</div>
             <div class="transaction-details">
-              <div>Data da transação: ${this.formatarData(config.dataGeracao)} - ${this.formatarHora(config.dataGeracao)}</div>
-              <div>Número de controle: ${config.numeroControle}</div>
+              <div>Data da transação: 25/08/2025 - 10:57:09</div>
+              <div>Número de controle: 27dc6a7d-4003-4574-b3bb-fae182b17962</div>
             </div>
           </div>
         </div>
@@ -519,15 +519,15 @@ export class ExtratoGeneratorService {
         <div class="detail-grid">
           <div class="detail-item">
             <span class="detail-label">Empresa | CNPJ:</span>
-            <span class="detail-value">${config.empresa}</span>
+            <span class="detail-value">43.320.901 LUCIANO RAMOS | 43.320.901/0001-50</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">Agência | Conta:</span>
-            <span class="detail-value">${config.agencia}</span>
+            <span class="detail-value">1221 | 35394-9</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">Data da busca:</span>
-            <span class="detail-value">${config.periodo}</span>
+            <span class="detail-value">Agosto/2025</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">Tipo de investimento:</span>
@@ -589,7 +589,7 @@ export class ExtratoGeneratorService {
                 <td class="text-right"><strong>0,43</strong></td>
                 <td class="text-right"><strong>0,00</strong></td>
                 <td class="text-right"><strong>0,36</strong></td>
-                <td class="text-right"><strong>1.153,81</strong></td>
+                <td class="text-right"><strong>1.063,45</strong></td>
                 <td class="text-right"><strong></strong></td>
               </tr>
             </tfoot>
@@ -641,18 +641,21 @@ export class ExtratoGeneratorService {
             <tfoot>
               <tr class="total-row">
                 <td colspan="4"><strong>Total</strong></td>
-                <td class="text-right"><strong></strong></td>
-                <td class="text-right"><strong></strong></td>
-                <td class="text-right"><strong></strong></td>
-                <td class="text-right"><strong></strong></td>
-                <td class="text-right"><strong></strong></td>
-                <td class="text-right"><strong></strong></td>
+                <td class="text-right"><strong>850,00</strong></td>
+                <td class="text-right"><strong>750,00</strong></td>
+                <td class="text-right"><strong>0,00</strong></td>
+                <td class="text-right"><strong>0,00</strong></td>
+                <td class="text-right"><strong>0,00</strong></td>
+                <td class="text-right"><strong>750,00</strong></td>
                 <td class="text-right"><strong></strong></td>
               </tr>
             </tfoot>
           </table>
         </div>
       </section>
+      
+      <!-- Separador visual como na imagem -->
+      <div style="height: 20px; background: #000; margin: 20px 0;"></div>
     `;
   }
 
