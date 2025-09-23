@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ExtratoGeneratorService, ExtratoConfig, GeracaoOptions, ExtratoSimples } from './extrato-generator.service';
+import { ExtratoGeneratorService, ExtratoConfig, GeracaoOptions, ExtratoSimples, ExtratoItemSimples } from './extrato-generator.service';
 import { RENDA_FIXA_DATA } from '../../../../../data/mock-extrato.data';
 
 /**
@@ -66,6 +66,7 @@ import { RENDA_FIXA_DATA } from '../../../../../data/mock-extrato.data';
             class="btn btn-success">
             🌐 Gerar HTML
           </button>
+          
         </div>
       </div>
 
@@ -251,21 +252,62 @@ import { RENDA_FIXA_DATA } from '../../../../../data/mock-extrato.data';
 export class ExtratoGeneratorDemoComponent {
   private readonly extratoGenerator = inject(ExtratoGeneratorService);
 
-  // Dados do extrato
+  // Dados do extrato usando RENDA_FIXA_DATA diretamente
   extratoData: ExtratoSimples = {
-    itens: [
-      { data: '2024-09-01', descricao: 'Depósito Inicial', valor: 1000, saldo: 1000 },
-      { data: '2024-09-02', descricao: 'Saque ATM', valor: -100, saldo: 900 },
-      { data: '2024-09-03', descricao: 'Transferência Recebida', valor: 500, saldo: 1400 },
-      { data: '2024-09-04', descricao: 'Pagamento PIX', valor: -200, saldo: 1200 },
-      { data: '2024-09-05', descricao: 'Depósito', valor: 300, saldo: 1500 }
-    ]
+    itens: this.mapearItensRendaFixa()
   };
 
-  // Configuração do extrato
+  // Mapeamento direto dos dados de renda fixa
+  private mapearItensRendaFixa(): ExtratoItemSimples[] {
+    const itens: ExtratoItemSimples[] = [];
+    
+    // Saldo Anterior
+    RENDA_FIXA_DATA.rendaFixa.saldoAnterior?.forEach((item: any) => {
+      itens.push({
+        data: item.dataAplicacao,
+        descricao: `Saldo Anterior - Taxa: ${item.taxa}%`,
+        valor: item.valorPrincipal || 0,
+        saldo: item.valoLiquido || 0
+      });
+    });
+
+    // Aplicações
+    RENDA_FIXA_DATA.rendaFixa.aplicacao?.forEach((item: any) => {
+      itens.push({
+        data: item.dataAplicacao,
+        descricao: `Aplicação - Taxa: ${item.taxa}%`,
+        valor: item.valorPrincipal || 0,
+        saldo: item.valorPrincipal || 0
+      });
+    });
+
+    // Resgates
+    RENDA_FIXA_DATA.rendaFixa.resgate?.forEach((item: any) => {
+      itens.push({
+        data: item.datasResgate,
+        descricao: `Resgate - Taxa: ${item.taxa}%`,
+        valor: item.valorBruto || 0,
+        saldo: item.valoLiquido || 0
+      });
+    });
+
+    // Saldo Final
+    RENDA_FIXA_DATA.rendaFixa.saldoFinal?.forEach((item: any) => {
+      itens.push({
+        data: item.dataVencimento,
+        descricao: `Saldo Final - Taxa: ${item.taxa}%`,
+        valor: item.valorBruto || 0,
+        saldo: item.valoLiquido || 0
+      });
+    });
+
+    return itens;
+  }
+
+  // Configuração do extrato usando dados reais
   config: ExtratoConfig = {
-    titulo: 'Extrato Bancário Demo',
-    empresa: 'Banco Demo Ltda',
+    titulo: 'Extrato de Renda Fixa',
+    empresa: 'Itaú Unibanco S.A.',
     agencia: '0001',
     conta: '12345-6',
     periodo: '01/09/2024 - 30/09/2024',
@@ -313,12 +355,29 @@ export class ExtratoGeneratorDemoComponent {
    * Gera HTML do extrato
    */
   async gerarHTML(): Promise<void> {
-    await this.executarGeracao('HTML', () => 
-      this.extratoGenerator.gerarHTML(this.extratoData, this.config, {
-        ...this.options,
-        fileName: `extrato-demo-${this.formatarData(new Date())}.html`
-      })
-    );
+    await this.executarGeracao('HTML', async () => {
+      try {
+        const html = this.extratoGenerator.gerarHTML(this.extratoData, this.config, {
+          ...this.options,
+          fileName: `extrato-demo-${this.formatarData(new Date())}.html`
+        });
+        
+        // Criar blob e download
+        const blob = new Blob([html], { type: 'text/html' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `extrato-demo-${this.formatarData(new Date())}.html`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        
+        return true;
+      } catch (error) {
+        return false;
+      }
+    });
   }
 
   /**

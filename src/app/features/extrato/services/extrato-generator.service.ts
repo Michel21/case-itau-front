@@ -81,7 +81,7 @@ export class ExtratoGeneratorService {
   ): Promise<boolean> {
     try {
       const fileName = options.fileName || `extrato-${this.formatarData(config.dataGeracao).replace(/\//g, '-')}.pdf`;
-      const htmlContent = this.gerarHTMLDoExtrato(extratoData, config, options);
+      const htmlContent = this.gerarHTMLParaPDF(extratoData, config, options);
       
       // Criar elemento temporário
       const tempElement = this.criarElementoTemporario(htmlContent);
@@ -167,30 +167,23 @@ export class ExtratoGeneratorService {
     }
   }
 
-  /**
-   * Gera HTML do extrato
-   */
-  async gerarHTML(
-    extratoData: ExtratoSimples,
-    config: ExtratoConfig,
-    options: GeracaoOptions = {}
-  ): Promise<boolean> {
-    try {
-      const fileName = options.fileName || `extrato-${this.formatarData(config.dataGeracao)}.html`;
-      
-      // Gerar HTML do extrato
-      const htmlContent = this.gerarHTMLDoExtrato(extratoData, config, options);
-      
-      // Download
-      return await this.webViewDownloadService.downloadHTML(htmlContent, fileName);
 
-    } catch (error) {
-      return false;
-    }
+  /**
+   * Gera HTML completo do extrato
+   */
+  public gerarHTML(extratoData: ExtratoSimples, config: ExtratoConfig, options: GeracaoOptions = {}): string {
+    return this.gerarHTMLDoExtrato(extratoData, config, options);
   }
 
   /**
-   * Gera HTML do extrato
+   * Gera HTML para conversão em PDF
+   */
+  private gerarHTMLParaPDF(extratoData: ExtratoSimples, config: ExtratoConfig, options: GeracaoOptions): string {
+    return this.gerarHTMLDoExtrato(extratoData, config, options);
+  }
+
+  /**
+   * Gera HTML do extrato (método principal)
    */
   private gerarHTMLDoExtrato(extratoData: ExtratoSimples, config: ExtratoConfig, options: GeracaoOptions): string {
     const css = this.gerarCSS();
