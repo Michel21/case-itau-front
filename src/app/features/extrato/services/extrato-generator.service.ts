@@ -204,7 +204,7 @@ export class ExtratoGeneratorService {
   }
 
   /**
-   * Gera CSS para o extrato
+   * Gera CSS para o extrato (replicando o layout do ExtratoPdfComponent)
    */
   private gerarCSS(): string {
     return `
@@ -217,44 +217,178 @@ export class ExtratoGeneratorService {
       body {
         font-family: Arial, sans-serif;
         font-size: 12px;
-        line-height: 1.4;
+        line-height: 1.3;
         color: #000;
         background: #fff;
       }
       
       .extrato-container {
-        max-width: 1000px;
+        max-width: 1400px;
         margin: 0 auto;
-        padding: 20px;
+        padding: 25px;
         background: #fff;
+        min-height: 100vh;
       }
       
-      .header {
-        text-align: center;
-        margin-bottom: 30px;
-        border-bottom: 2px solid #000;
-        padding-bottom: 20px;
+      .extrato-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        position: relative;
       }
       
-      .header h1 {
-        font-size: 24px;
+      .header-left {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+      }
+      
+      .logo {
+        font-size: 28px;
         font-weight: bold;
+        color: #cc0000;
+        margin-bottom: 2px;
+        text-transform: none;
+      }
+      
+      .subtitle {
+        font-size: 16px;
+        color: #000;
+        margin-bottom: 4px;
+        text-transform: none;
+        font-weight: normal;
+      }
+      
+      .global-solutions {
+        font-size: 14px;
+        color: #666;
+        text-transform: none;
+        font-weight: normal;
+      }
+      
+      .header-right {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        text-align: right;
+      }
+      
+      .report-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #001e61;
         margin-bottom: 10px;
       }
       
-      .header-info {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 15px;
+      .transaction-details {
+        font-size: 12px;
+        color: #555;
+        line-height: 1.4;
       }
       
-      .header-info div {
+      .search-details {
+        margin-bottom: 25px;
+        padding: 15px;
+        background: #f4f4f9;
+        border-radius: 5px;
+      }
+      
+      .search-details h3 {
+        font-size: 16px;
+        font-weight: bold;
+        color: #001e61;
+        margin-bottom: 15px;
+      }
+      
+      .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      
+      .detail-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 5px 0;
+        border-bottom: 1px solid #dbdbdb;
+      }
+      
+      .detail-label {
+        font-weight: bold;
+        color: #555;
+        min-width: 200px;
+      }
+      
+      .detail-value {
+        color: #000;
+        text-align: right;
         flex: 1;
+      }
+      
+      .table-section {
+        margin-bottom: 25px;
+      }
+      
+      .table-container {
+        overflow-x: auto;
+        border: 1px solid #dbdbdb;
+        border-radius: 5px;
+      }
+      
+      .financial-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11px;
+      }
+      
+      .financial-table th {
+        background: #001e61;
+        color: #fff;
+        padding: 12px 8px;
+        text-align: center;
+        font-weight: bold;
+        border: 1px solid #001e61;
+      }
+      
+      .financial-table td {
+        padding: 8px;
+        border: 1px solid #dbdbdb;
+        text-align: center;
+        vertical-align: middle;
+      }
+      
+      .financial-table tr:nth-child(even) {
+        background: #f4f4f9;
+      }
+      
+      .financial-table tr:hover {
+        background: #e8f4f8;
+      }
+      
+      .text-right {
+        text-align: right;
+      }
+      
+      .text-left {
         text-align: left;
       }
       
-      .header-info div:last-child {
-        text-align: right;
+      .text-center {
+        text-align: center;
+      }
+      
+      .total-row {
+        background: #001e61 !important;
+        color: #fff !important;
+        font-weight: bold;
+      }
+      
+      .total-row td {
+        border: 1px solid #001e61;
+        padding: 10px 8px;
       }
       
       .section {
@@ -265,39 +399,35 @@ export class ExtratoGeneratorService {
         font-size: 18px;
         font-weight: bold;
         margin-bottom: 15px;
-        border-bottom: 1px solid #ccc;
+        color: #001e61;
+        border-bottom: 2px solid #001e61;
         padding-bottom: 5px;
+      }
+      
+      .section h3 {
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #001e61;
       }
       
       table {
         width: 100%;
         border-collapse: collapse;
         margin-bottom: 20px;
+        font-size: 11px;
       }
       
       th, td {
         padding: 8px;
         text-align: left;
-        border: 1px solid #ccc;
-        font-size: 11px;
+        border: 1px solid #dbdbdb;
       }
       
       th {
-        background-color: #f5f5f5;
+        background-color: #f4f4f9;
         font-weight: bold;
-      }
-      
-      .text-right {
-        text-align: right;
-      }
-      
-      .text-center {
-        text-align: center;
-      }
-      
-      .total {
-        font-weight: bold;
-        background-color: #f0f0f0;
+        color: #001e61;
       }
       
       .footer {
@@ -305,45 +435,50 @@ export class ExtratoGeneratorService {
         text-align: center;
         font-size: 10px;
         color: #666;
-        border-top: 1px solid #ccc;
+        border-top: 1px solid #dbdbdb;
         padding-top: 15px;
       }
       
       @media print {
         body { margin: 0; }
         .extrato-container { margin: 0; padding: 10px; }
+        .financial-table { page-break-inside: avoid; }
       }
     `;
   }
 
   /**
-   * Gera header do extrato
+   * Gera header do extrato (replicando o layout do Bradesco)
    */
   private gerarHeader(config: ExtratoConfig): string {
     return `
-      <div class="header">
-        <h1>${config.titulo}</h1>
-        <div class="header-info">
-          <div>
-            <strong>Empresa:</strong> ${config.empresa}<br>
-            <strong>Agência:</strong> ${config.agencia}<br>
-            <strong>Conta:</strong> ${config.conta}
+      <header class="extrato-header">
+        <div class="header-content">
+          <div class="header-left">
+            <div class="logo">bradesco</div>
+            <div class="subtitle">corporate</div>
+            <div class="global-solutions">global solutions</div>
           </div>
-          <div>
-            <strong>Período:</strong> ${config.periodo}<br>
-            <strong>Data de Geração:</strong> ${this.formatarData(config.dataGeracao)}<br>
-            <strong>Número de Controle:</strong> ${config.numeroControle}
+          <div class="header-right">
+            <div class="report-title">Saldo e extrato</div>
+            <div class="transaction-details">
+              <div>Data da transação: ${this.formatarData(config.dataGeracao)} - ${this.formatarHora(config.dataGeracao)}</div>
+              <div>Número de controle: ${config.numeroControle}</div>
+            </div>
           </div>
         </div>
-      </div>
+      </header>
     `;
   }
 
   /**
-   * Gera body do extrato
+   * Gera body do extrato (replicando o layout do Bradesco)
    */
   private gerarBody(extratoData: ExtratoSimples, config: ExtratoConfig, options: GeracaoOptions): string {
     let body = '';
+
+    // Seção de detalhes da pesquisa
+    body += this.gerarSecaoDetalhesPesquisa(config);
 
     // Seção de itens do extrato
     if (extratoData.itens && extratoData.itens.length > 0) {
@@ -359,30 +494,105 @@ export class ExtratoGeneratorService {
   }
 
   /**
-   * Gera seção de itens
+   * Gera seção de detalhes da pesquisa (replicando o layout do Bradesco)
+   */
+  private gerarSecaoDetalhesPesquisa(config: ExtratoConfig): string {
+    return `
+      <section class="search-details">
+        <h3>Detalhes da Pesquisa</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Empresa | CNPJ:</span>
+            <span class="detail-value">${config.empresa}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Agência | Conta:</span>
+            <span class="detail-value">${config.agencia}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Data da busca:</span>
+            <span class="detail-value">${config.periodo}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Tipo de investimento:</span>
+            <span class="detail-value">CDB - Certificado de Depósito Bancário</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Tipo de Produto:</span>
+            <span class="detail-value">Invest Facil Bradesco</span>
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  /**
+   * Gera seção de itens (replicando a tabela financeira do Bradesco)
    */
   private gerarSecaoItens(itens: ExtratoItemSimples[]): string {
-    let html = '<div class="section"><h2>Extrato de Movimentações</h2><table>';
+    let html = `
+      <section class="table-section">
+        <div class="table-container">
+          <table class="financial-table">
+            <thead>
+              <tr>
+                <th>Data Aplicação</th>
+                <th>Data Vencimento</th>
+                <th>Taxa</th>
+                <th>Valor Principal</th>
+                <th>Valor Bruto</th>
+                <th>Renda Total</th>
+                <th>IOF</th>
+                <th>IRRF</th>
+                <th>Valor Líquido</th>
+                <th>Renda Bruta %</th>
+                <th>Renda Bruta</th>
+              </tr>
+            </thead>
+            <tbody>
+    `;
     
-    // Header da tabela
-    html += '<thead><tr>';
-    html += '<th>Data</th>';
-    html += '<th>Descrição</th>';
-    html += '<th>Valor</th>';
-    html += '<th>Saldo</th>';
-    html += '</tr></thead>';
-    
-    // Body da tabela
-    html += '<tbody>';
+    // Adicionar itens
     itens.forEach(item => {
       html += '<tr>';
       html += `<td>${item.data || ''}</td>`;
-      html += `<td>${item.descricao || ''}</td>`;
+      html += `<td>${item.data || ''}</td>`; // Data vencimento (usando data como exemplo)
+      html += `<td class="text-right">5,00%</td>`;
       html += `<td class="text-right">${this.formatarMoeda(item.valor || 0)}</td>`;
-      html += `<td class="text-right">${this.formatarMoeda(item.saldo || 0)}</td>`;
+      html += `<td class="text-right">${this.formatarMoeda((item.valor || 0) * 1.001)}</td>`;
+      html += `<td class="text-right">${this.formatarMoeda(0)}</td>`;
+      html += `<td class="text-right">${this.formatarMoeda(0)}</td>`;
+      html += `<td class="text-right">${this.formatarMoeda(0.01)}</td>`;
+      html += `<td class="text-right">${this.formatarMoeda((item.valor || 0) * 0.999)}</td>`;
+      html += `<td class="text-right">0,02%</td>`;
+      html += `<td class="text-right">${this.formatarMoeda(0.02)}</td>`;
       html += '</tr>';
     });
-    html += '</tbody></table></div>';
+    
+    // Linha de total
+    const totalPrincipal = itens.reduce((sum, item) => sum + (item.valor || 0), 0);
+    const totalBruto = totalPrincipal * 1.001;
+    const totalLiquido = totalPrincipal * 0.999;
+    
+    html += `
+            </tbody>
+            <tfoot>
+              <tr class="total-row">
+                <td colspan="3"><strong>TOTAL</strong></td>
+                <td class="text-right"><strong>${this.formatarMoeda(totalPrincipal)}</strong></td>
+                <td class="text-right"><strong>${this.formatarMoeda(totalBruto)}</strong></td>
+                <td class="text-right"><strong>${this.formatarMoeda(0)}</strong></td>
+                <td class="text-right"><strong>${this.formatarMoeda(0)}</strong></td>
+                <td class="text-right"><strong>${this.formatarMoeda(0.01)}</strong></td>
+                <td class="text-right"><strong>${this.formatarMoeda(totalLiquido)}</strong></td>
+                <td class="text-right"><strong>0,02%</strong></td>
+                <td class="text-right"><strong>${this.formatarMoeda(0.02)}</strong></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+    `;
 
     return html;
   }
@@ -541,5 +751,15 @@ export class ExtratoGeneratorService {
       minimumFractionDigits: 2, 
       maximumFractionDigits: 2 
     }) + '%';
+  }
+
+  /**
+   * Formata hora
+   */
+  private formatarHora(data: Date): string {
+    return data.toLocaleTimeString('pt-BR', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
   }
 }
