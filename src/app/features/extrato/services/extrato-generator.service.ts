@@ -56,6 +56,49 @@ export interface ExtratoSimples {
 })
 export class ExtratoGeneratorService {
   private readonly webViewDownloadService = new WebViewDownloadService();
+  
+  // Cache para otimização de performance
+  private cssCache: string | null = null;
+  private htmlTemplateCache = new Map<string, string>();
+  private formatacaoCache = new Map<string, string>();
+  
+  // Pool de elementos temporários para reutilização
+  private tempElementPool: HTMLElement[] = [];
+  private readonly MAX_POOL_SIZE = 3;
+  
+  // Performance tracking
+  private performanceMetrics = {
+    htmlGenerationTime: 0,
+    pdfGenerationTime: 0,
+    cacheHits: 0,
+    cacheMisses: 0
+  };
+  
+  /**
+   * Obtém métricas de performance do serviço
+   */
+  getPerformanceMetrics() {
+    return { ...this.performanceMetrics };
+  }
+  
+  /**
+   * Limpa cache e pool para liberar memória
+   */
+  clearCache(): void {
+    this.cssCache = null;
+    this.htmlTemplateCache.clear();
+    this.formatacaoCache.clear();
+    this.tempElementPool.forEach(element => element.remove());
+    this.tempElementPool = [];
+    
+    // Reset metrics
+    this.performanceMetrics = {
+      htmlGenerationTime: 0,
+      pdfGenerationTime: 0,
+      cacheHits: 0,
+      cacheMisses: 0
+    };
+  }
 
   /**
    * Gera PDF do extrato
@@ -65,14 +108,18 @@ export class ExtratoGeneratorService {
     config: ExtratoConfig,
     options: GeracaoOptions = {}
   ): Promise<boolean> {
+    const startTime = performance.now();
+    
     try {
       const fileName = options.fileName || `extrato-${this.formatarData(config.dataGeracao).replace(/\//g, '-')}.pdf`;
       
-      // Gerar HTML do extrato
+      // Gerar HTML do extrato com timing
+      const htmlStartTime = performance.now();
       const htmlContent = this.gerarHTMLDoExtrato(extratoData, config, options);
+      this.performanceMetrics.htmlGenerationTime = performance.now() - htmlStartTime;
       
-      // Criar elemento temporário
-      const tempElement = this.criarElementoTemporario(htmlContent);
+      // Criar elemento temporário otimizado
+      const tempElement = this.obterElementoTemporario(htmlContent);
       document.body.appendChild(tempElement);
 
       // Aguardar renderização
@@ -120,14 +167,21 @@ export class ExtratoGeneratorService {
         heightLeft -= pageHeight;
       }
 
-      // Remover elemento temporário
+      // Remover elemento temporário e retornar ao pool
       document.body.removeChild(tempElement);
+      this.retornarElementoTemporario(tempElement);
 
       // Download
       const pdfBlob = pdf.output('blob');
-      return await this.webViewDownloadService.downloadPDF(pdfBlob, fileName);
+      const result = await this.webViewDownloadService.downloadPDF(pdfBlob, fileName);
+      
+      // Registrar métricas de performance
+      this.performanceMetrics.pdfGenerationTime = performance.now() - startTime;
+      
+      return result;
 
     } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
       return false;
     }
   }
@@ -207,6 +261,20 @@ export class ExtratoGeneratorService {
    * Gera CSS para o extrato (replicando o layout do ExtratoPdfComponent)
    */
   private gerarCSS(): string {
+    // Retorna do cache se já foi gerado
+    if (this.cssCache) {
+      return this.cssCache;
+    }
+    
+    // Gera CSS apenas uma vez e armazena no cache
+    this.cssCache = this.buildCSS();
+    return this.cssCache;
+  }
+  
+  /**
+   * Constrói o CSS do extrato
+   */
+  private buildCSS(): string {
     return `
       * {
         margin: 0;
@@ -665,36 +733,39 @@ export class ExtratoGeneratorService {
    * Gera tabela principal (replicando exatamente o layout do app-extrato-pdf)
    */
   private gerarTabelaPrincipal(): string {
-    return `
-      <section class="table-section">
-        <div class="table-container">
-          <table class="financial-table">
-            <thead>
-              <tr class="table-header">
-                <th>Data aplic.</th>
-                <th>Data vencto.</th>
-                <th>Resgate/Carência</th>
-                <th>Taxa (%)</th>
-                <th>Valor princ. (BRL)</th>
-                <th>Valor Bruto (BRL)</th>
-                <th>Renda total (BRL)</th>
-                <th>IOF (BRL)</th>
-                <th>IRRF (BRL)</th>
-                <th>Valor Líquido (BRL)</th>
-                <th>Renda bruta per</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${this.gerarSecaoSaldoAnteriorDados()}
-              ${this.gerarSecaoAplicacoesDados()}
-              ${this.gerarHeaderRepetido()}
-              ${this.gerarSecaoResgatesDados()}
-              ${this.gerarSecaoSaldoFinalDados()}
-            </tbody>
-          </table>
-        </div>
-      </section>
-    `;
+    // Usar array para melhor performance com strings grandes
+    const htmlParts = [
+      '<section class="table-section">',
+      '<div class="table-container">',
+      '<table class="financial-table">',
+      '<thead>',
+      '<tr class="table-header">',
+      '<th>Data aplic.</th>',
+      '<th>Data vencto.</th>',
+      '<th>Resgate/Carência</th>',
+      '<th>Taxa (%)</th>',
+      '<th>Valor princ. (BRL)</th>',
+      '<th>Valor Bruto (BRL)</th>',
+      '<th>Renda total (BRL)</th>',
+      '<th>IOF (BRL)</th>',
+      '<th>IRRF (BRL)</th>',
+      '<th>Valor Líquido (BRL)</th>',
+      '<th>Renda bruta per</th>',
+      '</tr>',
+      '</thead>',
+      '<tbody>',
+      this.gerarSecaoSaldoAnteriorDados(),
+      this.gerarSecaoAplicacoesDados(),
+      this.gerarHeaderRepetido(),
+      this.gerarSecaoResgatesDados(),
+      this.gerarSecaoSaldoFinalDados(),
+      '</tbody>',
+      '</table>',
+      '</div>',
+      '</section>'
+    ];
+    
+    return htmlParts.join('');
   }
 
   /**
@@ -808,24 +879,39 @@ export class ExtratoGeneratorService {
   }
 
   /**
-   * Gera header repetido
+   * Gera header repetido (com cache)
    */
   private gerarHeaderRepetido(): string {
-    return `
-      <tr class="table-header">
-        <th>Data aplic.</th>
-        <th>Data vencto.</th>
-        <th>Resgate/Carência</th>
-        <th>Taxa (%)</th>
-        <th>Valor princ. (BRL)</th>
-        <th>Valor Bruto (BRL)</th>
-        <th>Renda total (BRL)</th>
-        <th>IOF (BRL)</th>
-        <th>IRRF (BRL)</th>
-        <th>Valor Líquido (BRL)</th>
-        <th>Renda bruta per</th>
-      </tr>
-    `;
+    const cacheKey = 'header-repetido';
+    
+    // Verificar cache
+    if (this.htmlTemplateCache.has(cacheKey)) {
+      this.performanceMetrics.cacheHits++;
+      return this.htmlTemplateCache.get(cacheKey)!;
+    }
+    
+    // Gerar template
+    const headerTemplate = [
+      '<tr class="table-header">',
+      '<th>Data aplic.</th>',
+      '<th>Data vencto.</th>',
+      '<th>Resgate/Carência</th>',
+      '<th>Taxa (%)</th>',
+      '<th>Valor princ. (BRL)</th>',
+      '<th>Valor Bruto (BRL)</th>',
+      '<th>Renda total (BRL)</th>',
+      '<th>IOF (BRL)</th>',
+      '<th>IRRF (BRL)</th>',
+      '<th>Valor Líquido (BRL)</th>',
+      '<th>Renda bruta per</th>',
+      '</tr>'
+    ].join('');
+    
+    // Armazenar no cache
+    this.htmlTemplateCache.set(cacheKey, headerTemplate);
+    this.performanceMetrics.cacheMisses++;
+    
+    return headerTemplate;
   }
 
   /**
@@ -939,67 +1025,6 @@ export class ExtratoGeneratorService {
   }
 
   /**
-   * Gera seção de renda fixa
-   */
-  private gerarSecaoRendaFixa(rendaFixa: any): string {
-    let html = '<div class="section"><h2>Renda Fixa</h2>';
-    
-    if (rendaFixa?.saldoAnterior && rendaFixa.saldoAnterior.length > 0) {
-      html += this.gerarTabelaRendaFixa('Saldo Anterior', rendaFixa.saldoAnterior);
-    }
-    
-    if (rendaFixa?.aplicacao && rendaFixa.aplicacao.length > 0) {
-      html += this.gerarTabelaRendaFixa('Aplicações', rendaFixa.aplicacao);
-    }
-    
-    if (rendaFixa?.resgate && rendaFixa.resgate.length > 0) {
-      html += this.gerarTabelaRendaFixa('Resgates', rendaFixa.resgate);
-    }
-    
-    if (rendaFixa?.saldoFinal && rendaFixa.saldoFinal.length > 0) {
-      html += this.gerarTabelaRendaFixa('Saldo Final', rendaFixa.saldoFinal);
-    }
-    
-    html += '</div>';
-    return html;
-  }
-
-  /**
-   * Gera tabela de renda fixa
-   */
-  private gerarTabelaRendaFixa(titulo: string, itens: any[]): string {
-    if (!itens || itens.length === 0) return '';
-
-    let html = `<h3>${titulo}</h3><table>`;
-    
-    // Header
-    html += '<thead><tr>';
-    html += '<th>Data Aplicação</th>';
-    html += '<th>Data Vencimento</th>';
-    html += '<th>Taxa</th>';
-    html += '<th>Valor Principal</th>';
-    html += '<th>Valor Bruto</th>';
-    html += '<th>Renda Total</th>';
-    html += '</tr></thead>';
-    
-    // Body
-    html += '<tbody>';
-    itens.forEach(item => {
-      html += '<tr>';
-      html += `<td>${item.dataAplicacao || ''}</td>`;
-      html += `<td>${item.dataVencimento || ''}</td>`;
-      html += `<td class="text-right">${this.formatarPercentual(item.taxa || 0)}</td>`;
-      html += `<td class="text-right">${this.formatarMoeda(item.valorPrincipal || 0)}</td>`;
-      html += `<td class="text-right">${this.formatarMoeda(item.valorBruto || 0)}</td>`;
-      html += `<td class="text-right">${this.formatarMoeda(item.rendaTotal || 0)}</td>`;
-      html += '</tr>';
-    });
-    html += '</tbody></table>';
-
-    return html;
-  }
-
-  /**
    * Gera footer do extrato
    */
   private gerarFooter(config: ExtratoConfig): string {
@@ -1031,7 +1056,79 @@ export class ExtratoGeneratorService {
   }
 
   /**
-   * Cria elemento temporário para renderização
+   * Obtém elemento temporário do pool ou cria um novo (otimizado)
+   */
+  private obterElementoTemporario(htmlContent: string): HTMLElement {
+    let tempDiv: HTMLElement;
+    
+    // Tentar reutilizar elemento do pool
+    if (this.tempElementPool.length > 0) {
+      tempDiv = this.tempElementPool.pop()!;
+      this.performanceMetrics.cacheHits++;
+    } else {
+      // Criar novo elemento se pool estiver vazio
+      tempDiv = this.criarNovoElementoTemporario();
+      this.performanceMetrics.cacheMisses++;
+    }
+    
+    // Definir conteúdo HTML
+    tempDiv.innerHTML = htmlContent;
+    
+    return tempDiv;
+  }
+  
+  /**
+   * Retorna elemento ao pool para reutilização
+   */
+  private retornarElementoTemporario(element: HTMLElement): void {
+    if (this.tempElementPool.length < this.MAX_POOL_SIZE) {
+      // Limpar conteúdo mas manter estilos
+      element.innerHTML = '';
+      this.tempElementPool.push(element);
+    }
+    // Se pool estiver cheio, deixa GC limpar o elemento
+  }
+  
+  /**
+   * Cria novo elemento temporário com estilos otimizados
+   */
+  private criarNovoElementoTemporario(): HTMLElement {
+    const tempDiv = document.createElement('div');
+    this.aplicarEstilosTemporarios(tempDiv);
+    return tempDiv;
+  }
+  
+  /**
+   * Aplica estilos otimizados ao elemento temporário
+   */
+  private aplicarEstilosTemporarios(element: HTMLElement): void {
+    // Aplicar estilos em lote para melhor performance
+    Object.assign(element.style, {
+      position: 'absolute',
+      left: '-9999px',
+      top: '0',
+      width: '1000px',
+      maxWidth: '1000px',
+      minWidth: '1000px',
+      backgroundColor: '#ffffff',
+      color: '#000000',
+      fontFamily: 'Arial, sans-serif',
+      fontSize: '12px',
+      lineHeight: '1.4',
+      margin: '0',
+      padding: '5px',
+      border: 'none',
+      boxShadow: 'none',
+      visibility: 'visible',
+      display: 'block',
+      overflow: 'visible',
+      transform: 'none',
+      transformOrigin: 'top left'
+    });
+  }
+
+  /**
+   * Cria elemento temporário para renderização (método legado - mantido para compatibilidade)
    */
   private criarElementoTemporario(htmlContent: string): HTMLElement {
     const tempDiv = document.createElement('div');
@@ -1100,13 +1197,28 @@ export class ExtratoGeneratorService {
   }
 
   /**
-   * Formata moeda
+   * Formata moeda (com cache para valores frequentes)
    */
   private formatarMoeda(valor: number): string {
-    return valor.toLocaleString('pt-BR', { 
+    const cacheKey = `moeda_${valor}`;
+    
+    // Verificar cache
+    if (this.formatacaoCache.has(cacheKey)) {
+      return this.formatacaoCache.get(cacheKey)!;
+    }
+    
+    // Formatar valor
+    const valorFormatado = valor.toLocaleString('pt-BR', { 
       minimumFractionDigits: 2, 
       maximumFractionDigits: 2 
     });
+    
+    // Armazenar no cache (limitando tamanho do cache)
+    if (this.formatacaoCache.size < 100) {
+      this.formatacaoCache.set(cacheKey, valorFormatado);
+    }
+    
+    return valorFormatado;
   }
 
   /**
