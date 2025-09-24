@@ -67,6 +67,13 @@ import { RENDA_FIXA_DATA } from '../../../../../data/mock-extrato.data';
             🌐 Gerar HTML
           </button>
           
+          <button 
+            (click)="gerarXLS()" 
+            [disabled]="isLoading"
+            class="btn btn-warning">
+            📊 Gerar XLS
+          </button>
+          
         </div>
       </div>
 
@@ -182,6 +189,15 @@ import { RENDA_FIXA_DATA } from '../../../../../data/mock-extrato.data';
 
     .btn-success:hover:not(:disabled) {
       background: #1e7e34;
+    }
+
+    .btn-warning {
+      background: #ffc107;
+      color: #212529;
+    }
+
+    .btn-warning:hover:not(:disabled) {
+      background: #e0a800;
     }
 
     .loading {
@@ -378,6 +394,18 @@ export class ExtratoGeneratorDemoComponent {
         return false;
       }
     });
+  }
+
+  /**
+   * Gera XLS do extrato
+   */
+  async gerarXLS(): Promise<void> {
+    await this.executarGeracao('XLS', () => 
+      this.extratoGenerator.gerarXLS(this.extratoData, this.config, {
+        ...this.options,
+        fileName: `extrato-demo-${this.formatarData(new Date())}.xlsx`
+      })
+    );
   }
 
   /**

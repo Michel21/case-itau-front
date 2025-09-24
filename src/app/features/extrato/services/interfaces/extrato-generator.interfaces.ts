@@ -70,7 +70,7 @@ export interface IDocumentConfig {
 export interface IGenerationOptions {
   fileName?: string;
   includeRendaFixa?: boolean;
-  format?: 'pdf' | 'csv' | 'html';
+  format?: 'pdf' | 'csv' | 'html' | 'xls';
   quality?: 'low' | 'medium' | 'high';
   theme?: 'default' | 'corporate' | 'minimal';
   locale?: string;

@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import * as XLSX from 'xlsx';
+import * as XLSXStyle from 'xlsx-js-style';
 import { WebViewDownloadService } from '../../../shared/services/webview-download.service';
 import { RendaFixaData } from '../../../../../types/extrato.types';
-import { RENDA_FIXA_DATA } from '../../../../../data/mock-extrato.data';
+import { RENDA_FIXA_DATA, MOCK_EXTRATO_DATA } from '../../../../../data/mock-extrato.data';
 
 // Importações dos serviços modulares essenciais
 import { DocumentFormatterService } from './formatters/document-formatter.service';
@@ -29,7 +31,7 @@ export interface ExtratoConfig {
 export interface GeracaoOptions {
   fileName?: string;
   includeRendaFixa?: boolean;
-  format?: 'pdf' | 'csv' | 'html';
+  format?: 'pdf' | 'csv' | 'html' | 'xls';
   quality?: 'low' | 'medium' | 'high';
 }
 
@@ -163,6 +165,49 @@ export class ExtratoGeneratorService {
       return await this.webViewDownloadService.downloadCSV(csvContent, fileName);
 
     } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Gera arquivo XLS com cores usando xlsx-js-style
+   */
+  async gerarXLS(
+    extratoData: ExtratoSimples,
+    config: ExtratoConfig,
+    options: GeracaoOptions = {}
+  ): Promise<boolean> {
+    try {
+      const fileName = options.fileName || `extrato-${this.formatarData(config.dataGeracao)}.xlsx`;
+      
+      // Criar workbook e worksheet com cores
+      const workbook = XLSXStyle.utils.book_new();
+      const worksheetData = this.gerarDadosXLSComCores(extratoData, config, options);
+      const worksheet = XLSXStyle.utils.aoa_to_sheet(worksheetData);
+
+      // Aplicar formatação com cores
+      this.aplicarFormatacaoXLSComCores(worksheet, worksheetData);
+
+      // Adicionar worksheet ao workbook
+      XLSXStyle.utils.book_append_sheet(workbook, worksheet, 'Saldo e Extrato');
+
+      // Gerar arquivo com formatação
+      const xlsBuffer = XLSXStyle.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([xlsBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+      // Download
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      return true;
+    } catch (error) {
+      console.error('Erro ao gerar XLS:', error);
       return false;
     }
   }
@@ -1135,4 +1180,401 @@ export class ExtratoGeneratorService {
       default: return '70px';
     }
   }
+
+  /**
+   * Converte data brasileira (DD/MM/YYYY) para objeto Date
+   */
+  private converterDataBrasileira(dataBr: string): Date {
+    if (!dataBr) return new Date();
+    const partes = dataBr.split('/');
+    if (partes.length !== 3) return new Date();
+    // new Date(ano, mês-1, dia)
+    return new Date(parseInt(partes[2]), parseInt(partes[1]) - 1, parseInt(partes[0]));
+  }
+
+  /**
+   * Gera dados estruturados para XLS com cores usando xlsx-style
+   */
+  private gerarDadosXLSComCores(extratoData: ExtratoSimples, config: ExtratoConfig, options: GeracaoOptions): any[][] {
+    const dados: any[][] = [];
+    const rendaFixa = RENDA_FIXA_DATA.rendaFixa;
+
+    // Header Bradesco - replicando exatamente a imagem
+    dados.push(['🏦 bradesco', '', '', '', '', '', '', '', '', '', '', '', '']);
+    dados.push(['empresas e negócios', '', '', '', '', '', '', '', '', '', '', '', '']);
+    
+    // Linhas vazias
+    for (let i = 0; i < 5; i++) {
+      dados.push(['', '', '', '', '', '', '', '', '', '', '', '', '']);
+    }
+
+    // Título - replicando a imagem (sem fundo, centralizado)
+    dados.push(['Saldo e Extrato', '', '', '', '', '', '', '', '', '', '', '', '']);
+
+    // Data da transação - replicando a imagem
+    const dataAtual = this.formatarDataHora(new Date());
+    dados.push(['Data da transação:', dataAtual, '', '', '', '', '', '', '', '', '', '', '']);
+
+    // Linha vazia
+    dados.push(['', '', '', '', '', '', '', '', '', '', '', '', '']);
+
+    // Detalhes da Pesquisa - replicando a imagem
+    dados.push(['Detalhes da Pesquisa', '', '', '', '', '', '', '', '', '', '', '', '']);
+
+    // Dados básicos - usando dados do RENDA_FIXA_DATA
+    const formatarDataBusca = (data: string) => {
+      const date = this.converterDataBrasileira(data);
+      const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+      return `${meses[date.getMonth()]}/${date.getFullYear()}`;
+    };
+    const dataBusca = formatarDataBusca(rendaFixa.dataSaldoAnterior);
+    dados.push(['Agência | Conta:', '', '2 | 35108-3', '', '', '', '', '', '', '', '', '', '']);
+    dados.push(['Data da busca:', '', dataBusca, '', '', '', '', '', '', '', '', '', '']);
+    dados.push(['Tipo de investimento:', '', 'Fundos de Investimentos', '', '', '', '', '', '', '', '', '', '']);
+    dados.push(['Tipo de Produto:', '', 'Bradesco FIC FI RF Referenciado DI Max', '', '', '', '', '', '', '', '', '', '']);
+
+    // Linha vazia
+    dados.push(['', '', '', '', '', '', '', '', '', '', '', '', '']);
+
+    // Header da tabela - replicando exatamente as colunas da imagem
+    dados.push([
+      'Data aplicação',
+      'Resgate/Carência',
+      'Quantidade de Cotas',
+      'Valor princ. (BRL)',
+      'Valor da Cota',
+      'Valor Brut.',
+      'Renda tot.',
+      'IOF (BRL)',
+      'IRRF (BRL)',
+      'Valor Líqu',
+      'Renda bruta per',
+      '',
+      ''
+    ]);
+
+    // Saldo anterior - usando dados do RENDA_FIXA_DATA
+    const dataSaldoAnterior = this.formatarData(this.converterDataBrasileira(rendaFixa.dataSaldoAnterior));
+    dados.push(['', `Saldo anterior em ${dataSaldoAnterior}`, '', '', '', '', '', '', '', '', '', '', '']);
+    
+    if (rendaFixa.saldoAnterior && rendaFixa.saldoAnterior.length > 0) {
+      const saldoAnt = rendaFixa.saldoAnterior[0];
+      dados.push([
+        this.formatarData(this.converterDataBrasileira(saldoAnt.dataAplicacao)),
+        '50.450.472430000',
+        '',
+        this.formatarMoeda(rendaFixa.saldoAteriorTotal.valorPrincipal),
+        '649615000',
+        this.formatarMoeda(saldoAnt.valorBruto),
+        this.formatarMoeda(saldoAnt.rendaTotal),
+        this.formatarMoeda(saldoAnt.iof),
+        this.formatarMoeda(saldoAnt.irrf),
+        this.formatarMoeda(saldoAnt.valoLiquido),
+        '',
+        '',
+        ''
+      ]);
+
+      dados.push([
+        'Total',
+        '50.450.472430000',
+        '',
+        this.formatarMoeda(rendaFixa.saldoAteriorTotal.valorPrincipal),
+        '',
+        this.formatarMoeda(rendaFixa.saldoAteriorTotal.valorBruto),
+        this.formatarMoeda(rendaFixa.saldoAteriorTotal.rendaTotal),
+        this.formatarMoeda(rendaFixa.saldoAteriorTotal.iof),
+        this.formatarMoeda(rendaFixa.saldoAteriorTotal.irrf),
+        this.formatarMoeda(rendaFixa.saldoAteriorTotal.valoLiquido),
+        '',
+        '',
+        ''
+      ]);
+    }
+
+    // Aplicações - usando dados do RENDA_FIXA_DATA
+    dados.push(['', 'Aplicações', '', '', '', '', '', '', '', '', '', '', '']);
+    
+    if (rendaFixa.aplicacao && rendaFixa.aplicacao.length > 0) {
+      rendaFixa.aplicacao.forEach(aplicacao => {
+        dados.push([
+          this.formatarData(this.converterDataBrasileira(aplicacao.dataAplicacao)),
+          '',
+          '',
+          this.formatarMoeda(aplicacao.valorPrincipal),
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          ''
+        ]);
+      });
+    }
+    
+    dados.push([
+      'Total',
+      '',
+      '',
+      this.formatarMoeda(rendaFixa.aplicacaoTotal.valorPrincipal),
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      ''
+    ]);
+
+    // Resgates/Vencimentos - usando dados do RENDA_FIXA_DATA
+    dados.push(['', 'Resgates/Vencimentos', '', '', '', '', '', '', '', '', '', '', '']);
+    
+    if (rendaFixa.resgate && rendaFixa.resgate.length > 0) {
+      rendaFixa.resgate.forEach(resgate => {
+        dados.push([
+          this.formatarData(this.converterDataBrasileira(resgate.dataAplicacao)),
+          '',
+          '',
+          this.formatarMoeda(resgate.valorPrincipal),
+          '',
+          this.formatarMoeda(resgate.valorBruto),
+          this.formatarMoeda(resgate.rendaTotal),
+          this.formatarMoeda(resgate.iof),
+          this.formatarMoeda(resgate.irrf),
+          this.formatarMoeda(resgate.valoLiquido),
+          '',
+          '',
+          ''
+        ]);
+      });
+    }
+    
+    dados.push([
+      'Total',
+      '',
+      '',
+      this.formatarMoeda(rendaFixa.resgateTotal.valorPrincipal),
+      '',
+      this.formatarMoeda(rendaFixa.resgateTotal.valorBruto),
+      this.formatarMoeda(rendaFixa.resgateTotal.rendaTotal),
+      this.formatarMoeda(rendaFixa.resgateTotal.iof),
+      this.formatarMoeda(rendaFixa.resgateTotal.irrf),
+      this.formatarMoeda(rendaFixa.resgateTotal.valoLiquido),
+      '',
+      '',
+      ''
+    ]);
+
+    // Redução de cotas - não há dados no mock, mantendo zerado
+    dados.push(['', 'Redução de cotas - Recolhimento de IR conforme legislação vigente', '', '', '', '', '', '', '', '', '', '', '']);
+    
+    dados.push([
+      'Total',
+      '',
+      '',
+      '0,00',
+      '',
+      '0,00',
+      '0,00',
+      '0,00',
+      '0,00',
+      '0,00',
+      '',
+      '',
+      ''
+    ]);
+
+    // Saldo final - usando dados do RENDA_FIXA_DATA
+    const dataSaldoFinal = this.formatarData(this.converterDataBrasileira(rendaFixa.dataSaldoFinal));
+    dados.push(['', `Saldo final em ${dataSaldoFinal}`, '', '', '', '', '', '', '', '', '', '', '']);
+    
+    if (rendaFixa.saldoFinal && rendaFixa.saldoFinal.length > 0) {
+      const saldoFin = rendaFixa.saldoFinal[0];
+      dados.push([
+        this.formatarData(this.converterDataBrasileira(saldoFin.dataAplicacao)),
+        '50.450.472430000',
+        '',
+        this.formatarMoeda(rendaFixa.saldoFinalTotal.valorPrincipal),
+        '668052000',
+        this.formatarMoeda(saldoFin.valorBruto),
+        this.formatarMoeda(saldoFin.rendaTotal),
+        this.formatarMoeda(saldoFin.iof),
+        this.formatarMoeda(saldoFin.irrf),
+        this.formatarMoeda(saldoFin.valoLiquido),
+        this.formatarMoeda(saldoFin.rendaBruta),
+        '',
+        ''
+      ]);
+
+      dados.push([
+        'Total',
+        '50.450.472430000',
+        '',
+        this.formatarMoeda(rendaFixa.saldoFinalTotal.valorPrincipal),
+        '',
+        this.formatarMoeda(rendaFixa.saldoFinalTotal.valorBruto),
+        this.formatarMoeda(rendaFixa.saldoFinalTotal.rendaTotal),
+        this.formatarMoeda(rendaFixa.saldoFinalTotal.iof),
+        this.formatarMoeda(rendaFixa.saldoFinalTotal.irrf),
+        this.formatarMoeda(rendaFixa.saldoFinalTotal.valoLiquido),
+        this.formatarMoeda(rendaFixa.saldoFinalTotal.rendaBruta),
+        '',
+        ''
+      ]);
+    }
+
+    return dados;
+  }
+
+  /**
+   * Aplica formatação com cores usando xlsx-js-style
+   */
+  private aplicarFormatacaoXLSComCores(worksheet: any, dados: any[][]): void {
+    // Definir largura das colunas
+    const colWidths = [
+      { wch: 12 }, { wch: 25 }, { wch: 18 }, { wch: 15 }, { wch: 13 },
+      { wch: 13 }, { wch: 13 }, { wch: 12 }, { wch: 12 }, { wch: 15 },
+      { wch: 15 }, { wch: 5 }, { wch: 5 }
+    ];
+    worksheet['!cols'] = colWidths;
+
+    // Aplicar estilos com cores usando xlsx-js-style
+    for (let row = 0; row < dados.length; row++) {
+      for (let col = 0; col < dados[row].length; col++) {
+        const cellAddress = XLSXStyle.utils.encode_cell({ r: row, c: col });
+        
+        if (!worksheet[cellAddress]) {
+          worksheet[cellAddress] = { v: dados[row][col] };
+        }
+
+        // Header Bradesco (linhas 0-1, colunas A-B) - Azul escuro como na imagem
+        if (row <= 1 && col <= 1) {
+          worksheet[cellAddress].s = {
+            fill: { fgColor: { rgb: '003366' } },
+            font: { 
+              color: { rgb: 'FFFFFF' }, 
+              bold: true, 
+              sz: row === 0 ? 14 : 12 
+            },
+            alignment: { horizontal: 'left', vertical: 'center' }
+          };
+        }
+        // Título principal (linha 7) - Centralizado na coluna A como na imagem
+        else if (row === 7) {
+          if (col === 0) {
+            worksheet[cellAddress].s = {
+              font: { bold: true, sz: 14 },
+              alignment: { horizontal: 'left', vertical: 'center' }
+            };
+          }
+        }
+        // Data da transação (linha 8) - Alinhamento correto
+        else if (row === 8) {
+          if (col === 0) {
+            worksheet[cellAddress].s = {
+              font: { bold: false, sz: 11 },
+              alignment: { horizontal: 'left', vertical: 'center' }
+            };
+          } else if (col === 1) {
+            worksheet[cellAddress].s = {
+              font: { bold: false, sz: 11 },
+              alignment: { horizontal: 'left', vertical: 'center' }
+            };
+          }
+        }
+        // Detalhes da Pesquisa (linha 10) - Cinza claro como na imagem
+        else if (row === 10) {
+          worksheet[cellAddress].s = {
+            fill: { fgColor: { rgb: 'E8E8E8' } },
+            font: { bold: true, sz: 11 }
+          };
+        }
+        // Header da tabela (linha 16) - Cinza prata como na imagem
+        else if (row === 16) {
+          worksheet[cellAddress].s = {
+            fill: { fgColor: { rgb: 'C0C0C0' } },
+            font: { bold: true, sz: 11 },
+            alignment: { horizontal: 'center', vertical: 'center' }
+          };
+        }
+        // Títulos das seções (coluna A) - Sem fundo como na imagem
+        else if (col === 0 && (row === 17 || row === 20 || row === 22 || row === 24 || row === 26)) {
+          worksheet[cellAddress].s = {
+            font: { bold: true, sz: 11 }
+          };
+        }
+        // Títulos das seções - Negrito e alinhado à esquerda na coluna B (PRIORIDADE)
+        else if (col === 1 && (dados[row][col].includes('Saldo anterior em') || 
+                               dados[row][col] === 'Aplicações' || 
+                               dados[row][col] === 'Resgates/Vencimentos' || 
+                               dados[row][col] === 'Redução de cotas - Recolhimento de IR conforme legislação vigente' ||
+                               dados[row][col].includes('Saldo final em'))) {
+          worksheet[cellAddress].s = {
+            font: { bold: true },
+            alignment: { horizontal: 'left', vertical: 'center' }
+          };
+        }
+        // Valores monetários - Alinhados à direita como na imagem (exceto títulos de seções)
+        else if ([1, 3, 4, 5, 6, 7, 8, 9].includes(col) && dados[row][col] !== '' && 
+                 !(col === 1 && (dados[row][col].includes('Saldo anterior em') || 
+                                 dados[row][col] === 'Aplicações' || 
+                                 dados[row][col] === 'Resgates/Vencimentos' || 
+                                 dados[row][col] === 'Redução de cotas - Recolhimento de IR conforme legislação vigente' ||
+                                 dados[row][col].includes('Saldo final em')))) {
+          worksheet[cellAddress].s = {
+            alignment: { horizontal: 'right' }
+          };
+        }
+        // Totais - Negrito
+        else if (dados[row][0] === 'Total') {
+          worksheet[cellAddress].s = {
+            font: { bold: true }
+          };
+        }
+      }
+    }
+
+    // Mesclagens - replicando exatamente a estrutura da imagem
+    if (!worksheet['!merges']) worksheet['!merges'] = [];
+    
+    // Header Bradesco - mesclado apenas até coluna B como na imagem
+    worksheet['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: 1 } });
+    worksheet['!merges'].push({ s: { r: 1, c: 0 }, e: { r: 1, c: 1 } });
+    
+    // Saldo e Extrato - sem mesclagem para ficar claramente na coluna A
+    // Removido mesclagem para manter o texto apenas na coluna A
+    
+    // Data da transação - sem mesclagem (A: label, B: data)
+    // Não precisa de mesclagem pois são células individuais
+    
+    // Detalhes da Pesquisa
+    worksheet['!merges'].push({ s: { r: 10, c: 0 }, e: { r: 10, c: 12 } });
+
+    // Títulos das seções - mesclando da coluna B até M (dinâmico)
+    for (let row = 0; row < dados.length; row++) {
+      if (dados[row][1] && (
+        dados[row][1].includes('Saldo anterior em') ||
+        dados[row][1] === 'Aplicações' ||
+        dados[row][1] === 'Resgates/Vencimentos' ||
+        dados[row][1] === 'Redução de cotas - Recolhimento de IR conforme legislação vigente' ||
+        dados[row][1].includes('Saldo final em')
+      )) {
+        worksheet['!merges'].push({ s: { r: row, c: 1 }, e: { r: row, c: 12 } });
+      }
+    }
+
+    // Range do worksheet
+    const range = XLSXStyle.utils.decode_range(worksheet['!ref'] || 'A1');
+    range.e.c = Math.max(range.e.c, 12);
+    range.e.r = Math.max(range.e.r, dados.length - 1);
+    worksheet['!ref'] = XLSXStyle.utils.encode_range(range);
+  }
+
+
 }
