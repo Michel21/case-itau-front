@@ -16,7 +16,6 @@ import {
   NG_VALUE_ACCESSOR,
   FormsModule
 } from '@angular/forms';
-import { LiveAnnouncer } from '@angular/cdk/a11y';
 
 /**
  * Interface para opções do toggle
@@ -80,20 +79,17 @@ export class ToggleSegmentedComponent<T = string> implements ControlValueAccesso
   readonly options = input.required<readonly ToggleOption<T>[]>();
   readonly ariaLabel = input<string>('Selecione uma opção');
   readonly disabled = input<boolean>(false);
-  readonly styleConfig = input<ToggleStyleConfig>({});
-  readonly announceDelay = input<number>(600); // Delay para narração (ms)
-  readonly announceState = input<boolean>(true); // Se deve anunciar estado
+  readonly styleConfig = input<ToggleStyleConfig>({})
 
   // Outputs
   readonly valueChange = output<T>();
 
   // Estado interno
   readonly internalValue = signal<T | null>(null);
-  readonly anuncioA11y = signal<string>('');
+  readonly anuncioSelecao = signal<string>('');
   readonly radioGroupName = `toggle-segmented-${Math.random().toString(36).substr(2, 9)}`;
 
   // Injeções
-  private readonly liveAnnouncer = inject(LiveAnnouncer);
   private readonly destroyRef = inject(DestroyRef);
 
   // ControlValueAccessor
@@ -140,6 +136,68 @@ export class ToggleSegmentedComponent<T = string> implements ControlValueAccesso
         this.valueChange.emit(value);
       }
     });
+
+    // Effect: Sincronizar cliques e foco nos elementos visuais e acessíveis
+    effect(() => {
+      const opts = this.options();
+      
+      // Aguardar DOM estar completamente pronto
+      setTimeout(() => {
+        requestAnimationFrame(() => {
+        opts.forEach((option, idx) => {
+          // Sincronizar cliques visuais
+          const visualElement = document.getElementById(`visual-${this.getOptionId(option, idx)}`);
+          if (visualElement) {
+            // Remover listener anterior se existir
+            const oldClickListener = (visualElement as any)._clickListener;
+            if (oldClickListener) {
+              visualElement.removeEventListener('click', oldClickListener);
+            }
+            
+            // Adicionar novo listener de click
+            const newClickListener = () => this.selectOption(option);
+            visualElement.addEventListener('click', newClickListener);
+            (visualElement as any)._clickListener = newClickListener;
+          }
+
+          // Sincronizar dimensões e foco dos elementos acessíveis com visual
+          const a11yElement = document.getElementById(this.getOptionId(option, idx)) as HTMLElement;
+          if (a11yElement && visualElement) {
+            // Sincronizar dimensões do botão acessível com o elemento visual
+            const rect = visualElement.getBoundingClientRect();
+            const parentRect = visualElement.parentElement?.getBoundingClientRect();
+            
+            if (parentRect) {
+              a11yElement.style.left = `${rect.left - parentRect.left}px`;
+              a11yElement.style.width = `${rect.width}px`;
+              a11yElement.style.height = `${rect.height}px`;
+            }
+            
+            // Remover listeners anteriores se existirem
+            const oldFocusListener = (a11yElement as any)._focusListener;
+            const oldBlurListener = (a11yElement as any)._blurListener;
+            
+            if (oldFocusListener) {
+              a11yElement.removeEventListener('focus', oldFocusListener);
+            }
+            if (oldBlurListener) {
+              a11yElement.removeEventListener('blur', oldBlurListener);
+            }
+            
+            // Adicionar novos listeners
+            const newFocusListener = () => this.updateVisualFocus(idx);
+            const newBlurListener = () => this.clearVisualFocus();
+            
+            a11yElement.addEventListener('focus', newFocusListener);
+            a11yElement.addEventListener('blur', newBlurListener);
+            
+            (a11yElement as any)._focusListener = newFocusListener;
+            (a11yElement as any)._blurListener = newBlurListener;
+          }
+        });
+        });
+      }, 0);
+    });
   }
 
   /**
@@ -178,11 +236,19 @@ export class ToggleSegmentedComponent<T = string> implements ControlValueAccesso
   }
 
   /**
-   * Obtém tabindex para opção
+   * Obtém tabindex para opção (roving tabindex pattern)
    */
   getTabIndex(option: ToggleOption<T>): number {
     if (this.disabled() || option.disabled) return -1;
-    return this.isSelected(option) ? 0 : -1;
+    
+    // Se há uma opção selecionada, apenas ela tem tabindex=0
+    if (this.internalValue() !== null) {
+      return this.isSelected(option) ? 0 : -1;
+    }
+    
+    // Se nenhuma opção está selecionada, a primeira opção habilitada tem tabindex=0
+    const firstEnabledOption = this.options().find(opt => !opt.disabled);
+    return option === firstEnabledOption ? 0 : -1;
   }
 
   /**
@@ -198,9 +264,52 @@ export class ToggleSegmentedComponent<T = string> implements ControlValueAccesso
   selectOption(option: ToggleOption<T>): void {
     if (this.disabled() || option.disabled) return;
 
+    const previousValue = this.internalValue();
     this.internalValue.set(option.value);
     this.onChange(option.value);
     this.onTouched();
+
+    // Anunciar seleção
+    const index = this.options().indexOf(option);
+    if (index !== -1) {
+      this.announceSelection(option, index);
+    }
+  }
+
+  /**
+   * Anuncia seleção de um item
+   * Força narração usando blur/focus e aria-live
+   */
+  private announceSelection(option: ToggleOption<T>, index: number): void {
+    const currentFocusedElement = document.activeElement as HTMLElement;
+    const a11yElement = document.getElementById(this.getOptionId(option, index));
+
+    // Verificar se o foco está em um elemento acessível (não no visual)
+    const isA11yFocused = currentFocusedElement?.classList.contains('sr-only-option');
+
+    if (isA11yFocused && currentFocusedElement) {
+      // Fazer blur temporário para forçar narração
+      currentFocusedElement.blur();
+    }
+
+    // Limpar aria-live primeiro para forçar nova narração
+    this.anuncioSelecao.set('');
+
+    // Preparar mensagem de narração
+    const announcement = this.getCustomAnnouncement(option, index);
+
+    setTimeout(() => {
+      // Anunciar via aria-live
+      this.anuncioSelecao.set(announcement);
+
+      // Restaurar foco após narração
+      setTimeout(() => {
+        if (a11yElement) {
+          a11yElement.focus();
+          this.updateVisualFocus(index);
+        }
+      }, 100);
+    }, 50);
   }
 
   /**
@@ -230,15 +339,11 @@ export class ToggleSegmentedComponent<T = string> implements ControlValueAccesso
       const nextOption = this.options()[nextIndex];
       if (nextOption && !nextOption.disabled) {
         const nextId = this.getOptionId(nextOption, nextIndex);
-        const nextInput = document.getElementById(nextId) as HTMLInputElement;
+        const nextElement = document.getElementById(nextId);
 
-        if (nextInput) {
-          nextInput.focus();
-
-          // Anunciar estado se habilitado
-          if (this.announceState()) {
-            this.announceOptionState(nextOption);
-          }
+        if (nextElement) {
+          nextElement.focus();
+          this.updateVisualFocus(nextIndex);
         }
       }
       return;
@@ -258,7 +363,11 @@ export class ToggleSegmentedComponent<T = string> implements ControlValueAccesso
       if (firstEnabled) {
         const firstIndex = this.options().indexOf(firstEnabled);
         const firstId = this.getOptionId(firstEnabled, firstIndex);
-        document.getElementById(firstId)?.focus();
+        const firstElement = document.getElementById(firstId);
+        if (firstElement) {
+          firstElement.focus();
+          this.updateVisualFocus(firstIndex);
+        }
       }
       return;
     }
@@ -271,7 +380,11 @@ export class ToggleSegmentedComponent<T = string> implements ControlValueAccesso
       if (lastEnabled) {
         const lastIndex = this.options().indexOf(lastEnabled);
         const lastId = this.getOptionId(lastEnabled, lastIndex);
-        document.getElementById(lastId)?.focus();
+        const lastElement = document.getElementById(lastId);
+        if (lastElement) {
+          lastElement.focus();
+          this.updateVisualFocus(lastIndex);
+        }
       }
       return;
     }
@@ -280,22 +393,35 @@ export class ToggleSegmentedComponent<T = string> implements ControlValueAccesso
   }
 
   /**
-   * Anuncia estado da opção para leitores de tela
+   * Atualiza o foco visual para sincronizar com elemento acessível
    */
-  private announceOptionState(option: ToggleOption<T>): void {
-    setTimeout(() => {
-      const selecionado = this.isSelected(option);
-      const estado = selecionado ? 'selecionado' : 'não selecionado';
+  private updateVisualFocus(index: number): void {
+    const option = this.options()[index];
+    if (!option) return;
 
-      // Limpar aria-live primeiro
-      this.anuncioA11y.set('');
+    const visualId = `visual-${this.getOptionId(option, index)}`;
+    const visualElement = document.getElementById(visualId);
+    
+    if (visualElement) {
+      // Remover outline de todos os elementos visuais
+      this.clearVisualFocus();
 
-      // Aguardar leitor terminar narração nativa
-      setTimeout(() => {
-        this.anuncioA11y.set(estado);
-      }, this.announceDelay());
+      // Adicionar outline no elemento focado
+      visualElement.style.outline = '2px solid #0046c0';
+      visualElement.style.outlineOffset = '2px';
+      visualElement.style.zIndex = '10';
+    }
+  }
 
-    }, 100);
+  /**
+   * Remove o foco visual de todos os elementos
+   */
+  private clearVisualFocus(): void {
+    document.querySelectorAll('.toggle-segmented__option').forEach(el => {
+      (el as HTMLElement).style.outline = '';
+      (el as HTMLElement).style.outlineOffset = '';
+      (el as HTMLElement).style.zIndex = '';
+    });
   }
 
   /**
@@ -316,6 +442,20 @@ export class ToggleSegmentedComponent<T = string> implements ControlValueAccesso
    */
   getOptionAriaLabel(option: ToggleOption<T>): string {
     return option.ariaLabel || option.label;
+  }
+
+  /**
+   * Gera mensagem de narração customizada para um item
+   * Segue o mesmo padrão do modal-select-generic.component.ts
+   */
+  getCustomAnnouncement(option: ToggleOption<T>, index: number): string {
+    const position = index + 1;
+    const total = this.options().length;
+    const status = this.isSelected(option) ? 'selecionado' : 'não selecionado';
+    
+    // Formato personalizado: "x de x, selecionado" ou "x de x, não selecionado"
+    return `${position} de ${total}, ${status} ${option.label}`;
+   
   }
 }
 

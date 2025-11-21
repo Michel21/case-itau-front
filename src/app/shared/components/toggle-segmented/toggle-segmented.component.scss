@@ -25,6 +25,26 @@ $gray-700: #374151;
   border-width: 0;
 }
 
+// Controles acessíveis (APENAS para leitores de tela)
+.sr-only-option {
+  position: absolute;
+  top: 0;
+  opacity: 0;
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 100;
+  
+  &:focus {
+    outline: none;
+  }
+}
+
+// Wrapper para posicionamento dos controles acessíveis
+.toggle-segmented-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
 // Container principal
 .toggle-segmented {
   display: inline-flex;
@@ -37,31 +57,7 @@ $gray-700: #374151;
     width: 100%;
   }
 
-  // Wrapper para cada opção
-  &__wrapper {
-    position: relative;
-    display: flex;
-    flex: 1;
-    min-width: 0;
-  }
-
-  // Input escondido visualmente
-  &__input {
-    position: absolute;
-    opacity: 0;
-    width: 1px;
-    height: 1px;
-    pointer-events: none;
-    
-    // Mostrar outline no label quando input está focado
-    &:focus-visible + .toggle-segmented__option {
-      outline: 2px solid $primary-color;
-      outline-offset: 2px;
-      z-index: 10;
-    }
-  }
-
-  // Opção (label)
+  // Opção (agora é um div com role="radio")
   &__option {
     display: flex;
     align-items: center;
@@ -78,6 +74,13 @@ $gray-700: #374151;
     position: relative;
     flex: 1;
     min-width: 0;
+    
+    // Outline de foco para acessibilidade
+    &:focus-visible {
+      outline: 2px solid $primary-color;
+      outline-offset: 2px;
+      z-index: 10;
+    }
     
     &:hover:not(&--disabled):not(&--selected) {
       background-color: rgba(0, 70, 192, 0.05);
