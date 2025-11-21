@@ -185,26 +185,16 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
   // ============================================================================
 
   /**
-   * Effect para anunciar abertura do modal automaticamente
-   * Usa Angular Signals para reatividade automática
+   * Effect para limpar narração quando modal fecha
+   * A narração de abertura é feita pelo método announceModalOpening()
    */
   private readonly modalOpeningEffect = effect(() => {
     const isOpen = this.isOpen();
-    const titulo = this.titulo();
     
-    if (isOpen && titulo) {
-      // Aguardar DOM estar pronto antes de anunciar
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          // Narração personalizada: "Selecione o mês, caixa de diálogo"
-          const mensagem = `${titulo}, caixa de diálogo`;
-          this.modalOpeningAnnouncement.set(mensagem);
-          this.announceWithLiveAnnouncer(mensagem, 'assertive');
-        });
-      });
-    } else {
+    if (!isOpen) {
       // Limpar narração quando modal fecha
       this.modalOpeningAnnouncement.set('');
+      this.titleAnnouncement.set('');
       this.liveAnnouncer.clear();
     }
   });
@@ -286,16 +276,23 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
    * REFATORADO: Reconfigura event listeners quando modal abre
    */
   private handleModalOpen(): void {
-    this.hidePageContent();
     this.resetState();
     
-    // Reconfigurar event listeners quando modal abre (elemento pode ter sido recriado)
+    // Aguardar modal estar no DOM antes de ocultar conteúdo da página
     requestAnimationFrame(() => {
+      this.hidePageContent();
       this.setupTitleEventListeners();
-      this.setupInitialFocus();
     });
     
-    this.announceModalOpening();
+    // Anunciar abertura do modal após um pequeno delay
+    setTimeout(() => {
+      this.announceModalOpening();
+    }, 150);
+    
+    // Configurar foco no título após a narração
+    setTimeout(() => {
+      this.setupInitialFocus();
+    }, 800);
   }
 
   /**
@@ -351,17 +348,16 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
   }
 
   /**
-   * Configura foco inicial no primeiro item
+   * Configura foco inicial no título
    */
   private setupInitialFocus(): void {
     this.updateTabIndices();
     
-    // Focar no primeiro item após DOM estar pronto
+    // Focar no título após DOM estar pronto
     requestAnimationFrame(() => {
-      const firstItemId = this.getOptionId(this.options()[0]?.value);
-      const firstItem = document.getElementById(`option-${firstItemId}`);
-      if (firstItem) {
-        firstItem.focus();
+      const titleElement = this.modalTitle()?.nativeElement;
+      if (titleElement) {
+        titleElement.focus();
       }
     });
   }
@@ -387,16 +383,23 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
 
   /**
    * Anuncia abertura da modal e título
-   * REFATORADO: Usa Angular Signals e Effects para controle reativo
+   * REFATORADO: Usa apenas região aria-live nativa para máxima confiabilidade
    */
   private announceModalOpening(): void {
-    // A narração agora é controlada automaticamente pelo effect modalOpeningEffect
-    // Este método pode ser usado para lógica adicional se necessário
     const titulo = this.titulo();
     if (titulo) {
-      // Narração personalizada: "Selecione o mês, caixa de diálogo"
-      const mensagem = `${titulo}, caixa de diálogo`;
-      this.modalOpeningAnnouncement.set(mensagem);
+      // Narração personalizada: "Selecione o mês, modal aberta"
+      const mensagem = `${titulo}, modal aberta`;
+      
+      // Primeiro limpar a região para garantir que a mudança seja detectada
+      this.modalOpeningAnnouncement.set('');
+      this.cdr.detectChanges();
+      
+      // Depois definir a mensagem após um pequeno delay
+      setTimeout(() => {
+        this.modalOpeningAnnouncement.set(mensagem);
+        this.cdr.detectChanges();
+      }, 100);
     }
   }
 
@@ -645,7 +648,8 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
     // O effect titleFocusEffect irá anunciar automaticamente
     const titulo = this.titulo();
     if (titulo) {
-      this.titleAnnouncement.set(`Título: ${titulo}`);
+      // Narrar apenas o título quando receber foco (sem "caixa de diálogo")
+      this.titleAnnouncement.set(titulo);
     }
     
     // Não resetar isNavigating aqui para evitar interferir com navegação em andamento

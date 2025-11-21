@@ -14,7 +14,6 @@
       type="button" 
       class="back-button" 
       tabindex="0"
-      aria-label="Voltar"
       (click)="toggleTema()">
       <span aria-hidden="true" class="back-button__icon">←</span>
       <span class="back-button__text">Voltar</span>
@@ -55,7 +54,6 @@
           class="segment-control__option"
           [class.segment-control__option--active]="tipoPeriodo() === 'intervalo'"
           [attr.aria-checked]="tipoPeriodo() === 'intervalo' ? 'true' : 'false'"
-          aria-label="Intervalo"
           aria-posinset="1"
           aria-setsize="2"
           tabindex="0"
@@ -72,7 +70,6 @@
           class="segment-control__option"
           [class.segment-control__option--active]="tipoPeriodo() === 'mes'"
           [attr.aria-checked]="tipoPeriodo() === 'mes' ? 'true' : 'false'"
-          aria-label="Mês"
           aria-posinset="2"
           aria-setsize="2"
           tabindex="0"

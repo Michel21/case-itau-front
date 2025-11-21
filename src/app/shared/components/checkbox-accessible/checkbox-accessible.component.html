@@ -11,7 +11,6 @@
     class="checkbox"
     [ngClass]="checkboxClasses()"
     [attr.aria-checked]="isChecked() ? 'true' : 'false'"
-    [attr.aria-label]="ariaLabel()"
     [attr.aria-describedby]="description() ? id() + '-description' : null"
     [attr.aria-disabled]="disabled() ? 'true' : null"
     [disabled]="disabled()"
