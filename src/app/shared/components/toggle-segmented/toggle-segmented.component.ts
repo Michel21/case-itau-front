@@ -16,6 +16,7 @@ import {
   NG_VALUE_ACCESSOR,
   FormsModule
 } from '@angular/forms';
+import { ScrollIntoViewDirective } from '../../directives/scroll-into-view.directive';
 
 /**
  * Interface para opções do toggle
@@ -58,7 +59,7 @@ export interface ToggleStyleConfig {
 @Component({
   selector: 'app-toggle-segmented',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ScrollIntoViewDirective],
   templateUrl: './toggle-segmented.component.html',
   styleUrls: ['./toggle-segmented.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

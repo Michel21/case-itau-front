@@ -1,5 +1,5 @@
 <!-- Container wrapper com position relative -->
-<div class="toggle-segmented-wrapper" role="none">
+<div class="toggle-segmented-wrapper">
   <!-- Container visual (COMPLETAMENTE OCULTO de leitores de tela) -->
   <div 
     class="toggle-segmented"
@@ -12,9 +12,10 @@
         [id]="'visual-' + getOptionId(option, idx)"
         class="toggle-segmented__option"
         [ngClass]="getOptionClasses(option, idx)"
-        tabindex="-1">
+        tabindex="-1"
+        aria-hidden="true">
         
-        <span class="toggle-segmented__label-text">
+        <span class="toggle-segmented__label-text" aria-hidden="true">
           {{ option.label }}
         </span>
       </div>
@@ -29,6 +30,10 @@
       class="sr-only-option"
       [attr.tabindex]="getTabIndex(option)"
       [attr.aria-label]="getCustomAnnouncement(option, idx)"
+      appScrollIntoView
+      [scrollBehavior]="'smooth'"
+      [scrollBlock]="'nearest'"
+      [scrollOnFocus]="true"
       (click)="selectOption(option)"
       (keydown)="onKeyDown($event, option, idx)">
     </button>
