@@ -351,16 +351,17 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
   }
 
   /**
-   * Configura foco inicial no título
+   * Configura foco inicial no primeiro item
    */
   private setupInitialFocus(): void {
     this.updateTabIndices();
     
-    // Focar no título após DOM estar pronto
+    // Focar no primeiro item após DOM estar pronto
     requestAnimationFrame(() => {
-      const titleEl = this.modalTitle()?.nativeElement;
-      if (titleEl) {
-        titleEl.focus();
+      const firstItemId = this.getOptionId(this.options()[0]?.value);
+      const firstItem = document.getElementById(`option-${firstItemId}`);
+      if (firstItem) {
+        firstItem.focus();
       }
     });
   }

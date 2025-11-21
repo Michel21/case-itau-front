@@ -1,0 +1,346 @@
+// ============================================================================
+// ACESSIBILIDADE GLOBAL
+// ============================================================================
+// Configurações globais para controlar semântica nativa e melhorar a11y
+
+// ============================================================================
+// REMOVER SEMÂNTICA NATIVA DE ELEMENTOS
+// ============================================================================
+
+/**
+ * Remove anúncios de semântica nativa indesejados
+ * Útil quando você quer controlar completamente a narração via ARIA
+ */
+
+// Remove anúncio de "button" quando usando role="none" ou role="presentation"
+[role="none"],
+[role="presentation"] {
+  // Garante que leitores de tela ignorem completamente o elemento
+  speak: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+// Remove semântica de listas quando usando role="none"
+ul[role="none"],
+ol[role="none"],
+dl[role="none"] {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+// Remove semântica de itens de lista
+li[role="none"] {
+  display: block;
+}
+
+// ============================================================================
+// CONTROLE DE NARRAÇÃO
+// ============================================================================
+
+/**
+ * Classes utilitárias para controlar o que é narrado
+ */
+
+// Classe para ocultar visualmente mas manter acessível (screen reader only)
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// Classe para ocultar de leitores de tela mas manter visível
+.visual-only {
+  speak: none;
+  
+  &[aria-hidden="true"] {
+    pointer-events: auto; // Permite interação mesmo com aria-hidden
+  }
+}
+
+// ============================================================================
+// FOCO PERSONALIZADO
+// ============================================================================
+
+/**
+ * Estilos de foco consistentes e acessíveis
+ * WCAG 2.1 Level AA: contraste mínimo 3:1
+ */
+
+// Foco visível padrão (quando navegação por Tab)
+*:focus-visible {
+  outline: 2px solid #0046c0;
+  outline-offset: 2px;
+  transition: outline-offset 0.2s ease;
+}
+
+// Remove outline quando foco via mouse/touch
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+// Foco para elementos interativos customizados
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible {
+  outline: 2px solid #0046c0;
+  outline-offset: 2px;
+}
+
+// ============================================================================
+// CONTROLE DE TÍTULO E HEADINGS
+// ============================================================================
+
+/**
+ * Remove anúncios de nível de heading quando não desejado
+ */
+
+// Headings com role="presentation" não devem ser anunciados como heading
+h1[role="presentation"],
+h2[role="presentation"],
+h3[role="presentation"],
+h4[role="presentation"],
+h5[role="presentation"],
+h6[role="presentation"] {
+  // Comportamento visual de heading, mas sem semântica
+  font-weight: inherit;
+  font-size: inherit;
+  margin: 0;
+}
+
+// ============================================================================
+// CONTROLE DE ELEMENTOS DE FORMULÁRIO
+// ============================================================================
+
+/**
+ * Remove semântica de formulários quando controlado via ARIA
+ */
+
+// Inputs com role="presentation" ou "none"
+input[role="presentation"],
+input[role="none"],
+select[role="presentation"],
+select[role="none"],
+textarea[role="presentation"],
+textarea[role="none"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+// ============================================================================
+// CONTROLE DE GRUPOS (FIELDSET, RADIOGROUP, etc)
+// ============================================================================
+
+/**
+ * Remove anúncios de "grupo" indesejados
+ */
+
+// Fieldsets com role="none" não devem criar grupo semântico
+fieldset[role="none"],
+fieldset[role="presentation"] {
+  border: none;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+// Divs que podem criar contexto de grupo
+div[role="radiogroup"][aria-hidden="true"],
+div[role="group"][aria-hidden="true"] {
+  // Garantir que não seja anunciado
+  speak: none;
+}
+
+// ============================================================================
+// CONTROLE DE DIÁLOGOS E MODAIS
+// ============================================================================
+
+/**
+ * Remove anúncios duplicados em modais
+ */
+
+// Títulos de modais marcados como presentation
+[role="dialog"] [role="presentation"].modal-title,
+[role="dialog"] [role="none"].modal-title {
+  // Não deve ser anunciado (dialog usa aria-label)
+  speak: none;
+}
+
+// Container de scroll em modais (puramente visual)
+.modal-scroll-container[aria-hidden="true"] {
+  speak: none;
+  
+  // Mas permitir que elementos focáveis dentro sejam acessíveis
+  & * {
+    speak: inherit;
+  }
+  
+  & [role="none"],
+  & [role="presentation"] {
+    speak: none;
+  }
+}
+
+// ============================================================================
+// SUPORTE CROSS-BROWSER
+// ============================================================================
+
+/**
+ * Garantir compatibilidade com diferentes leitores de tela
+ */
+
+// Para NVDA e JAWS
+[aria-hidden="true"] {
+  // Garantir que seja completamente ignorado
+  visibility: inherit; // Não forçar hidden, mas respeitar aria-hidden
+}
+
+// Para VoiceOver (iOS/macOS)
+// VoiceOver às vezes ignora aria-hidden em elementos focáveis
+[aria-hidden="true"][tabindex="-1"] {
+  // Remover do fluxo de foco do VoiceOver
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+// ============================================================================
+// ANIMAÇÕES E MOVIMENTOS
+// ============================================================================
+
+/**
+ * Respeitar preferências de movimento reduzido
+ * WCAG 2.1: 2.3.3 Animation from Interactions
+ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+// ============================================================================
+// CONTRASTE E CORES
+// ============================================================================
+
+/**
+ * Garantir contraste mínimo em modo de alto contraste
+ */
+
+@media (prefers-contrast: high) {
+  *:focus-visible {
+    outline-width: 3px;
+    outline-color: currentColor;
+  }
+  
+  button:focus-visible,
+  a:focus-visible {
+    outline-width: 3px;
+  }
+}
+
+// ============================================================================
+// LIVE REGIONS
+// ============================================================================
+
+/**
+ * Estilos para regiões live (anúncios dinâmicos)
+ */
+
+[role="status"],
+[role="alert"],
+[aria-live] {
+  // Garantir que esteja no DOM mas oculto visualmente se necessário
+  &.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+// ============================================================================
+// TABINDEX NEGATIVO
+// ============================================================================
+
+/**
+ * Elementos com tabindex="-1" não devem ter outline ao focar via mouse
+ */
+
+[tabindex="-1"]:focus:not(:focus-visible) {
+  outline: none;
+}
+
+// Mas devem ter outline quando focados programaticamente
+[tabindex="-1"]:focus-visible {
+  outline: 2px solid #0046c0;
+  outline-offset: 2px;
+}
+
+// ============================================================================
+// HELPERS DE DEBUG (apenas em desenvolvimento)
+// ============================================================================
+
+/**
+ * Classes de debug para testar acessibilidade
+ * Remover em produção ou usar apenas em ambiente de desenvolvimento
+ */
+
+// Mostrar todos os elementos focáveis
+body.debug-a11y {
+  [tabindex]:not([tabindex="-1"]) {
+    outline: 2px dashed orange !important;
+  }
+  
+  button,
+  a[href],
+  input:not([disabled]),
+  select:not([disabled]),
+  textarea:not([disabled]) {
+    outline: 1px dotted green !important;
+  }
+  
+  [aria-hidden="true"] {
+    outline: 1px dotted red !important;
+    opacity: 0.5;
+  }
+}
+
+// ============================================================================
+// EXPORTAR VARIÁVEIS SCSS
+// ============================================================================
+
+/**
+ * Variáveis para usar em componentes
+ */
+
+$focus-color: #0046c0;
+$focus-width: 2px;
+$focus-offset: 2px;
+
+:export {
+  focusColor: $focus-color;
+  focusWidth: $focus-width;
+  focusOffset: $focus-offset;
+}
+
