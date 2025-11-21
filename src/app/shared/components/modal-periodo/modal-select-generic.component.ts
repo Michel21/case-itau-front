@@ -196,7 +196,8 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
       // Aguardar DOM estar pronto antes de anunciar
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          const mensagem = `Caixa de diálogo, ${titulo}`;
+          // Narração personalizada: "Selecione o mês, caixa de diálogo"
+          const mensagem = `${titulo}, caixa de diálogo`;
           this.modalOpeningAnnouncement.set(mensagem);
           this.announceWithLiveAnnouncer(mensagem, 'assertive');
         });
@@ -392,8 +393,8 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
     // Este método pode ser usado para lógica adicional se necessário
     const titulo = this.titulo();
     if (titulo) {
-      // O effect já cuida da narração, mas podemos atualizar o signal se necessário
-      const mensagem = `Caixa de diálogo, ${titulo}`;
+      // Narração personalizada: "Selecione o mês, caixa de diálogo"
+      const mensagem = `${titulo}, caixa de diálogo`;
       this.modalOpeningAnnouncement.set(mensagem);
     }
   }
@@ -469,18 +470,16 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
 
   /**
    * Torna item acessível (remove aria-hidden)
+   * CORRIGIDO: Containers intermediários removidos para evitar narração "grupo"
    */
   private makeItemAccessible(item: HTMLElement): void {
     item.removeAttribute('aria-hidden');
-    
-    const parentItem = item.parentElement;
-    if (parentItem?.classList.contains('modal-item')) {
-      parentItem.removeAttribute('aria-hidden');
-    }
-    
-    const listContainer = item.closest('.modal-list');
-    if (listContainer) {
-      listContainer.removeAttribute('aria-hidden');
+
+    // Garantir que o container de scroll permaneça oculto
+    const scrollContainer = item.closest('.modal-scroll-container');
+    if (scrollContainer) {
+      scrollContainer.setAttribute('aria-hidden', 'true');
+      scrollContainer.setAttribute('role', 'none');
     }
   }
 
@@ -574,7 +573,8 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
       return customFn(option, index, total, this.isSelected(option.value));
     }
     
-    return `${position} de ${total}, ${status}, radio button, ${option.label}`;
+    // Formato limpo: sem "grupo", sem "radio button", apenas informações essenciais
+    return `${position} de ${total}, ${status}, ${option.label}`;
   }
 
   /**
@@ -687,8 +687,7 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
     
     // PRIORIDADE 1: Se o foco está em um item, NÃO processar aqui
     const isItemFocused = activeElement.classList.contains('modal-label') ||
-                          activeElement.closest('.modal-label') !== null ||
-                          activeElement.closest('.modal-item') !== null;
+                          activeElement.closest('.modal-label') !== null;
     
     if (isItemFocused) {
       return;
@@ -832,6 +831,46 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
       
       // Garantir que o item tem tabindex="0" quando recebe foco
       item.setAttribute('tabindex', '0');
+      
+      // Remover qualquer atributo que possa causar narração "grupo" ou "com X itens"
+      item.removeAttribute('aria-posinset');
+      item.removeAttribute('aria-setsize');
+      item.removeAttribute('aria-owns');
+      item.removeAttribute('aria-describedby');
+      item.removeAttribute('aria-controls');
+      // Remover role="presentation" quando focado para que aria-label funcione
+      // Mas manter sem role para evitar semântica de grupo
+      item.removeAttribute('role');
+      item.removeAttribute('aria-expanded');
+      item.removeAttribute('aria-haspopup');
+      item.removeAttribute('aria-selected');
+      
+      // Garantir que o container pai permaneça completamente oculto
+      const scrollContainer = item.closest('.modal-scroll-container');
+      if (scrollContainer) {
+        scrollContainer.setAttribute('aria-hidden', 'true');
+        scrollContainer.setAttribute('role', 'presentation');
+        scrollContainer.removeAttribute('aria-label');
+        scrollContainer.removeAttribute('aria-labelledby');
+      }
+      
+      // Garantir que o diálogo não tenha atributos que possam causar "grupo"
+      const dialog = item.closest('[role="dialog"]');
+      if (dialog) {
+        dialog.removeAttribute('aria-describedby');
+        dialog.removeAttribute('aria-owns');
+      }
+      
+      // Ocultar todos os outros itens para evitar que sejam interpretados como grupo
+      const allItems = document.querySelectorAll('.modal-label');
+      allItems.forEach((otherItem) => {
+        if (otherItem !== item) {
+          otherItem.setAttribute('aria-hidden', 'true');
+        }
+      });
+      
+      // Garantir que o item focado está visível
+      item.removeAttribute('aria-hidden');
     }
     
     this.focusedIndex.set(index);

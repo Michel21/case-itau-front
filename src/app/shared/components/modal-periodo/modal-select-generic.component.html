@@ -14,7 +14,7 @@
       - aria-modal="true" indica que é um modal bloqueante
       - Focus trap garante que o foco permanece dentro do modal
     -->
-    <div 
+    <div
       #modalContent
       class="modal-content"
       [class]="config().contentClass || ''"
@@ -29,71 +29,65 @@
       
       <!-- 
         TÍTULO DO MODAL
-        - Focável para receber foco inicial (WCAG 2.4.3 Focus Order)
-        - aria-hidden="true" para evitar que leitor de tela leia "nível de título 2"
-        - Título é narrado via aria-label do dialog e narração programática
-        - Suporta navegação por teclado (setas) para iniciar navegação na lista
+        - Completamente oculto do leitor de tela (aria-hidden)
+        - O diálogo usa aria-label diretamente para evitar "grupo"
+        - Focável apenas para navegação por teclado (setas)
         - tabindex="-1" permite foco programático mas não via Tab
-        - Event listeners gerenciados via JavaScript nativo (refatorado)
       -->
-      <h2 
-        #modalTitle 
+      <div
+        #modalTitle
         [id]="'modal-title-' + modalId"
-        class="modal-title" 
+        class="modal-title"
+        role="presentation"
         aria-hidden="true"
-        tabindex="-1">
-        {{ titulo() }}
-      </h2>
+        tabindex="-1"
+        (keydown)="onDialogKeyDown($event)"
+        (focus)="onTitleFocus()"
+        (blur)="onTitleBlur()">
+        <span aria-hidden="true">{{ titulo() }}</span>
+      </div>
 
       <!-- Container de scroll (COMPLETAMENTE OCULTO de leitores de tela) -->
-      <div 
+      <div
         class="modal-scroll-container"
         [style.max-height]="config().maxHeight || '227px'"
         aria-hidden="true"
+        role="presentation"
         tabindex="-1">
-        
-        <!-- Lista de opções (radiogroup para agrupar radio buttons) -->
-        <div 
-          class="modal-list" 
-          role="radiogroup"
-          [attr.aria-label]="'Selecione uma opção'"
-          aria-hidden="true">
-          @for (option of options(); track option.value; let idx = $index) {
-            <div class="modal-item" aria-hidden="true">
-              <!-- Elemento focável - aria-hidden será removido via JS quando focado -->
-              <div
-              [id]="'option-' + getOptionId(option.value)"
-              class="modal-label"
-              [class.modal-label--selected]="isSelected(option.value)"
-              role="radio"
-              [attr.aria-checked]="isSelected(option.value)"
-              [attr.aria-label]="getCustomAnnouncement(option, idx)"
-              [attr.aria-hidden]="null"
-              [attr.tabindex]="-1"
-              (click)="onItemClick(option.value)"
-              (keydown)="onKeyDown($event, option.value, idx)"
-              (focus)="onItemFocus(idx, option)">
-              
-              <span class="modal-text" aria-hidden="true">{{ option.label }}</span>
-              
-              @if (config().showCheckIcon !== false) {
-                <span class="modal-check" [class.modal-check--active]="isSelected(option.value)" aria-hidden="true">
-                  @if (isSelected(option.value)) {
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <circle cx="12" cy="12" r="10.5" stroke="#3B69FF" stroke-width="1.5" fill="none"/>
-                      <circle cx="12" cy="12" r="6" fill="#3B69FF"/>
-                    </svg>
-                  } @else {
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <circle cx="12" cy="12" r="10.5" stroke="#3B69FF" stroke-width="1.5" fill="none"/>
-                    </svg>
-                  }
-                </span>
-              }
-              </div>
-            </div>
-          }
-        </div>
+
+        <!-- Itens focáveis usando button para evitar narração "grupo" -->
+        @for (option of options(); track option.value; let idx = $index) {
+          <button
+            type="button"
+            [id]="'option-' + getOptionId(option.value)"
+            class="modal-label"
+            [class.modal-label--selected]="isSelected(option.value)"
+            role="none"
+            [attr.aria-label]="getCustomAnnouncement(option, idx)"
+            [attr.aria-hidden]="null"
+            [attr.tabindex]="-1"
+            (click)="onItemClick(option.value)"
+            (keydown)="onKeyDown($event, option.value, idx)"
+            (focus)="onItemFocus(idx, option)">
+
+            <span class="modal-text" aria-hidden="true">{{ option.label }}</span>
+
+            @if (config().showCheckIcon !== false) {
+              <span class="modal-check" [class.modal-check--active]="isSelected(option.value)" aria-hidden="true">
+                @if (isSelected(option.value)) {
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10.5" stroke="#3B69FF" stroke-width="1.5" fill="none"/>
+                    <circle cx="12" cy="12" r="6" fill="#3B69FF"/>
+                  </svg>
+                } @else {
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10.5" stroke="#3B69FF" stroke-width="1.5" fill="none"/>
+                  </svg>
+                }
+              </span>
+            }
+          </button>
+        }
       </div>
 
       <!-- Botões de ação (OCULTOS de leitores de tela - navegação é via teclado) -->
@@ -102,6 +96,7 @@
         aria-hidden="true">
         <button
           type="button"
+          role="link"
           class="modal-btn modal-btn--cancel"
           (click)="onCancelar()"
           [attr.aria-label]="cancelText()">

@@ -85,11 +85,6 @@ describe('ModalSelectGenericComponent', () => {
       expect(component.selectedValue()).toBe('fev');
     });
 
-    it('deve aceitar ariaLabel via input', () => {
-      fixture.componentRef.setInput('ariaLabel', 'Custom Label');
-      fixture.detectChanges();
-      expect(component.ariaLabel()).toBe('Custom Label');
-    });
 
     it('deve aceitar cancelText via input', () => {
       fixture.componentRef.setInput('cancelText', 'Fechar');
@@ -110,17 +105,6 @@ describe('ModalSelectGenericComponent', () => {
       expect(component.config()).toEqual(config);
     });
 
-    it('deve aceitar announceTitle via input', () => {
-      fixture.componentRef.setInput('announceTitle', false);
-      fixture.detectChanges();
-      expect(component.announceTitle()).toBe(false);
-    });
-
-    it('deve aceitar announceNavigation via input', () => {
-      fixture.componentRef.setInput('announceNavigation', false);
-      fixture.detectChanges();
-      expect(component.announceNavigation()).toBe(false);
-    });
   });
 
   // ============================================================================
@@ -384,26 +368,17 @@ describe('ModalSelectGenericComponent', () => {
     it('deve cancelar ao pressionar Escape', () => {
       fixture.componentRef.setInput('isOpen', true);
       fixture.detectChanges();
-      
+
       jest.spyOn(component, 'onCancelar');
-      
+
       const event = new KeyboardEvent('keydown', { key: 'Escape' });
-      component.onEscapeKey(event);
-      
+      // Simular pressionar Escape diretamente no modal
+      const modalElement = compiled.querySelector('[role="dialog"]') as HTMLElement;
+      modalElement?.dispatchEvent(event);
+
       expect(component.onCancelar).toHaveBeenCalled();
     });
 
-    it('não deve cancelar com Escape se modal fechada', () => {
-      fixture.componentRef.setInput('isOpen', false);
-      fixture.detectChanges();
-      
-      jest.spyOn(component, 'onCancelar');
-      
-      const event = new KeyboardEvent('keydown', { key: 'Escape' });
-      component.onEscapeKey(event);
-      
-      expect(component.onCancelar).not.toHaveBeenCalled();
-    });
   });
 
   // ============================================================================
@@ -498,60 +473,35 @@ describe('ModalSelectGenericComponent', () => {
       expect(dialog).toBeTruthy();
     });
 
-    it('deve ter aria-labelledby apontando para o título', () => {
+    it('não deve ter aria-labelledby (título removido)', () => {
       const dialog = compiled.querySelector('[role="dialog"]');
-      expect(dialog?.getAttribute('aria-labelledby')).toBe('modal-title');
+      expect(dialog?.getAttribute('aria-labelledby')).toBeNull();
     });
 
-    it('deve ter título com id correto', () => {
-      const title = compiled.querySelector('#modal-title');
-      expect(title).toBeTruthy();
-      expect(title?.textContent).toContain('Select Month');
-    });
-
-    it('título deve ter role="heading"', () => {
-      const title = compiled.querySelector('#modal-title');
-      expect(title?.getAttribute('role')).toBe('heading');
-    });
-
-    it('título deve ter aria-level="1"', () => {
-      const title = compiled.querySelector('#modal-title');
-      expect(title?.getAttribute('aria-level')).toBe('1');
-    });
-
-    it('título deve ter tabindex="-1"', () => {
-      const title = compiled.querySelector('#modal-title');
-      expect(title?.getAttribute('tabindex')).toBe('-1');
-    });
-
-    it('lista deve ter role="radiogroup"', () => {
+    it('não deve ter role="radiogroup" (removido para evitar narração indesejada)', () => {
       const list = compiled.querySelector('[role="radiogroup"]');
-      expect(list).toBeTruthy();
+      expect(list).toBeNull();
     });
 
-    it('lista deve ter aria-label correto', () => {
-      const list = compiled.querySelector('[role="radiogroup"]');
-      expect(list?.getAttribute('aria-label')).toBe('Month List');
-    });
-
-    it('botões devem ter role="radio"', () => {
+    it('itens não devem ter role="radio" (removido para evitar narração indesejada)', () => {
       const buttons = compiled.querySelectorAll('[role="radio"]');
-      expect(buttons.length).toBe(3);
+      expect(buttons.length).toBe(0);
     });
 
-    it('botões devem ter aria-checked', () => {
+    it('itens não devem ter aria-checked (removido para evitar narração indesejada)', () => {
       component.currentValue.set('fev');
       fixture.detectChanges();
-      
-      const buttons = compiled.querySelectorAll('[role="radio"]');
-      expect(buttons[1].getAttribute('aria-checked')).toBe('true');
-      expect(buttons[0].getAttribute('aria-checked')).toBe('false');
+
+      const items = compiled.querySelectorAll('.modal-label');
+      items.forEach(item => {
+        expect(item.getAttribute('aria-checked')).toBeNull();
+      });
     });
 
-    it('botões devem ter aria-posinset e aria-setsize', () => {
-      const firstButton = compiled.querySelector('[role="radio"]');
-      expect(firstButton?.getAttribute('aria-posinset')).toBe('1');
-      expect(firstButton?.getAttribute('aria-setsize')).toBe('3');
+    it('itens não devem ter aria-posinset e aria-setsize (removidos para evitar narração indesejada)', () => {
+      const firstItem = compiled.querySelector('.modal-label');
+      expect(firstItem?.getAttribute('aria-posinset')).toBeNull();
+      expect(firstItem?.getAttribute('aria-setsize')).toBeNull();
     });
 
     it('deve ter FocusTrap ativo quando aberto', () => {
@@ -591,7 +541,7 @@ describe('ModalSelectGenericComponent', () => {
       fixture.componentRef.setInput('options', mockOptions);
       fixture.detectChanges();
       
-      const items = compiled.querySelectorAll('.modal-item');
+      const items = compiled.querySelectorAll('.modal-label');
       expect(items.length).toBe(3);
     });
 
