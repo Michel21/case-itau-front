@@ -1,0 +1,690 @@
+// ============================================================================
+// ESTILOS DA TABELA - Baseado em BRAI_CSS/brai.css
+// ============================================================================
+
+// Variáveis de cores
+$azul-principal: #3B69FF;
+$azul-claro: #EAF0FF;
+$cinza-claro: #F0F1F5;
+$cinza-medio: #E4E5E9;
+$cinza-escuro: #C8C9CC;
+$cinza-texto: #47484C;
+$cinza-border: #A7A8AC;
+$branco: #FFFFFF;
+$preto: #000000;
+
+// ============================================================================
+// ESTILOS BASE DA TABELA
+// ============================================================================
+
+.linhaAzul {
+  background-color: $azul-claro;
+}
+
+.borderLeftAzul {
+  border-left: 4px solid $azul-principal;
+}
+
+.tamanhoColunaIcones {
+  width: 1px;
+  text-align: center;
+  padding: 0 8px;
+}
+
+.tabela-alta {
+  padding: 48px 16px;
+}
+
+.celulas-alta {
+  padding: 28px 16px;
+}
+
+.tabela-base {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+
+  // Caption (Título da tabela)
+  caption > div {
+    align-items: center;
+    background: $azul-principal;
+    display: flex;
+    height: 48px;
+    width: 100%;
+
+    > div:nth-child(1) {
+      color: $branco;
+      flex-grow: 1;
+      padding-left: 56px;
+    }
+
+    > div:nth-child(2) button {
+      background: none;
+      border: 1px solid $branco;
+      border-radius: 30px !important;
+      cursor: pointer;
+      font: 13px montserratmedium, sans-serif;
+      color: $branco;
+      margin: 16px 16px 16px 0;
+      padding: 8px 48px;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+    }
+  }
+
+  // Cabeçalho da tabela
+  thead {
+    border-bottom-color: $cinza-border;
+    border-bottom-style: solid;
+    border-bottom-width: 2px;
+    padding: 32px 0px 16px 16px;
+    background: $cinza-claro;
+
+    tr {
+      min-height: 64px;
+      max-height: 80px;
+
+      th {
+        padding: 32px 0px 16px 16px;
+        border-bottom: 2px solid $cinza-claro;
+
+        &.legenda {
+          font-family: "montserratsemibold", sans-serif;
+          color: $preto;
+        }
+      }
+
+      .checkCustom {
+        input[type=checkbox]:checked + span {
+          font-size: 12px;
+          line-height: 16px !important;
+        }
+
+        input[type=checkbox].parcial + span:before {
+          font-size: 12px;
+          line-height: 16px !important;
+        }
+
+        span {
+          line-height: 16px !important;
+        }
+      }
+
+      .radioCustom {
+        input[type=radio]:checked + span {
+          font-size: 12px;
+        }
+
+        span {
+          font: 14px montserratsemibold, sans-serif;
+          line-height: 18px;
+          color: $preto;
+          color: #6D6E71;
+        }
+      }
+    }
+  }
+
+  // Corpo da tabela
+  tbody {
+    background: $branco;
+
+    tr {
+      td {
+        padding: 20px 16px;
+        border-bottom: 1px solid $cinza-claro;
+
+        a {
+          font-size: 12px;
+          font-family: montserratmedium, sans-serif;
+        }
+      }
+
+      .checkCustom {
+        input[type=checkbox]:checked + span {
+          font-size: 12px;
+          line-height: 16px !important;
+        }
+
+        input[type=checkbox].parcial + span:before {
+          font-size: 12px;
+          line-height: 16px !important;
+        }
+
+        span {
+          font: 13px montserratmedium, sans-serif;
+          line-height: 17px;
+          color: $cinza-texto;
+          line-height: 16px !important;
+        }
+      }
+
+      .radioCustom {
+        input[type=radio]:checked + span {
+          font-size: 12px;
+        }
+
+        span {
+          font: 13px montserratmedium, sans-serif;
+          line-height: 17px;
+          color: $cinza-texto;
+        }
+      }
+
+      &.cor-linha-par {
+        background: $cinza-claro;
+      }
+    }
+
+    .tabela-checked td {
+      font-family: montserratsemibold, sans-serif;
+      color: $preto;
+      border-top: 1px solid $cinza-escuro;
+      background: $azul-claro;
+
+      a {
+        font-size: 12px;
+        font-family: montserratsemibold, sans-serif;
+      }
+    }
+  }
+
+  // Tabela com expansível
+  &.tabela-expansivel {
+    border-collapse: collapse;
+
+    thead tr {
+      border-left: 4px solid $cinza-medio;
+      border-bottom: 1px solid $cinza-escuro;
+
+      &.active {
+        border-left: 4px solid $azul-principal;
+        display: table-row;
+      }
+
+      th span {
+        &:not(.expansivel) {
+          margin-left: 24px;
+        }
+
+        &.expansivel,
+        &.expansivel.open {
+          margin-right: 8px;
+        }
+      }
+    }
+
+    tbody tr {
+      margin-left: 26px;
+      border-left: 4px solid $branco;
+
+      &.active {
+        border-left: 4px solid $azul-principal;
+        display: table-row;
+      }
+
+      td span {
+        &:not(.expansivel) {
+          margin-left: 24px;
+        }
+
+        &.expansivel,
+        &.expansivel.open {
+          margin-right: 8px;
+        }
+      }
+
+      td .expandido {
+        background: $cinza-claro;
+      }
+    }
+  }
+}
+
+// ============================================================================
+// TABELA COM ORDENAÇÃO (SORT)
+// ============================================================================
+
+.tabela-base.tabela-sort {
+  background-color: $cinza-medio;
+
+  tr th span.arrow-sorter {
+    position: relative;
+    padding-right: 28px;
+    display: inline-block;
+    vertical-align: middle;
+    cursor: pointer;
+  }
+
+  tr th span span.arrow {
+    position: absolute;
+    padding-right: 0;
+    display: block;
+    right: 0;
+    top: 50%;
+    height: 12px;
+    width: 17px;
+    margin-top: -6px;
+  }
+
+  // Estado inicial (não ordenado)
+  tr th.tabela-sort-headerUnSorted span span.arrow {
+    // Ícone de setas para cima e baixo
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='17' height='12' viewBox='0 0 17 12'%3E%3Cpath fill='%23999' d='M8.5 0l4 4h-8zm0 12l-4-4h8z'/%3E%3C/svg%3E");
+    background-position: 0 -1px;
+  }
+
+  // Ordenação ascendente
+  tr th.tabela-sort-headerAsc span span.arrow {
+    // Seta para cima
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%233B69FF' d='M7 14l5-5 5 5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    transform: rotate(90deg);
+  }
+
+  // Ordenação descendente
+  th.tabela-ordenacao-headerDesc span span.arrow {
+    // Seta para baixo
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%233B69FF' d='M7 14l5-5 5 5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    transform: rotate(270deg);
+  }
+}
+
+// ============================================================================
+// ÍCONES
+// ============================================================================
+
+.icon {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: pointer;
+
+  &.seta-baixo {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23666' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  }
+
+  &.seta-cima {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%233B69FF' d='M7 14l5-5 5 5z'/%3E%3C/svg%3E");
+  }
+}
+
+// ============================================================================
+// PAGINAÇÃO
+// ============================================================================
+
+.paginacao {
+  border-top: 1px solid $cinza-escuro;
+  padding-top: 24px;
+  text-align: center;
+}
+
+.paginacao-select {
+  display: inline-flex;
+  float: right;
+  align-items: center;
+
+  .ng-select-container {
+    border: none;
+  }
+
+  .ng-select-container.ng-has-value {
+    padding-left: 12px;
+    padding-right: 16px;
+  }
+
+  .ng-select span.ng-arrow-wrapper {
+    top: 12px;
+  }
+
+  .ng-dropdown-panel .ng-dropdown-panel-items div div {
+    padding: 8px;
+    padding-right: 20px;
+  }
+
+  .ng-select.ng-select-single .ng-select-container .ng-value-container {
+    width: 75px;
+    text-align: center;
+    display: contents;
+  }
+
+  .ng-select .ng-select-container {
+    font-size: 12px;
+  }
+
+  // Select padrão HTML
+  select,
+  .page-size-select {
+    width: 75px;
+    padding: 8px 12px;
+    border: 1px solid $cinza-escuro;
+    border-radius: 4px;
+    font-size: 12px;
+    background: $branco;
+    cursor: pointer;
+
+    &:focus {
+      outline: none;
+      border-color: $azul-principal;
+    }
+  }
+}
+
+.container-paginacao {
+  display: inline-flex;
+  justify-content: space-between;
+  cursor: pointer;
+  width: 100%;
+  padding: 16px 0;
+
+  .anterior-paginacao {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .anterior {
+      height: 24px;
+      width: 24px;
+      transform: rotate(90deg);
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%233B69FF' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") left no-repeat;
+      display: inline-block;
+    }
+
+    button {
+      background: none;
+      border: none;
+      color: $azul-principal;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .proximo-paginacao {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    right: 0;
+
+    .proximo {
+      height: 24px;
+      width: 24px;
+      transform: rotate(-90deg);
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%233B69FF' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") right no-repeat;
+      display: inline-block;
+    }
+
+    button {
+      background: none;
+      border: none;
+      color: $azul-principal;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  // Botões de página
+  .btn-page {
+    min-width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid $cinza-escuro;
+    border-radius: 4px;
+    background: $branco;
+    color: #47484C;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+
+    &:hover {
+      background-color: $cinza-claro;
+      border-color: $azul-principal;
+    }
+
+    &.ativo {
+      background-color: $azul-principal;
+      color: $branco;
+      border-color: $azul-principal;
+      font-family: montserratmedium, sans-serif;
+      font-weight: 600;
+    }
+  }
+
+  .text-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+  }
+}
+
+// ============================================================================
+// RADIO BUTTON CUSTOMIZADO
+// ============================================================================
+
+.radioCustom {
+  display: inline-block;
+  cursor: pointer;
+
+  input[type=radio] {
+    position: absolute;
+    opacity: 0;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+    filter: alpha(opacity=0);
+
+    &:disabled {
+      font: 14px montserratsemibold, sans-serif;
+      line-height: 18px;
+      color: $preto;
+      color: #6D6E71;
+
+      + span {
+        color: $cinza-border !important;
+
+        &:before {
+          border: 1px solid $cinza-border;
+        }
+      }
+
+      &:checked + span:before {
+        border: 3px solid $cinza-border;
+      }
+    }
+
+    &:checked + span {
+      font: 14px montserratsemibold, sans-serif;
+      line-height: 18px;
+      color: $preto;
+
+      &:before {
+        border: 3px solid $azul-principal;
+      }
+    }
+  }
+
+  span {
+    font: 14px montserratmedium, sans-serif;
+    color: #999999;
+    position: relative;
+    padding-left: 24px;
+    display: block;
+    line-height: 17px;
+    min-height: 17px;
+
+    &:before {
+      border: 1px solid $azul-principal;
+      height: 14px;
+      width: 14px;
+      content: "";
+      display: block;
+      float: right;
+      background: none;
+      border-radius: 50%;
+      position: relative;
+      top: 50%;
+      left: 0;
+    }
+  }
+}
+
+// ============================================================================
+// CAMPO DE BUSCA
+// ============================================================================
+
+.inputText {
+  position: relative;
+  margin-bottom: 1rem;
+
+  .icone-busca {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    pointer-events: none;
+
+    &::before {
+      content: "🔍";
+      font-size: 16px;
+    }
+  }
+
+  .busca {
+    width: 100%;
+    padding: 0.75rem 2.5rem;
+    border: 1px solid $cinza-escuro;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: montserratmedium, sans-serif;
+
+    &:focus {
+      outline: none;
+      border-color: $azul-principal;
+    }
+  }
+}
+
+// ============================================================================
+// UTILITÁRIOS
+// ============================================================================
+
+.alinhamento-centro {
+  display: flex;
+  align-items: center;
+}
+
+.mr-8 {
+  margin-right: 0.5rem;
+}
+
+.mr-16 {
+  margin-right: 1rem;
+}
+
+.mt-8 {
+  margin-top: 0.5rem;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.clearfix::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+// ============================================================================
+// LEGENDA
+// ============================================================================
+
+.legenda {
+  font-size: 13px;
+  color: $cinza-texto;
+  font-family: montserratmedium, sans-serif;
+
+  &.legError {
+    color: #CC0000;
+  }
+}
+
+// ============================================================================
+// RESPONSIVIDADE
+// ============================================================================
+
+@media (max-width: 768px) {
+  .tabela-base {
+    caption > div {
+      flex-direction: column;
+      height: auto;
+      padding: 16px;
+
+      > div:nth-child(1) {
+        padding-left: 0;
+        margin-bottom: 16px;
+      }
+
+      > div:nth-child(2) button {
+        margin: 0;
+      }
+    }
+
+    thead tr th {
+      padding: 16px 8px;
+      font-size: 12px;
+    }
+
+    tbody tr td {
+      padding: 12px 8px;
+      font-size: 12px;
+    }
+  }
+
+  .container-paginacao {
+    flex-wrap: wrap;
+    gap: 16px;
+
+    .anterior-paginacao,
+    .proximo-paginacao {
+      order: 2;
+    }
+
+    .text-center {
+      order: 1;
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  .paginacao-select {
+    float: none;
+    justify-content: center;
+    margin-top: 16px;
+  }
+}

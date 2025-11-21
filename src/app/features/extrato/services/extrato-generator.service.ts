@@ -1,11 +1,10 @@
 import { Injectable } from '@angular/core';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import * as XLSX from 'xlsx';
 import * as XLSXStyle from 'xlsx-js-style';
 import { WebViewDownloadService } from '../../../shared/services/webview-download.service';
 import { RendaFixaData } from '../../../../../types/extrato.types';
-import { RENDA_FIXA_DATA, MOCK_EXTRATO_DATA } from '../../../../../data/mock-extrato.data';
+import { RENDA_FIXA_DATA } from '../../../../../data/mock-extrato.data';
 
 // Importações dos serviços modulares essenciais
 import { DocumentFormatterService } from './formatters/document-formatter.service';
@@ -1575,6 +1574,4 @@ export class ExtratoGeneratorService {
     range.e.r = Math.max(range.e.r, dados.length - 1);
     worksheet['!ref'] = XLSXStyle.utils.encode_range(range);
   }
-
-
 }

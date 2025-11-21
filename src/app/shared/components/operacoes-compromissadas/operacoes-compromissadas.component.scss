@@ -1,0 +1,376 @@
+.operacoes-compromissadas {
+  padding: 24px;
+  background-color: #ffffff;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  .section-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0 0 20px 0;
+    padding: 0;
+  }
+
+  .summary-values {
+    display: flex;
+    gap: 40px;
+    margin-bottom: 20px;
+    padding: 0;
+
+    .summary-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+
+      .summary-label {
+        font-size: 12px;
+        color: #666666;
+        font-weight: 400;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .summary-value {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1a1a1a;
+      }
+    }
+  }
+
+  .table-container {
+    background: white;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    overflow: hidden;
+
+    .table-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1a1a1a;
+      padding: 16px 20px;
+      margin: 0;
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #e5e5e5;
+    }
+
+    .custom-table-wrapper {
+      overflow-x: auto;
+    }
+
+    .operacoes-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+
+      .tabela-header {
+        background-color: #f8f9fa;
+        
+        th {
+          padding: 12px 16px;
+          text-align: left;
+          font-weight: 600;
+          color: #1a1a1a;
+          border-bottom: 1px solid #e5e5e5;
+          position: relative;
+          white-space: nowrap;
+          
+          &.sortable-header {
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.15s ease;
+
+            &:hover {
+              background-color: #e9ecef;
+            }
+
+            .sort-arrow {
+              margin-left: 6px;
+              font-size: 10px;
+              color: #999999;
+              transition: color 0.15s ease;
+              display: inline-block;
+              width: 12px;
+              text-align: center;
+            }
+
+            &.active {
+              background-color: #e3f2fd;
+              
+              .sort-arrow {
+                color: #1976d2;
+                font-weight: bold;
+              }
+            }
+          }
+        }
+      }
+
+      .tabela-body {
+        .tabela-row {
+          border-bottom: 1px solid #f0f0f0;
+          transition: background-color 0.15s ease;
+
+          &:hover {
+            background-color: #f8f9fa;
+          }
+
+          &:last-child {
+            border-bottom: none;
+          }
+
+          .tabela-cell {
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #1a1a1a;
+            vertical-align: top;
+
+            &.certificado-cell {
+              font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+              font-weight: 500;
+              font-size: 13px;
+
+              .certificado-content {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+
+                .expand-btn {
+                  background: none;
+                  border: none;
+                  cursor: pointer;
+                  padding: 2px 6px;
+                  border-radius: 3px;
+                  font-size: 14px;
+                  color: #333;
+                  transition: all 0.2s ease;
+                  min-width: 20px;
+                  height: 20px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-weight: 400;
+                  line-height: 1;
+                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+                  &:hover {
+                    background-color: #f0f0f0;
+                    color: #000;
+                  }
+
+                  &.expanded {
+                    color: #333;
+                  }
+                }
+
+                .certificado-number {
+                  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+                  font-weight: 500;
+                  font-size: 13px;
+                }
+              }
+            }
+
+            &.data-cell {
+              color: #666666;
+              font-size: 13px;
+            }
+
+            &.valor-cell {
+              text-align: right;
+              font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+              font-weight: 500;
+              font-size: 13px;
+
+              &.valor-liquido-cell {
+                color: #1a1a1a;
+                font-weight: 600;
+              }
+            }
+          }
+        }
+
+        // Linha expandida
+        .expandido-row {
+          background-color: #f8f9fa;
+          border-top: none;
+
+          .expandido-content {
+            padding: 0;
+            border-top: 1px solid #e5e5e5;
+
+            .expandido-details {
+              padding: 20px;
+              background-color: #ffffff;
+              border: 1px solid #e5e5e5;
+              border-radius: 4px;
+              margin: 8px;
+
+              .detail-section {
+                margin-bottom: 24px;
+
+                &:last-child {
+                  margin-bottom: 0;
+                }
+
+                .detail-title {
+                  font-size: 14px;
+                  font-weight: 600;
+                  color: #333;
+                  margin: 0 0 12px 0;
+                  padding-bottom: 6px;
+                  border-bottom: 1px solid #e5e5e5;
+                }
+
+                .detail-grid {
+                  display: grid;
+                  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                  gap: 12px;
+
+                  .detail-item {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 8px 0;
+                    border-bottom: 1px solid #f0f0f0;
+
+                    &:last-child {
+                      border-bottom: none;
+                    }
+
+                    .detail-label {
+                      font-size: 13px;
+                      color: #666;
+                      font-weight: 500;
+                      flex: 1;
+                    }
+
+                    .detail-value {
+                      font-size: 13px;
+                      color: #333;
+                      font-weight: 600;
+                      text-align: right;
+                      font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Paginação customizada
+    .custom-pagination {
+      padding: 12px 20px;
+      background-color: #f8f9fa;
+      border-top: 1px solid #e5e5e5;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .pagination-info {
+        font-size: 13px;
+        color: #666666;
+        font-weight: 400;
+      }
+
+      .pagination-buttons {
+        display: flex;
+        gap: 4px;
+
+        .pagination-btn {
+          padding: 8px 12px;
+          border: 1px solid #d1d5db;
+          background: white;
+          color: #374151;
+          border-radius: 6px;
+          cursor: pointer;
+          transition: all 0.15s ease;
+          font-size: 16px;
+          min-width: 36px;
+          height: 36px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-left: 6px;
+          font-weight: 600;
+
+          &:hover:not(:disabled) {
+            background-color: #f3f4f6;
+            border-color: #9ca3af;
+            transform: translateY(-1px);
+          }
+
+          &:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            background-color: #f9fafb;
+            transform: none;
+          }
+
+          &.first-btn {
+            font-size: 16px;
+          }
+
+          &.prev-btn {
+            font-size: 16px;
+          }
+
+          &.next-btn {
+            font-size: 16px;
+          }
+
+          &.last-btn {
+            font-size: 16px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .operacoes-compromissadas {
+    padding: 16px;
+
+    .summary-values {
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .table-container {
+      :host ::ng-deep .operacoes-table {
+        .tabela-header th,
+        .tabela-body .tabela-cell {
+          padding: 8px 12px;
+          font-size: 13px;
+        }
+      }
+    }
+  }
+}
+
+// Estilo para destacar coluna ativa (como na imagem)
+.operacoes-compromissadas {
+  :host ::ng-deep .operacoes-table {
+    .tabela-header th.active {
+      background-color: #e3f2fd;
+      color: #1976d2;
+      position: relative;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background-color: #1976d2;
+      }
+    }
+  }
+}

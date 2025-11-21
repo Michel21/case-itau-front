@@ -1,0 +1,31 @@
+<div class="container-paginacao mt-8">
+    <div class="anterior-paginacao">
+        @if (!firstPage()) {
+            <button class="btn-anterior" (click)="setPage(currentPage() - 1)" type="button">
+                <span class="anterior">‹</span>
+                {{labelAnterior()}}
+            </button>
+        }
+    </div>
+    
+    <div class="text-center">
+        @for (page of pages(); track page.page) {
+            <button 
+                class="btn-page mr-8" 
+                type="button"
+                [ngClass]="{ 'ativo': page.page === currentPage() }"
+                (click)="setPage(page.page)">
+                {{ page.descricao }}
+            </button>
+        }
+    </div>
+    
+    <div class="proximo-paginacao">
+        @if (!lastPage()) {
+            <button class="btn-proximo" (click)="setPage(currentPage() + 1)" type="button">
+                {{labelProximo()}}
+                <span class="proximo">›</span>
+            </button>
+        }
+    </div>
+</div>

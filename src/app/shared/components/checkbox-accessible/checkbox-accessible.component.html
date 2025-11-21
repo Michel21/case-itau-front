@@ -1,0 +1,76 @@
+<!-- Container do Checkbox -->
+<div 
+  class="checkbox-wrapper"
+  [class.checkbox-wrapper--disabled]="disabled()">
+  
+  <!-- Checkbox (button com role="checkbox") -->
+  <button
+    type="button"
+    role="checkbox"
+    [id]="id()"
+    class="checkbox"
+    [ngClass]="checkboxClasses()"
+    [attr.aria-checked]="isChecked() ? 'true' : 'false'"
+    [attr.aria-label]="ariaLabel()"
+    [attr.aria-describedby]="description() ? id() + '-description' : null"
+    [attr.aria-disabled]="disabled() ? 'true' : null"
+    [disabled]="disabled()"
+    [tabindex]="disabled() ? -1 : 0"
+    (click)="toggle()"
+    (keydown)="onKeyDown($event)"
+    (focus)="onFocus()"
+    (blur)="onBlur()">
+    
+    <!-- Ícone de Check -->
+    <span class="checkbox__icon" aria-hidden="true">
+      @if (isChecked()) {
+        <svg 
+          xmlns="http://www.w3.org/2000/svg" 
+          width="16" 
+          height="16" 
+          viewBox="0 0 16 16" 
+          fill="none">
+          <path 
+            d="M13.5 4L6 11.5L2.5 8" 
+            stroke="currentColor" 
+            stroke-width="2" 
+            stroke-linecap="round" 
+            stroke-linejoin="round"/>
+        </svg>
+      }
+    </span>
+  </button>
+
+  <!-- Label -->
+  <label 
+    [for]="id()" 
+    class="checkbox-label"
+    [class.checkbox-label--disabled]="disabled()">
+    {{ label() }}
+    
+    <!-- Ícone de validação (opcional) -->
+    @if (showValidation() && isChecked()) {
+      <span class="checkbox-label__validation" aria-hidden="true">
+        ✓
+      </span>
+    }
+  </label>
+
+  <!-- Descrição adicional -->
+  @if (description()) {
+    <p 
+      [id]="id() + '-description'" 
+      class="checkbox-description">
+      {{ description() }}
+    </p>
+  }
+</div>
+
+<!-- Live Region (fallback, LiveAnnouncer já cuida disso) -->
+<div 
+  class="visually-hidden" 
+  role="status" 
+  aria-live="polite" 
+  aria-atomic="true">
+</div>
+

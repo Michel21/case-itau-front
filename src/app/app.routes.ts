@@ -35,6 +35,23 @@ export const routes: Routes = [
     loadChildren: () => import('./features/extrato/selecao-periodo/demo/validacao-periodo-demo.routes').then(m => m.VALIDACAO_PERIODO_DEMO_ROUTES)
   },
   {
+    path: 'extrato-filtro-demo',
+    loadChildren: () => import('./features/extrato/selecao-periodo/demo/extrato-filtro-figma/extrato-filtro-figma.routes').then(m => m.extratoFiltroFigmaRoutes)
+  },
+  {
+    path: 'periodo-mobile',
+    loadComponent: () => import('./features/extrato/selecao-periodo/periodo-mobile/periodo-mobile.component').then(m => m.PeriodoMobileComponent)
+  },
+  {
+    path: 'demo/modal-periodo',
+    loadComponent: () => import('./shared/components/modal-periodo/modal-periodo-demo.component').then(m => m.ModalPeriodoDemoComponent)
+  },
+  // Rota do toggle-segmented-demo removida - componente não existe
+  // {
+  //   path: 'demo/toggle-segmented',
+  //   loadComponent: () => import('./shared/components/toggle-segmented/toggle-segmented-demo.component').then(m => m.ToggleSegmentedDemoComponent)
+  // },
+  {
     path: 'extrato-generator-demo',
     loadChildren: () => import('./features/extrato/services/extrato-generator-demo.routes').then(m => m.EXTRATO_GENERATOR_DEMO_ROUTES)
   },

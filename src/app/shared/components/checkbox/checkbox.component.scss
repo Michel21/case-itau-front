@@ -1,0 +1,190 @@
+// ============================================================================
+// CHECKBOX COMPONENT - Baseado em LIB_CCP_V2
+// ============================================================================
+
+// Variáveis
+$azul-principal: #3B69FF;
+$cinza-texto: #47484C;
+$cinza-desabilitado: #A7A8AC;
+$preto: #000;
+
+// Previne seleção de texto
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version */
+}
+
+// Checkbox principal
+.bradCheckbox {
+  font: 14px montserratmedium, sans-serif;
+  line-height: 17px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  height: 24px;
+  box-sizing: border-box;
+  color: $cinza-texto;
+  cursor: pointer;
+
+  span {
+    width: 16px;
+    height: 16px;
+    box-sizing: border-box;
+    display: inline-block;
+    margin-right: 8px;
+    border: 1px solid $azul-principal;
+    border-radius: 4px;
+    background-color: transparent;
+    transition: all 0.2s ease;
+  }
+
+  // Estado checked (selecionado)
+  &[aria-checked="true"] {
+    font-family: "montserratbold", sans-serif;
+    font-weight: 700;
+    color: $preto;
+
+    span {
+      background: $azul-principal;
+      border: 1px solid $azul-principal;
+      position: relative;
+
+      // Ícone de check usando SVG inline
+      &::after {
+        content: '';
+        position: absolute;
+        left: 3px;
+        top: 0px;
+        width: 8px;
+        height: 12px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+      }
+    }
+  }
+
+  // Estado mixed (parcial/indeterminado)
+  &[aria-checked="mixed"] {
+    span {
+      background: $azul-principal;
+      border: 1px solid $azul-principal;
+      position: relative;
+
+      // Ícone de menos (traço) usando SVG inline
+      &::after {
+        content: '';
+        position: absolute;
+        left: 3px;
+        top: 6px;
+        width: 8px;
+        height: 2px;
+        background: white;
+      }
+    }
+  }
+
+  // Estado focus
+  &:focus span {
+    border-color: $azul-principal;
+    box-shadow: 0 0 0 2px rgba(59, 105, 255, 0.2);
+  }
+
+  // Estado desabilitado
+  &[aria-disabled="true"] {
+    color: $cinza-desabilitado;
+    cursor: not-allowed;
+
+    &[aria-checked="true"] span {
+      background-color: $azul-principal;
+      border-color: $azul-principal;
+      opacity: 0.5;
+    }
+
+    &[aria-checked="false"] span {
+      background-color: transparent;
+      border-color: $azul-principal;
+      opacity: 0.5;
+    }
+
+    &[aria-checked="mixed"] span {
+      background-color: $azul-principal;
+      border-color: $azul-principal;
+      opacity: 0.5;
+    }
+  }
+
+  // Hover (quando não desabilitado)
+  &:not([aria-disabled="true"]):hover span {
+    border-color: darken($azul-principal, 10%);
+  }
+}
+
+// Checkbox pequeno
+.bradCheckboxSmall {
+  font-size: 12px;
+  height: 16px;
+
+  span {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+// Layout com justificação (espaço entre checkbox e texto)
+.justificar {
+  justify-content: space-between;
+  width: 100%;
+
+  span {
+    order: 2;
+    margin-right: 0;
+    margin-left: 8px;
+  }
+}
+
+// Label à esquerda
+.reverse {
+  flex-direction: row-reverse;
+
+  span {
+    margin-right: 0;
+    margin-left: 8px;
+  }
+
+  &.justificar {
+    span {
+      order: 1;
+      margin-left: 0;
+      margin-right: 8px;
+    }
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .bradCheckbox {
+    font-size: 13px;
+    height: 20px;
+
+    span {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  .bradCheckboxSmall {
+    font-size: 11px;
+    height: 14px;
+
+    span {
+      width: 10px;
+      height: 10px;
+    }
+  }
+}
+

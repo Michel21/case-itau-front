@@ -15,6 +15,7 @@
       "ES2022",
       "dom"
     ],
+    "types": ["node"],
     "useDefineForClassFields": false,
     "strict": true,
     "noImplicitOverride": true,

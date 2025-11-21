@@ -19,7 +19,7 @@
       class="modal-content"
       [class]="config().contentClass || ''"
       role="dialog"
-      [attr.aria-labelledby]="'modal-title-' + modalId"
+      [attr.aria-label]="titulo()"
       [attr.aria-modal]="true"
       (click)="onModalClick($event)"
       appFocusTrap
@@ -30,8 +30,8 @@
       <!-- 
         TÍTULO DO MODAL
         - Focável para receber foco inicial (WCAG 2.4.3 Focus Order)
-        - ID único para referência via aria-labelledby
-        - h2 já é semanticamente um heading de nível 2 (sem necessidade de role/aria-level)
+        - aria-hidden="true" para evitar que leitor de tela leia "nível de título 2"
+        - Título é narrado via aria-label do dialog e narração programática
         - Suporta navegação por teclado (setas) para iniciar navegação na lista
         - tabindex="-1" permite foco programático mas não via Tab
         - Event listeners gerenciados via JavaScript nativo (refatorado)
@@ -40,6 +40,7 @@
         #modalTitle 
         [id]="'modal-title-' + modalId"
         class="modal-title" 
+        aria-hidden="true"
         tabindex="-1">
         {{ titulo() }}
       </h2>

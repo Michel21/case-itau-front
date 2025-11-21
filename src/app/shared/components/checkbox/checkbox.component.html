@@ -1,0 +1,18 @@
+<label
+  [ngClass]="{ 
+    'justificar': justificar(), 
+    'reverse': labelEsquerda(),
+    'bradCheckboxSmall': small()
+  }"
+  (click)="changeCheckbox()"
+  (keyup.enter)="changeCheckbox()"
+  (keyup.space)="changeCheckbox()"
+  [attr.aria-checked]="ariaChecked()"
+  [attr.aria-disabled]="disabled() ? 'true' : 'false'"
+  [attr.tabindex]="disabled() ? null : tabindex()"
+  [attr.title]="attrTitle()"
+  class="noselect bradCheckbox"
+  role="checkbox">
+  <span></span>
+  {{titulo()}}
+</label>

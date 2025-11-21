@@ -1,0 +1,177 @@
+@if (buscaMostrarCampo()) {
+  <div class="inputText">
+    <span class="icone-busca"></span>
+    <span class="icone-fechar"></span>
+    <input #inputBusca class="busca" type="text" placeholder="Buscar">
+  </div>
+}
+
+@if (temPaginacao()) {
+  <div class="paginacao-select alinhamento-centro mr-8">
+    <p class="mr-16">{{labelResultadosPorPagina()}}</p>
+    <select
+      (change)="setPageSize({numero: $any($event.target).value})"
+      [value]="pageSize()"
+      class="page-size-select">
+      @for (size of recordsPageSize(); track size.numero) {
+        <option [value]="size.numero">{{size.numero}}</option>
+      }
+    </select>
+  </div>
+}
+
+<table class="tabela-base tabela-sort">
+  @if (caption() || botoesCaption()) {
+    <caption>
+      <div>
+        <div class="caption-text">{{caption() || ''}}</div>
+        @if (botoesCaption(); as botoes) {
+          <div>
+            <ng-container *ngTemplateOutlet="botoes"></ng-container>
+          </div>
+        }
+      </div>
+    </caption>
+  }
+  
+  <thead>
+    @if (mostrarHeader()) {
+      <tr>
+        @if (temExpansivel()) {
+          <th class="tamanhoColunaIcones"></th>
+        }
+        
+        @if (temCheckbox()) {
+          <th class="tamanhoColunaIcones">
+            <input
+              type="checkbox"
+              [checked]="checkHeader()"
+              [indeterminate]="checkHeader() === undefined"
+              (change)="valueChangeHeader($any($event.target).checked)">
+          </th>
+        }
+        
+        @if (temRadioButton()) {
+          <th class="tamanhoColunaIcones"></th>
+        }
+        
+        @if (headers().length > 0) {
+          @for (header of headers(); track $index) {
+            <th
+              class="legenda"
+              [ngClass]="sortClassColumn()[$index]">
+              <span class="arrow-sorter">
+                <span
+                  class="arrow"
+                  (click)="ordena($index)"></span>
+                <ng-container *ngTemplateOutlet="header"></ng-container>
+              </span>
+            </th>
+          }
+        }
+
+        @if (headers().length === 0) {
+          @for (header of headersDirective(); track $index) {
+            <th
+              class="legenda"
+              [ngClass]="sortClassColumn()[$index]">
+              @if (desabilitarOrdenadacao() && desabilitarOrdenadacao().indexOf($index) >= 0) {
+                <ng-container *ngTemplateOutlet="header.template"></ng-container>
+              } @else {
+                <span
+                  class="arrow-sorter"
+                  (click)="ordena($index, header.campoOrdenacao)">
+                  <span class="arrow"></span>
+                  <ng-container *ngTemplateOutlet="header.template"></ng-container>
+                </span>
+              }
+            </th>
+          }
+        }
+      </tr>
+    }
+  </thead>
+  
+  <tbody>
+    @for (linha of (buscaAtivarBuscaEstatica() === true ? ((itensProcessados() | filtrarArray : buscaKeyword() : buscarNasPropriedades()) | sliceArray : paginacaoStartIndex() : paginacaoEndIndex()) : (pageOfItens())); track $index) {
+      <tr
+        class="legenda"
+        [ngClass]="linha.linhaAzul"
+        [class.cor-linha-par]="$index % 2 != 0 && !linha.linhaAzul">
+        
+        @if (temExpansivel()) {
+          <td
+            class="tamanhoColunaIcones"
+            [ngClass]="linha.borderLeftAzul">
+            <span
+              [ngClass]="linha.iconeExpansivel"
+              (click)="expande(linha._internalID)"></span>
+          </td>
+        }
+        
+        @if (temCheckbox()) {
+          <td class="tamanhoColunaIcones">
+            <input
+              type="checkbox"
+              [checked]="linha.check || false"
+              (change)="valueChangeItem($any($event.target).checked, $index)">
+          </td>
+        }
+        
+        @if (temRadioButton()) {
+          <td class="tamanhoColunaIcones">
+            <label class="radioCustom clearfix">
+              <input
+                type="radio"
+                name="grupo"
+                (change)="valueChangeItemRadio($any($event.target).checked, $index)">
+              <span></span>
+            </label>
+          </td>
+        }
+        
+        @for (coluna of colunas(); track $index) {
+          <td>
+            <ng-container *ngTemplateOutlet="coluna; context: { elemento: linha }"></ng-container>
+          </td>
+        }
+      </tr>
+      
+      @if (temExpansivel() && linha.expande) {
+        <tr [style.background]="'#FFFFFF'">
+          @for (expansivel of expansiveis(); track $index) {
+            <td
+              [attr.colspan]="(temCheckbox() || temRadioButton() ? colunas().length + 2 : colunas().length + 1)"
+              [ngClass]="linha.borderLeftAzul">
+              <ng-container *ngTemplateOutlet="expansivel; context: { elemento: linha }"></ng-container>
+            </td>
+          }
+        </tr>
+      }
+    }
+  </tbody>
+</table>
+
+@if (temPaginacao()) {
+  <div class="paginacao-select alinhamento-centro mr-8">
+    <p class="mr-16">{{labelResultadosPorPagina()}}</p>
+    <select
+      (change)="setPageSize({numero: $any($event.target).value})"
+      [value]="pageSize()"
+      class="page-size-select">
+      @for (size of recordsPageSize(); track size.numero) {
+        <option [value]="size.numero">{{size.numero}}</option>
+      }
+    </select>
+  </div>
+  
+  <app-paginacao
+    (changePage)="onChangePage($event)"
+    [currentPage]="currentPage()"
+    [labelAnterior]="labelAnterior()"
+    [labelProximo]="labelProximo()"
+    [pageSize]="pageSize()"
+    [totalItems]="(buscaAtivarBuscaEstatica() === true
+                    ? (itensProcessados() | filtrarArray : buscaKeyword() : buscarNasPropriedades()).length
+                    : itensProcessados().length)"></app-paginacao>
+}

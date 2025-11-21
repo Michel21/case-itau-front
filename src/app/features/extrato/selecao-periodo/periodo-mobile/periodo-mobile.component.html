@@ -1,0 +1,102 @@
+<div class="periodo-mobile" lang="pt-BR">
+  <!-- HEADER -->
+  <header class="header">
+    <button 
+      type="button" 
+      class="header__back-btn"
+      aria-label="Voltar"
+      (click)="voltar()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M15 18L9 12L15 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <h1 class="header__title">Investimentos</h1>
+  </header>
+
+  <!-- CONTENT -->
+  <main class="content">
+    <!-- Título e Subtítulo -->
+    <section class="intro">
+      <h2 class="intro__title">
+        Para visualizar o extrato,<br>escolha o período
+      </h2>
+      <p class="intro__subtitle">
+        É possível consultar lançamentos dos<br>últimos 12 meses.
+      </p>
+    </section>
+
+    <!-- Formulário -->
+    <form 
+      class="form" 
+      [formGroup]="filtroForm" 
+      (ngSubmit)="aplicarFiltro()" 
+      novalidate>
+      
+      <!-- Toggle Intervalo / Mês -->
+      <app-toggle-segmented
+        [options]="periodos"
+        formControlName="tipoPeriodo"
+        [styleConfig]="{variant: 'pills'}"
+        ariaLabel="Tipo de período"
+      />
+
+      <!-- Campos de Seleção (usando app-input-select) -->
+      @if (tipoPeriodo() === 'mes') {
+        <div class="fields">
+          <!-- Campo Mês (abre modal) -->
+          <app-input-select
+            label="Mês"
+            [value]="nomeMesSelecionado()"
+            placeholder="Selecione o mês"
+            (inputClick)="abrirModalMes()"
+            [styleConfig]="{variant: 'outline', fullWidth: true}"
+            ariaLabel="Selecionar mês"
+          />
+
+          <!-- Campo Ano (abre modal) -->
+          <app-input-select
+            label="Ano"
+            [value]="anoSelecionado()"
+            placeholder="Selecione o ano"
+            (inputClick)="abrirModalAno()"
+            [styleConfig]="{variant: 'outline', fullWidth: true}"
+            ariaLabel="Selecionar ano"
+          />
+        </div>
+      }
+
+      <!-- Botão Aplicar Filtro -->
+      <button
+        type="submit"
+        class="submit-btn"
+        [disabled]="!botaoHabilitado()"
+        [attr.aria-disabled]="!botaoHabilitado() ? 'true' : null">
+        Aplicar filtro
+      </button>
+    </form>
+  </main>
+
+  <!-- MODAIS -->
+  <!-- Modal de Seleção de Mês -->
+  <app-modal-select-generic
+    [isOpen]="modalMesAberto()"
+    [titulo]="'Selecione o mês'"
+    [options]="meses"
+    [selectedValue]="mesSelecionado()"
+   
+    (confirmar)="confirmarMes($event)"
+    (cancelar)="cancelarMes()"
+  />
+
+  <!-- Modal de Seleção de Ano -->
+  <app-modal-select-generic
+    [isOpen]="modalAnoAberto()"
+    [titulo]="'Selecione o ano'"
+    [options]="anos"
+    [selectedValue]="anoSelecionado()"
+   
+    (confirmar)="confirmarAno($event)"
+    (cancelar)="cancelarAno()"
+  />
+</div>
+

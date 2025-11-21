@@ -1,0 +1,345 @@
+// ============================================================================
+// VARIÁVEIS - CORES ITAÚ
+// ============================================================================
+
+$itau-blue-primary: #0046C0;
+$itau-blue-dark: #003380;
+$itau-blue-light: #005FE7;
+$itau-gray-bg: #F5F5F5;
+$itau-gray-text: #6B6B6B;
+$itau-gray-border: #D9D9D9;
+$itau-gray-disabled: #B3B3B3;
+$itau-red-error: #D32F2F;
+$white: #FFFFFF;
+$black: #1A1A1A;
+
+// ============================================================================
+// CONTAINER PRINCIPAL
+// ============================================================================
+
+.input-select {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+  &--full-width {
+    width: 100%;
+  }
+
+  // ============================================================================
+  // CONTAINER DO BOTÃO
+  // ============================================================================
+
+  &__container {
+    position: relative;
+    width: 100%;
+  }
+
+  // ============================================================================
+  // CONTEÚDO DO INPUT (Label + Valor)
+  // ============================================================================
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; // Centraliza quando vazio
+    flex: 1;
+    margin-top: 5px;
+    min-width: 0;
+  }
+
+  // ============================================================================
+  // LABEL PEQUENO (quando tem valor - "Mês", "Ano")
+  // ============================================================================
+
+  &__label-small {
+    font-size: 12px; // Um pouco maior para melhor visibilidade
+    font-weight: 400;
+    color: #737373; // Cinza médio
+    line-height: 1;
+    text-align: left;
+    margin-bottom: 2px; // Espaço antes do valor
+  }
+
+  // ============================================================================
+  // VALOR (texto selecionado - "Novembro", "2025")
+  // ============================================================================
+
+  &__value {
+    font-size: 16px; // Um pouco maior (como na imagem)
+    font-weight: 400;
+    color: #1A1A1A; // Preto
+    line-height: 1.2;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // ============================================================================
+  // PLACEHOLDER (quando vazio)
+  // ============================================================================
+
+  &__placeholder {
+    font-size: 16px; // Consistente com o valor
+    font-weight: 400;
+    color: #999999; // Cinza placeholder
+    line-height: 1.2;
+    text-align: left;
+  }
+
+  &__required {
+    color: $itau-red-error;
+    margin-left: 0.125rem;
+  }
+
+  // Button/Input (como na imagem de exemplo)
+  &__button {
+    display: flex;
+    flex-direction: row; // Horizontal: conteúdo + ícone
+    align-items: center; // Centralizado quando vazio
+    justify-content: space-between; // Conteúdo à esquerda, ícone à direita
+    gap: 12px;
+    width: 100%;
+    height: 64px; // Altura fixa (como na imagem)
+    padding: 12px 16px; // Padding balanceado (como na imagem)
+    background-color: #FFFFFF; // Branco puro
+    border: 1px solid #D9D9D9; // Borda cinza visível
+    border-radius: 12px; // Border radius
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    text-align: left;
+    position: relative;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    // Quando tem valor, alinha no topo (label + valor ficam no topo do input)
+    &.has-value {
+      align-items: flex-start; // Alinha no topo quando preenchido
+      padding-top: 10px; // Um pouco de espaço do topo (como na imagem)
+      padding-bottom: 10px;
+    }
+
+    &:hover:not(:disabled) {
+      border-color: $itau-blue-primary;
+    }
+
+    &:focus:not(:disabled) {
+      outline: none;
+      border-color: $itau-blue-primary;
+      box-shadow: 0 0 0 3px rgba(0, 70, 192, 0.1);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      background-color: #F5F5F5;
+      border-color: #E5E5E5;
+      opacity: 0.6;
+    }
+  }
+
+  // ============================================================================
+  // ÍCONE DA SETA (→)
+  // ============================================================================
+
+  &__icon {
+    flex-shrink: 0; // Não encolhe
+    width: 18px; // Tamanho visível e proporcional
+    height: 18px; // Tamanho visível e proporcional
+    color: $itau-blue-primary; // Azul Itaú
+    transition: transform 0.2s ease;
+    align-self: center !important; // ✅ Sempre centralizado verticalmente
+    margin-top: auto; // Centraliza verticalmente
+    margin-bottom: auto; // Centraliza verticalmente
+    opacity: 0.8; // Levemente transparente para suavizar
+  }
+
+  // ============================================================================
+  // HINT E ERROR
+  // ============================================================================
+
+  &__hint {
+    font-size: 0.75rem;
+    color: $itau-gray-text;
+    line-height: 1.4;
+    padding-left: 1rem;
+  }
+
+  &__error {
+    font-size: 0.75rem;
+    color: $itau-red-error;
+    line-height: 1.4;
+    font-weight: 500;
+    padding-left: 1rem;
+  }
+
+  // ============================================================================
+  // ESTADOS
+  // ============================================================================
+
+  &--error {
+    .input-select__button {
+      border-color: $itau-red-error;
+
+      &:hover:not(:disabled) {
+        border-color: $itau-red-error;
+      }
+
+      &:focus:not(:disabled) {
+        border-color: $itau-red-error;
+        box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1);
+      }
+    }
+
+    .input-select__label-small,
+    .input-select__placeholder {
+      color: $itau-red-error;
+    }
+  }
+
+  &--disabled {
+    .input-select__label-small,
+    .input-select__placeholder,
+    .input-select__value {
+      color: $itau-gray-disabled;
+    }
+
+    .input-select__icon {
+      opacity: 0.5;
+    }
+  }
+
+  // ============================================================================
+  // VARIANTES
+  // ============================================================================
+
+  // Variant: Outline (Padrão - como na imagem)
+  &--variant-outline {
+    .input-select__button {
+      background-color: #FFFFFF; // Branco puro (como na imagem)
+      border: 1px solid #D9D9D9; // Borda cinza visível (como na imagem)
+
+      &:hover:not(:disabled) {
+        border-color: $itau-blue-primary;
+      }
+
+      &:focus:not(:disabled) {
+        border-color: $itau-blue-primary;
+        box-shadow: 0 0 0 3px rgba(0, 70, 192, 0.1);
+      }
+    }
+  }
+
+  // Variant: Filled
+  &--variant-filled {
+    .input-select__button {
+      background-color: #F5F5F5; // Cinza bem claro para filled
+      border: 1px solid #E5E5E5;
+
+      &:hover:not(:disabled) {
+        border-color: $itau-blue-primary;
+        background-color: #F0F0F0;
+      }
+
+      &:focus:not(:disabled) {
+        border-color: $itau-blue-primary;
+        background-color: #FFFFFF;
+        box-shadow: 0 0 0 3px rgba(0, 70, 192, 0.1);
+      }
+    }
+  }
+
+  // Variant: Minimal (sem borda, só underline)
+  &--variant-minimal {
+    .input-select__button {
+      background-color: transparent;
+      border: none;
+      border-bottom: 2px solid $itau-gray-border;
+      border-radius: 0;
+      padding-left: 0;
+
+      &:hover:not(:disabled) {
+        background-color: transparent;
+        border-bottom-color: $itau-blue-primary;
+      }
+
+      &:focus-visible:not(:disabled) {
+        outline: none;
+        border-bottom-color: $itau-blue-primary;
+      }
+    }
+  }
+
+  // ============================================================================
+  // TAMANHOS
+  // ============================================================================
+
+  &--size-sm {
+    .input-select__button {
+      height: 40px;
+      font-size: 0.875rem;
+      padding: 0 0.75rem;
+    }
+
+    .input-select__label {
+      font-size: 0.8125rem; // 13px
+      margin-bottom: 0.375rem;
+    }
+  }
+
+  &--size-md {
+    .input-select__button {
+      height: 48px; // Altura padrão da imagem
+      font-size: 1rem;
+      padding: 0 1rem;
+    }
+
+    .input-select__label {
+      font-size: 0.875rem; // 14px
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  &--size-lg {
+    .input-select__button {
+      height: 56px;
+      font-size: 1.125rem;
+      padding: 0 1.25rem;
+    }
+
+    .input-select__label {
+      font-size: 1rem; // 16px
+      margin-bottom: 0.625rem;
+    }
+  }
+}
+
+// ============================================================================
+// ANIMAÇÃO DO ÍCONE (opcional)
+// ============================================================================
+
+.input-select__button:active:not(:disabled) {
+  .input-select__icon {
+    transform: translateY(2px);
+  }
+}
+
+// ============================================================================
+// RESPONSIVIDADE
+// ============================================================================
+
+@media (max-width: 640px) {
+  .input-select {
+    &__button {
+      height: 44px;
+      font-size: 1rem;
+    }
+
+    &__label {
+      font-size: 0.8125rem;
+    }
+  }
+}
+

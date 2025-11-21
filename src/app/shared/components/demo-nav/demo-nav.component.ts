@@ -417,6 +417,42 @@ export class DemoNavComponent {
       draggable: true
     },
     {
+      id: 'tabela',
+      title: 'Tabela',
+      description: 'Tabela com ordenação, paginação e busca',
+      icon: '📊',
+      routerLink: '/demo/tabela',
+      class: '',
+      draggable: true
+    },
+    {
+      id: 'checkbox',
+      title: 'Checkbox',
+      description: 'Checkbox com três estados e acessibilidade',
+      icon: '☑️',
+      routerLink: '/demo/checkbox',
+      class: '',
+      draggable: true
+    },
+    {
+      id: 'operacoes',
+      title: 'Operações Compromissadas',
+      description: 'Tabela de certificados com ordenação e valores totais',
+      icon: '💰',
+      routerLink: '/demo/operacoes',
+      class: '',
+      draggable: true
+    },
+    {
+      id: 'xls-image',
+      title: 'XLS com Imagens',
+      description: 'Demonstração de como adicionar imagens ao Excel',
+      icon: '📸',
+      routerLink: '/demo/xls-image',
+      class: '',
+      draggable: true
+    },
+    {
       id: 'coming-soon',
       title: 'Mais Demos',
       description: 'Novos componentes em breve...',

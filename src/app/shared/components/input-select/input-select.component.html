@@ -1,0 +1,84 @@
+<div 
+  class="input-select"
+  [ngClass]="hostClasses()">
+  
+  <!-- Input Container (como na imagem de exemplo) -->
+  <div class="input-select__container">
+    <button
+      type="button"
+      [id]="computedId()"
+      class="input-select__button"
+      [class.has-value]="!!displayValue()"
+      [disabled]="disabled()"
+      [attr.aria-label]="computedAriaLabel()"
+      [attr.aria-required]="required() ? 'true' : null"
+      [attr.aria-invalid]="error() ? 'true' : null"
+      [attr.aria-describedby]="error() ? computedId() + '-error' : (hint() ? computedId() + '-hint' : null)"
+      (click)="onInputClick()"
+      (keydown)="onKeyDown($event)"
+      (focus)="onFocus()"
+      (blur)="onBlur()">
+      
+      <!-- Conteúdo do Input: Label + Valor (DENTRO do button - como na imagem) -->
+      <div class="input-select__content">
+        @if (displayValue()) {
+          <!-- Quando tem valor: Label pequeno em cima + Valor embaixo -->
+          <span class="input-select__label-small">
+            {{ label() }}
+            @if (required()) {
+              <span class="input-select__required" aria-label="obrigatório">*</span>
+            }
+          </span>
+          <span class="input-select__value">{{ displayValue() }}</span>
+        } @else {
+          <!-- Quando vazio: apenas placeholder centralizado -->
+          <span class="input-select__placeholder">
+            {{ label() }}
+            @if (required()) {
+              <span class="input-select__required" aria-label="obrigatório">*</span>
+            }
+          </span>
+        }
+      </div>
+
+      <!-- Ícone de Seta para Baixo -->
+      @if (computedStyleConfig().showIcon) {
+        <svg 
+          class="input-select__icon"
+          width="18" 
+          height="18" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true">
+          <path 
+            d="M6 9L12 15L18 9" 
+            stroke="currentColor" 
+            stroke-width="2" 
+            stroke-linecap="round" 
+            stroke-linejoin="round"/>
+        </svg>
+      }
+    </button>
+  </div>
+
+  <!-- Hint -->
+  @if (hint() && !error()) {
+    <div 
+      [id]="computedId() + '-hint'"
+      class="input-select__hint">
+      {{ hint() }}
+    </div>
+  }
+
+  <!-- Error -->
+  @if (error()) {
+    <div 
+      [id]="computedId() + '-error'"
+      class="input-select__error"
+      role="alert">
+      {{ error() }}
+    </div>
+  }
+</div>
+

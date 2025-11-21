@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ExtratoGeneratorService, ExtratoConfig, GeracaoOptions, ExtratoSimples, ExtratoItemSimples } from './extrato-generator.service';
 import { RENDA_FIXA_DATA } from '../../../../../data/mock-extrato.data';
+import { OperacoesCompromissadasComponent } from 'src/app/shared/components/operacoes-compromissadas';
 
 /**
  * Demo do ExtratoGeneratorService
@@ -11,7 +12,7 @@ import { RENDA_FIXA_DATA } from '../../../../../data/mock-extrato.data';
 @Component({
   selector: 'app-extrato-generator-demo',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, OperacoesCompromissadasComponent],
   template: `
     <div style="padding: 20px; background: #f9f9f9; min-height: 100vh;">
       <h2>🚀 Demo ExtratoGeneratorService</h2>
@@ -103,6 +104,8 @@ import { RENDA_FIXA_DATA } from '../../../../../data/mock-extrato.data';
         </div>
       </div>
     </div>
+    <app-operacoes-compromissadas>
+    </app-operacoes-compromissadas>
   `,
   styles: [`
     .demo-container {

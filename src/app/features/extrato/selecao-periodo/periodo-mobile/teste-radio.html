@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teste Radio - Itaú Style</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 2rem;
+      background: #f5f5f5;
+    }
+
+    .toggle {
+      display: flex;
+      gap: 0.75rem;
+      max-width: 500px;
+      margin: 2rem auto;
+    }
+
+    /* Esconder o input, mas manter acessível */
+    .toggle__input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+
+    /* Label como botão */
+    .toggle__label {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 48px;
+      padding: 0 1.5rem;
+      font-size: 1rem;
+      font-weight: 500;
+      border-radius: 24px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    /* Outline (Intervalo) - sempre borda azul */
+    .toggle__label--outline {
+      border: 2px solid #0046C0;
+      background-color: white;
+      color: #0046C0;
+    }
+
+    /* Filled (Mês) - começa com borda azul */
+    .toggle__label--filled {
+      border: 2px solid #0046C0;
+      background-color: white;
+      color: #0046C0;
+    }
+
+    /* QUANDO CHECKED - Outline mantém igual */
+    .toggle__input:checked + .toggle__label--outline {
+      border: 2px solid #0046C0;
+      background-color: white;
+      color: #0046C0;
+    }
+
+    /* QUANDO CHECKED - Filled preenche com azul */
+    .toggle__input:checked + .toggle__label--filled {
+      background-color: #0046C0 !important;
+      color: white !important;
+      border-color: #0046C0;
+    }
+
+    /* Hover */
+    .toggle__label:hover {
+      background-color: rgba(0, 70, 192, 0.05);
+    }
+
+    .toggle__input:checked + .toggle__label--filled:hover {
+      background-color: #003380 !important;
+    }
+
+    /* Debug info */
+    .debug {
+      max-width: 500px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+
+    .debug h3 {
+      margin-top: 0;
+    }
+
+    .debug pre {
+      background: #f5f5f5;
+      padding: 0.5rem;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="text-align: center;">Teste Toggle Itaú</h1>
+
+  <!-- Toggle Real -->
+  <div class="toggle">
+    <!-- Intervalo -->
+    <input
+      type="radio"
+      id="tipo-intervalo"
+      name="tipoPeriodo"
+      value="intervalo"
+      class="toggle__input"
+      onchange="updateDebug()">
+    <label 
+      for="tipo-intervalo" 
+      class="toggle__label toggle__label--outline">
+      Intervalo
+    </label>
+
+    <!-- Mês -->
+    <input
+      type="radio"
+      id="tipo-mes"
+      name="tipoPeriodo"
+      value="mes"
+      class="toggle__input"
+      checked
+      onchange="updateDebug()">
+    <label 
+      for="tipo-mes" 
+      class="toggle__label toggle__label--filled">
+      Mês
+    </label>
+  </div>
+
+  <!-- Debug Info -->
+  <div class="debug">
+    <h3>🔍 Estado Atual</h3>
+    <p id="estado">Carregando...</p>
+    
+    <h3>📋 Instruções</h3>
+    <ol>
+      <li>Clique em "Mês" - deve ficar AZUL PREENCHIDO</li>
+      <li>Clique em "Intervalo" - "Mês" deve voltar BRANCO</li>
+      <li>Se funcionou aqui, o problema está no Angular</li>
+    </ol>
+
+    <h3>🐛 Debug CSS</h3>
+    <pre id="css-debug"></pre>
+  </div>
+
+  <script>
+    function updateDebug() {
+      const intervalo = document.getElementById('tipo-intervalo');
+      const mes = document.getElementById('tipo-mes');
+      const mesLabel = document.querySelector('label[for="tipo-mes"]');
+      
+      const estado = document.getElementById('estado');
+      estado.innerHTML = `
+        <strong>Intervalo checked:</strong> ${intervalo.checked}<br>
+        <strong>Mês checked:</strong> ${mes.checked}<br>
+        <strong>Valor selecionado:</strong> ${intervalo.checked ? 'intervalo' : 'mes'}
+      `;
+
+      const debug = document.getElementById('css-debug');
+      const computedStyle = window.getComputedStyle(mesLabel);
+      debug.textContent = `
+Label "Mês":
+  background: ${computedStyle.backgroundColor}
+  color: ${computedStyle.color}
+  border: ${computedStyle.border}
+      `;
+    }
+
+    // Atualizar ao carregar
+    updateDebug();
+
+    // Log no console
+    console.log('✅ Teste carregado. Clique nos botões e veja o debug.');
+  </script>
+</body>
+</html>
+

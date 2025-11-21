@@ -1,6 +1,7 @@
 import { ExtratoDados } from '../types/extrato.types';
 
 /**
+/**
  * Dados mock para teste baseados no modelo JSON fornecido
  */
 export const MOCK_EXTRATO_DATA: ExtratoDados = {
@@ -9,10 +10,220 @@ export const MOCK_EXTRATO_DATA: ExtratoDados = {
   dataBusca: 'Agosto/2025',
   tipoInvestimento: 'CDB - Certificado de Depósito Bancário',
   tipoProduto: 'Invest Facil Bradesco',
-  
+
   saldoAnterior: {
     dataSaldo: '25/08/2025',
     itens: [
+      {
+        dataAplicacao: '28/08/2025',
+        dataVencimento: '07/06/2027',
+        dataResgate: undefined,
+        taxa: 5.00,
+        valorPrincipal: 194.56,
+        valorBruto: 194.61,
+        rendaTotal: 0.00,
+        iof: 0.00,
+        irrf: 0.01,
+        valorLiquido: 194.60,
+        rendaBrutaPer: 0.02,
+        rendaBruta: 0.02
+      },
+      {
+        dataAplicacao: '28/08/2025',
+        dataVencimento: '07/06/2027',
+        dataResgate: undefined,
+        taxa: 5.00,
+        valorPrincipal: 194.56,
+        valorBruto: 194.61,
+        rendaTotal: 0.00,
+        iof: 0.00,
+        irrf: 0.01,
+        valorLiquido: 194.60,
+        rendaBrutaPer: 0.02,
+        rendaBruta: 0.02
+      },
+      {
+        dataAplicacao: '28/08/2025',
+        dataVencimento: '07/06/2027',
+        dataResgate: undefined,
+        taxa: 5.00,
+        valorPrincipal: 194.56,
+        valorBruto: 194.61,
+        rendaTotal: 0.00,
+        iof: 0.00,
+        irrf: 0.01,
+        valorLiquido: 194.60,
+        rendaBrutaPer: 0.02,
+        rendaBruta: 0.02
+      },
+      {
+        dataAplicacao: '28/08/2025',
+        dataVencimento: '07/06/2027',
+        dataResgate: undefined,
+        taxa: 5.00,
+        valorPrincipal: 194.56,
+        valorBruto: 194.61,
+        rendaTotal: 0.00,
+        iof: 0.00,
+        irrf: 0.01,
+        valorLiquido: 194.60,
+        rendaBrutaPer: 0.02,
+        rendaBruta: 0.02
+      },
+      {
+        dataAplicacao: '28/08/2025',
+        dataVencimento: '07/06/2027',
+        dataResgate: undefined,
+        taxa: 5.00,
+        valorPrincipal: 194.56,
+        valorBruto: 194.61,
+        rendaTotal: 0.00,
+        iof: 0.00,
+        irrf: 0.01,
+        valorLiquido: 194.60,
+        rendaBrutaPer: 0.02,
+        rendaBruta: 0.02
+      },
+      {
+        dataAplicacao: '28/08/2025',
+        dataVencimento: '07/06/2027',
+        dataResgate: undefined,
+        taxa: 5.00,
+        valorPrincipal: 194.56,
+        valorBruto: 194.61,
+        rendaTotal: 0.00,
+        iof: 0.00,
+        irrf: 0.01,
+        valorLiquido: 194.60,
+        rendaBrutaPer: 0.02,
+        rendaBruta: 0.02
+      },
+      {
+        dataAplicacao: '28/08/2025',
+        dataVencimento: '07/06/2027',
+        dataResgate: undefined,
+        taxa: 5.00,
+        valorPrincipal: 194.56,
+        valorBruto: 194.61,
+        rendaTotal: 0.00,
+        iof: 0.00,
+        irrf: 0.01,
+        valorLiquido: 194.60,
+        rendaBrutaPer: 0.02,
+        rendaBruta: 0.02
+      },
+      {
+        dataAplicacao: '28/08/2025',
+        dataVencimento: '07/06/2027',
+        dataResgate: undefined,
+        taxa: 5.00,
+        valorPrincipal: 194.56,
+        valorBruto: 194.61,
+        rendaTotal: 0.00,
+        iof: 0.00,
+        irrf: 0.01,
+        valorLiquido: 194.60,
+        rendaBrutaPer: 0.02,
+        rendaBruta: 0.02
+      },
+      {
+        dataAplicacao: '28/08/2025',
+        dataVencimento: '07/06/2027',
+        dataResgate: undefined,
+        taxa: 5.00,
+        valorPrincipal: 194.56,
+        valorBruto: 194.61,
+        rendaTotal: 0.00,
+        iof: 0.00,
+        irrf: 0.01,
+        valorLiquido: 194.60,
+        rendaBrutaPer: 0.02,
+        rendaBruta: 0.02
+      },
+      {
+        dataAplicacao: '28/08/2025',
+        dataVencimento: '07/06/2027',
+        dataResgate: undefined,
+        taxa: 5.00,
+        valorPrincipal: 194.56,
+        valorBruto: 194.61,
+        rendaTotal: 0.00,
+        iof: 0.00,
+        irrf: 0.01,
+        valorLiquido: 194.60,
+        rendaBrutaPer: 0.02,
+        rendaBruta: 0.02
+      },
+      {
+        dataAplicacao: '28/08/2025',
+        dataVencimento: '07/06/2027',
+        dataResgate: undefined,
+        taxa: 5.00,
+        valorPrincipal: 194.56,
+        valorBruto: 194.61,
+        rendaTotal: 0.00,
+        iof: 0.00,
+        irrf: 0.01,
+        valorLiquido: 194.60,
+        rendaBrutaPer: 0.02,
+        rendaBruta: 0.02
+      },
+      {
+        dataAplicacao: '28/08/2025',
+        dataVencimento: '07/06/2027',
+        dataResgate: undefined,
+        taxa: 5.00,
+        valorPrincipal: 194.56,
+        valorBruto: 194.61,
+        rendaTotal: 0.00,
+        iof: 0.00,
+        irrf: 0.01,
+        valorLiquido: 194.60,
+        rendaBrutaPer: 0.02,
+        rendaBruta: 0.02
+      },
+      {
+        dataAplicacao: '28/08/2025',
+        dataVencimento: '07/06/2027',
+        dataResgate: undefined,
+        taxa: 5.00,
+        valorPrincipal: 194.56,
+        valorBruto: 194.61,
+        rendaTotal: 0.00,
+        iof: 0.00,
+        irrf: 0.01,
+        valorLiquido: 194.60,
+        rendaBrutaPer: 0.02,
+        rendaBruta: 0.02
+      },
+      {
+        dataAplicacao: '28/08/2025',
+        dataVencimento: '07/06/2027',
+        dataResgate: undefined,
+        taxa: 5.00,
+        valorPrincipal: 194.56,
+        valorBruto: 194.61,
+        rendaTotal: 0.00,
+        iof: 0.00,
+        irrf: 0.01,
+        valorLiquido: 194.60,
+        rendaBrutaPer: 0.02,
+        rendaBruta: 0.02
+      },
+      {
+        dataAplicacao: '28/08/2025',
+        dataVencimento: '07/06/2027',
+        dataResgate: undefined,
+        taxa: 5.00,
+        valorPrincipal: 194.56,
+        valorBruto: 194.61,
+        rendaTotal: 0.00,
+        iof: 0.00,
+        irrf: 0.01,
+        valorLiquido: 194.60,
+        rendaBrutaPer: 0.02,
+        rendaBruta: 0.02
+      },
       {
         dataAplicacao: '28/08/2025',
         dataVencimento: '07/06/2027',
@@ -36,7 +247,7 @@ export const MOCK_EXTRATO_DATA: ExtratoDados = {
     totalValorLiquido: 194.60,
     totalRendaBrutaPer: 0.02
   },
-  
+
   aplicacoes: {
     itens: [
       {
@@ -62,7 +273,7 @@ export const MOCK_EXTRATO_DATA: ExtratoDados = {
     totalValorLiquido: 194.60,
     totalRendaBrutaPer: 0.02
   },
-  
+
   resgates: {
     itens: [
       {
@@ -88,7 +299,7 @@ export const MOCK_EXTRATO_DATA: ExtratoDados = {
     totalValorLiquido: 194.60,
     totalRendaBrutaPer: 0.02
   },
-  
+
   saldoFinal: {
     dataSaldo: '25/08/2025',
     itens: [

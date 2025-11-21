@@ -1,0 +1,1 @@
+export * from './operacoes-compromissadas.component';

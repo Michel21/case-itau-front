@@ -1,0 +1,260 @@
+<div class="operacoes-compromissadas">
+  <!-- Título da seção -->
+  <h2 class="section-title">Operações compromissadas</h2>
+  
+  <!-- Valores de resumo -->
+  <div class="summary-values">
+    <div class="summary-item">
+      <span class="summary-label">Valor bruto</span>
+      <span class="summary-value">BRL {{ formatarValorTotal(valorBrutoTotal()) }}</span>
+    </div>
+    <div class="summary-item">
+      <span class="summary-label">Valor líquido</span>
+      <span class="summary-value">BRL {{ formatarValorTotal(valorLiquidoTotal()) }}</span>
+    </div>
+  </div>
+
+  <!-- Tabela de certificados -->
+  <div class="table-container">
+    <h3 class="table-title">Certificados</h3>
+    
+    <!-- Tabela customizada -->
+    <div class="custom-table-wrapper">
+      <table class="operacoes-table">
+        <thead class="tabela-header">
+          <tr>
+            <th 
+              class="sortable-header" 
+              (click)="onOrdenar('certificado')"
+              [class.active]="sortDirection()['certificado']"
+              [class.asc]="sortDirection()['certificado'] === 'asc'"
+              [class.desc]="sortDirection()['certificado'] === 'desc'"
+              style="cursor: pointer;"
+            >
+              Certificado
+              <span class="sort-arrow">
+                @if (sortDirection()['certificado'] === 'asc') {
+                  ↑
+                } @else if (sortDirection()['certificado'] === 'desc') {
+                  ↓
+                } @else {
+                  ↕
+                }
+              </span>
+            </th>
+            <th 
+              class="sortable-header" 
+              (click)="onOrdenar('dataEmissao')"
+              [class.active]="sortDirection()['dataEmissao']"
+              [class.asc]="sortDirection()['dataEmissao'] === 'asc'"
+              [class.desc]="sortDirection()['dataEmissao'] === 'desc'"
+              style="cursor: pointer;"
+            >
+              Data de emissão
+              <span class="sort-arrow">
+                @if (sortDirection()['dataEmissao'] === 'asc') {
+                  ↑
+                } @else if (sortDirection()['dataEmissao'] === 'desc') {
+                  ↓
+                } @else {
+                  ↕
+                }
+              </span>
+            </th>
+            <th 
+              class="sortable-header" 
+              (click)="onOrdenar('valorPrincipal')"
+              [class.active]="sortDirection()['valorPrincipal']"
+              [class.asc]="sortDirection()['valorPrincipal'] === 'asc'"
+              [class.desc]="sortDirection()['valorPrincipal'] === 'desc'"
+              style="cursor: pointer;"
+            >
+              Valor principal (BRL)
+              <span class="sort-arrow">
+                @if (sortDirection()['valorPrincipal'] === 'asc') {
+                  ↑
+                } @else if (sortDirection()['valorPrincipal'] === 'desc') {
+                  ↓
+                } @else {
+                  ↕
+                }
+              </span>
+            </th>
+            <th 
+              class="sortable-header" 
+              (click)="onOrdenar('valorBruto')"
+              [class.active]="sortDirection()['valorBruto']"
+              [class.asc]="sortDirection()['valorBruto'] === 'asc'"
+              [class.desc]="sortDirection()['valorBruto'] === 'desc'"
+              style="cursor: pointer;"
+            >
+              Valor bruto (BRL)
+              <span class="sort-arrow">
+                @if (sortDirection()['valorBruto'] === 'asc') {
+                  ↑
+                } @else if (sortDirection()['valorBruto'] === 'desc') {
+                  ↓
+                } @else {
+                  ↕
+                }
+              </span>
+            </th>
+            <th 
+              class="sortable-header" 
+              (click)="onOrdenar('valorLiquido')"
+              [class.active]="sortDirection()['valorLiquido']"
+              [class.asc]="sortDirection()['valorLiquido'] === 'asc'"
+              [class.desc]="sortDirection()['valorLiquido'] === 'desc'"
+              style="cursor: pointer;"
+            >
+              Valor líquido (BRL)
+              <span class="sort-arrow">
+                @if (sortDirection()['valorLiquido'] === 'asc') {
+                  ↑
+                } @else if (sortDirection()['valorLiquido'] === 'desc') {
+                  ↓
+                } @else {
+                  ↕
+                }
+              </span>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="tabela-body">
+          @for (certificado of certificadosPaginated(); track certificado.certificado + certificado.dataEmissao) {
+            <tr class="tabela-row">
+              <td class="tabela-cell certificado-cell">
+                <div class="certificado-content">
+                  <button 
+                    class="expand-btn"
+                    (click)="toggleExpandir(certificado)"
+                    [class.expanded]="certificado.expandido"
+                    title="Expandir/Colapsar detalhes"
+                  >
+                    {{ certificado.expandido ? '▲' : '▼' }}
+                  </button>
+                  <span class="certificado-number">{{ certificado.certificado }}</span>
+                </div>
+              </td>
+              <td class="tabela-cell data-cell">{{ certificado.dataEmissao }}</td>
+              <td class="tabela-cell valor-cell">{{ formatarValor(certificado.valorPrincipal) }}</td>
+              <td class="tabela-cell valor-cell">{{ formatarValor(certificado.valorBruto) }}</td>
+              <td class="tabela-cell valor-cell valor-liquido-cell">{{ formatarValor(certificado.valorLiquido) }}</td>
+            </tr>
+            
+            @if (certificado.expandido) {
+              <tr class="tabela-row expandido-row">
+                <td colspan="5" class="expandido-content">
+                  <div class="expandido-details">
+                    <!-- Informações da operação -->
+                    <div class="detail-section">
+                      <h4 class="detail-title">Informações da operação</h4>
+                      <div class="detail-grid">
+                        <div class="detail-item">
+                          <span class="detail-label">Investimento inicial:</span>
+                          <span class="detail-value">BRL {{ formatarValor(certificado.investimentoInicial || 0) }}</span>
+                        </div>
+                        <div class="detail-item">
+                          <span class="detail-label">Indexador:</span>
+                          <span class="detail-value">{{ certificado.indexador || '-' }}</span>
+                        </div>
+                        <div class="detail-item">
+                          <span class="detail-label">Percentual indexador:</span>
+                          <span class="detail-value">{{ certificado.percentualIndexador || 0 }}%</span>
+                        </div>
+                        <div class="detail-item">
+                          <span class="detail-label">Data de vencimento da operação:</span>
+                          <span class="detail-value">{{ certificado.dataVencimentoOperacao || '-' }}</span>
+                        </div>
+                        <div class="detail-item">
+                          <span class="detail-label">Valor IOF:</span>
+                          <span class="detail-value">BRL {{ formatarValor(certificado.valorIOF || 0) }}</span>
+                        </div>
+                        <div class="detail-item">
+                          <span class="detail-label">Valor IRRF:</span>
+                          <span class="detail-value">BRL {{ formatarValor(certificado.valorIRRF || 0) }}</span>
+                        </div>
+                        <div class="detail-item">
+                          <span class="detail-label">Quantidade de papéis:</span>
+                          <span class="detail-value">{{ certificado.quantidadePapeis || 0 }}</span>
+                        </div>
+                        <div class="detail-item">
+                          <span class="detail-label">Preço unitário atual:</span>
+                          <span class="detail-value">BRL {{ formatarValor(certificado.precoUnitarioAtual || 0) }}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Informações do papel -->
+                    <div class="detail-section">
+                      <h4 class="detail-title">Informações do papel</h4>
+                      <div class="detail-grid">
+                        <div class="detail-item">
+                          <span class="detail-label">Código:</span>
+                          <span class="detail-value">{{ certificado.codigo || '-' }}</span>
+                        </div>
+                        <div class="detail-item">
+                          <span class="detail-label">Tipo:</span>
+                          <span class="detail-value">{{ certificado.tipo || '-' }}</span>
+                        </div>
+                        <div class="detail-item">
+                          <span class="detail-label">Emissor:</span>
+                          <span class="detail-value">{{ certificado.emissor || '-' }}</span>
+                        </div>
+                        <div class="detail-item">
+                          <span class="detail-label">Data de vencimento do papel:</span>
+                          <span class="detail-value">{{ certificado.dataVencimentoPapel || '-' }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginação customizada -->
+    <div class="custom-pagination">
+      <div class="pagination-info">
+        {{ paginationInfo() }}
+      </div>
+      <div class="pagination-buttons">
+        <button 
+          (click)="firstPage()" 
+          [disabled]="currentPage() === 1"
+          class="pagination-btn first-btn"
+          title="Primeira página"
+        >
+          ≪
+        </button>
+        <button 
+          (click)="previousPage()" 
+          [disabled]="currentPage() === 1"
+          class="pagination-btn prev-btn"
+          title="Página anterior"
+        >
+          ‹
+        </button>
+        <button 
+          (click)="nextPage()" 
+          [disabled]="currentPage() >= totalPages()"
+          class="pagination-btn next-btn"
+          title="Próxima página"
+        >
+          ›
+        </button>
+        <button 
+          (click)="lastPage()" 
+          [disabled]="currentPage() >= totalPages()"
+          class="pagination-btn last-btn"
+          title="Última página"
+        >
+          ≫
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

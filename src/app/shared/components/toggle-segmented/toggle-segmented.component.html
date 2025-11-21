@@ -1,0 +1,42 @@
+<div 
+  class="toggle-segmented"
+  [ngClass]="hostClasses()"
+  [attr.role]="'radiogroup'"
+  [attr.aria-label]="ariaLabel()">
+  
+  @for (option of options(); track option.value; let idx = $index) {
+    <div class="toggle-segmented__wrapper">
+      <!-- Input radio oculto (apenas para acessibilidade) -->
+      <input
+        type="radio"
+        [id]="getOptionId(option, idx)"
+        class="toggle-segmented__input"
+        [name]="radioGroupName"
+        [value]="option.value"
+        [checked]="isSelected(option)"
+        [disabled]="disabled() || option.disabled"
+        [attr.aria-label]="getOptionAriaLabel(option)"
+        (click)="selectOption(option)"
+        (keydown)="onKeyDown($event, option, idx)">
+      
+      <!-- Label visível (atua como botão) -->
+      <label
+        [for]="getOptionId(option, idx)"
+        class="toggle-segmented__option"
+        [ngClass]="getOptionClasses(option, idx)"
+        [attr.aria-pressed]="isSelected(option) ? 'true' : 'false'"
+        [attr.aria-disabled]="disabled() || option.disabled ? 'true' : 'false'">
+        {{ option.label }}
+      </label>
+    </div>
+  }
+</div>
+
+<!-- Região aria-live para anúncios a11y -->
+<div 
+  class="sr-only" 
+  role="status" 
+  aria-live="polite" 
+  aria-atomic="true">
+  {{ anuncioA11y() }}
+</div>
