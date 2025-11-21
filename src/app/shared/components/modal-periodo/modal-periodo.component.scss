@@ -1,0 +1,384 @@
+// ============================================================================
+// VARIÁVEIS - CORES ITAÚ
+// ============================================================================
+
+$itau-blue-primary: #0046C0;
+$itau-blue-dark: #003380;
+$itau-gray-text: #4A4A4A;
+$itau-gray-border: #E0E0E0;
+$itau-gray-bg: #F5F5F5;
+$white: #FFFFFF;
+$black: #1A1A1A;
+
+// ============================================================================
+// HOST (elemento raiz)
+// ============================================================================
+
+:host {
+  display: contents; // Permite que o conteúdo seja renderizado
+}
+
+// ============================================================================
+// BACKDROP (Overlay escuro)
+// ============================================================================
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.2s ease;
+  padding: 1rem;
+}
+
+// ============================================================================
+// MODAL CONTENT (Card branco)
+// ============================================================================
+
+.modal-content {
+  background: $white;
+  border-radius: 4px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  max-width: 480px;
+  width: 100%;
+  max-height: 70vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// ============================================================================
+// TÍTULO
+// ============================================================================
+
+.modal-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: $black;
+  margin: 0;
+  padding: 1.5rem 1.5rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid $itau-gray-border;
+}
+
+// ============================================================================
+// LISTA DE MESES
+// ============================================================================
+
+// Classe para esconder visualmente mas acessível para leitores de tela
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border-width: 0 !important;
+  // Garantir que não seja ocultado por aria-hidden
+  z-index: 10000 !important;
+  pointer-events: none !important;
+}
+
+// Announcer fixo no viewport (garante que VoiceOver sempre detecte)
+.modal-announcer-fixed {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 99999 !important;
+  pointer-events: none !important;
+}
+
+// Grupo de opções (radiogroup - padrão da imagem)
+.modal-options-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+// Container para scroll (substitui a função de layout do wrapper)
+.modal-scroll-container {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  max-height: 227px;
+
+  // Custom scrollbar
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 4px;
+  }
+}
+
+// Input radio (escondido visualmente - como toggle-segmented)
+.modal-input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+  overflow: hidden;
+}
+
+// ============================================================================
+// LABEL (linha clicável - agora é button)
+// ============================================================================
+
+.modal-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.875rem 1.5rem; // Padding um pouco menor (como na imagem)
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  user-select: none;
+  border: none;
+  border-bottom: 1px solid $itau-gray-border; // Borda movida para o label (já que modal-item usa display: contents)
+  background: transparent;
+  text-align: left;
+  font-family: inherit;
+  font-size: 1rem;
+  color: inherit;
+  gap: 1rem; // Espaço entre texto e radio
+  outline: none; // Remover outline padrão (será controlado por focus-visible)
+
+  // Remover borda do último item
+  &:last-of-type {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background-color: $itau-gray-bg;
+  }
+
+  &:active {
+    background-color: rgba(0, 70, 192, 0.05);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $itau-blue-primary;
+    outline-offset: -2px;
+    background-color: rgba(0, 70, 192, 0.08);
+  }
+
+  // Estado selecionado
+  &--selected {
+    background-color: rgba(0, 70, 192, 0.02);
+  }
+}
+
+// ============================================================================
+// INPUT RADIO (escondido)
+// ============================================================================
+
+.modal-radio {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+// ============================================================================
+// TEXTO DO MÊS
+// ============================================================================
+
+.modal-text {
+  flex: 1;
+  font-size: 1rem;
+  font-weight: 400;
+  color: $itau-gray-text;
+  text-align: left;
+  transition: color 0.2s ease, font-weight 0.2s ease;
+
+  .modal-label--selected & {
+    color: $itau-blue-primary;
+    font-weight: 500;
+  }
+}
+
+// ============================================================================
+// CHECK (ícone de rádio - como na imagem)
+// ============================================================================
+
+.modal-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; // Maior (como na imagem)
+  height: 28px; // Maior (como na imagem)
+  transition: transform 0.15s ease;
+
+  &--active {
+    transform: scale(1.05); // Leve aumento quando selecionado
+  }
+
+  svg {
+    width: 24px; // Círculo maior
+    height: 24px; // Círculo maior
+  }
+}
+
+// ============================================================================
+// BOTÕES DE AÇÃO
+// ============================================================================
+
+.modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem 1.5rem;
+  border-top: 1px solid $itau-gray-border;
+  background: $white;
+}
+
+.modal-btn {
+  flex: 1;
+  height: 48px;
+  padding: 0 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  letter-spacing: 0.01em;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  // Cancelar (texto azul)
+  &--cancel {
+    background: transparent;
+    color: $itau-blue-primary;
+    border: none;
+
+    &:hover {
+      background-color: rgba(0, 70, 192, 0.05);
+    }
+  }
+
+  // Confirmar (azul preenchido)
+  &--confirm {
+    background-color: $itau-blue-primary;
+    color: $white;
+
+    &:hover:not(:disabled) {
+      background-color: $itau-blue-dark;
+    }
+
+    &:disabled {
+      background-color: #B3B3B3;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+  }
+}
+
+// ============================================================================
+// ANIMAÇÕES
+// ============================================================================
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-100px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// ============================================================================
+// RESPONSIVIDADE
+// ============================================================================
+
+@media (max-width: 768px) {
+  .modal-backdrop {
+    padding: 1rem;
+    align-items: center; // Centraliza verticalmente
+    justify-content: center; // Centraliza horizontalmente
+  }
+
+  .modal-content {
+    border-radius: 4px; // Mantém arredondado em todos os cantos
+    max-height: 80vh;
+    width: calc(100% - 2rem); // Margem lateral
+    max-width: 400px; // Largura máxima no mobile
+    margin: 0; // Remove margin-top auto
+    animation: slideDownMobile 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  // Animação específica para mobile (desce do topo)
+  @keyframes slideDownMobile {
+    from {
+      opacity: 0;
+      transform: translateY(-150px) scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+}
+
+// ============================================================================
+// ACESSIBILIDADE
+// ============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-backdrop,
+  .modal-content,
+  .modal-label,
+  .modal-text,
+  .modal-check,
+  .modal-btn {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+// High contrast mode
+@media (prefers-contrast: high) {
+  .modal-label {
+    border: 1px solid $itau-gray-border;
+
+    &--selected {
+      border-color: $itau-blue-primary;
+      border-width: 2px;
+    }
+  }
+}
+

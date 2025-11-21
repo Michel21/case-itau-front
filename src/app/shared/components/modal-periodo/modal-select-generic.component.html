@@ -1,0 +1,148 @@
+<!-- BACKDROP (fundo escuro com overlay) -->
+@if (isOpen()) {
+  <div 
+    class="modal-backdrop" 
+    [class]="config().backdropClass || ''"
+    (click)="onBackdropClick($event)"
+    role="none"
+    aria-hidden="true">
+    
+    <!-- 
+      MODAL CONTENT
+      - Dialog semântico com role="dialog" (WCAG 4.1.2)
+      - aria-labelledby referencia o título para leitores de tela
+      - aria-modal="true" indica que é um modal bloqueante
+      - Focus trap garante que o foco permanece dentro do modal
+    -->
+    <div 
+      #modalContent
+      class="modal-content"
+      [class]="config().contentClass || ''"
+      role="dialog"
+      [attr.aria-labelledby]="'modal-title-' + modalId"
+      [attr.aria-modal]="true"
+      (click)="onModalClick($event)"
+      appFocusTrap
+      [trapActive]="isOpen()"
+      [autoFocus]="false"
+      tabindex="-1">
+      
+      <!-- 
+        TÍTULO DO MODAL
+        - Focável para receber foco inicial (WCAG 2.4.3 Focus Order)
+        - ID único para referência via aria-labelledby
+        - h2 já é semanticamente um heading de nível 2 (sem necessidade de role/aria-level)
+        - Suporta navegação por teclado (setas) para iniciar navegação na lista
+        - tabindex="-1" permite foco programático mas não via Tab
+        - Event listeners gerenciados via JavaScript nativo (refatorado)
+      -->
+      <h2 
+        #modalTitle 
+        [id]="'modal-title-' + modalId"
+        class="modal-title" 
+        tabindex="-1">
+        {{ titulo() }}
+      </h2>
+
+      <!-- Container de scroll (COMPLETAMENTE OCULTO de leitores de tela) -->
+      <div 
+        class="modal-scroll-container"
+        [style.max-height]="config().maxHeight || '227px'"
+        aria-hidden="true"
+        tabindex="-1">
+        
+        <!-- Lista de opções (radiogroup para agrupar radio buttons) -->
+        <div 
+          class="modal-list" 
+          role="radiogroup"
+          [attr.aria-label]="'Selecione uma opção'"
+          aria-hidden="true">
+          @for (option of options(); track option.value; let idx = $index) {
+            <div class="modal-item" aria-hidden="true">
+              <!-- Elemento focável - aria-hidden será removido via JS quando focado -->
+              <div
+              [id]="'option-' + getOptionId(option.value)"
+              class="modal-label"
+              [class.modal-label--selected]="isSelected(option.value)"
+              role="radio"
+              [attr.aria-checked]="isSelected(option.value)"
+              [attr.aria-label]="getCustomAnnouncement(option, idx)"
+              [attr.aria-hidden]="null"
+              [attr.tabindex]="-1"
+              (click)="onItemClick(option.value)"
+              (keydown)="onKeyDown($event, option.value, idx)"
+              (focus)="onItemFocus(idx, option)">
+              
+              <span class="modal-text" aria-hidden="true">{{ option.label }}</span>
+              
+              @if (config().showCheckIcon !== false) {
+                <span class="modal-check" [class.modal-check--active]="isSelected(option.value)" aria-hidden="true">
+                  @if (isSelected(option.value)) {
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <circle cx="12" cy="12" r="10.5" stroke="#3B69FF" stroke-width="1.5" fill="none"/>
+                      <circle cx="12" cy="12" r="6" fill="#3B69FF"/>
+                    </svg>
+                  } @else {
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <circle cx="12" cy="12" r="10.5" stroke="#3B69FF" stroke-width="1.5" fill="none"/>
+                    </svg>
+                  }
+                </span>
+              }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Botões de ação (OCULTOS de leitores de tela - navegação é via teclado) -->
+      <div 
+        class="modal-actions"
+        aria-hidden="true">
+        <button
+          type="button"
+          class="modal-btn modal-btn--cancel"
+          (click)="onCancelar()"
+          [attr.aria-label]="cancelText()">
+          {{ cancelText() }}
+        </button>
+
+        <button
+          type="button"
+          class="modal-btn modal-btn--confirm"
+          [disabled]="!canConfirm()"
+          (click)="onConfirmar()"
+          [attr.aria-label]="confirmText()">
+          {{ confirmText() }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- 
+  Regiões aria-live SEMPRE PRESENTES no DOM (VoiceOver só detecta se o elemento já existir)
+  NUNCA usar @if - o elemento precisa estar sempre no DOM para o VoiceOver detectar mudanças
+-->
+
+<!-- 
+  Announcer para abertura do modal e título
+  Usa Angular Signals para controle reativo de narração
+-->
+<div 
+  #modalAnnouncer
+  class="sr-only" 
+  role="status" 
+  aria-live="assertive" 
+  aria-atomic="true">
+  {{ modalOpeningAnnouncement() || anuncioSelecao() }}
+</div>
+
+<!-- Announcer para navegação e seleção de itens -->
+<div 
+  class="sr-only" 
+  role="log" 
+  aria-live="polite" 
+  aria-atomic="true"
+  aria-relevant="additions text">
+</div>

@@ -1,0 +1,82 @@
+<!-- BACKDROP (fundo escuro com overlay) -->
+@if (isOpen()) {
+  <div 
+    class="modal-backdrop" 
+    (click)="onBackdropClick($event)">
+    
+    <!-- MODAL CONTENT -->
+    <div 
+      class="modal-content"
+      (click)="onModalClick($event)"
+      appFocusTrap
+      [trapActive]="isOpen()"
+      [autoFocus]="true"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-labelledby]="'modal-title'">
+      
+      <!-- Título -->
+      <h2 id="modal-title" class="modal-title" aria-live="polite">{{ titulo() }}</h2>
+
+      <!-- Lista de Meses -->
+      <ul class="modal-list" role="radiogroup">
+        @for (mes of meses; track mes.value; let idx = $index) {
+          <li class="modal-item">
+            <button
+              type="button"
+              [id]="'mes-' + mes.value"
+              class="modal-label"
+              role="radio"
+              [class.modal-label--selected]="mesAtual() === mes.value"
+              [attr.aria-checked]="mesAtual() === mes.value ? 'true' : 'false'"
+              [attr.aria-label]="mes.label"
+              [attr.aria-posinset]="idx + 1"
+              [attr.aria-setsize]="meses.length"
+              [tabindex]="idx === 0 ? 0 : -1"
+              (click)="selecionarMes(mes.value)"
+              (keydown)="onKeyDown($event, mes.value)"
+              (keydown.space)="selecionarMes(mes.value); $event.preventDefault()"
+              (keydown.enter)="selecionarMes(mes.value); $event.preventDefault()">
+              
+              <span class="modal-text">{{ mes.label }}</span>
+              
+              <span class="modal-check" [class.modal-check--active]="mesAtual() === mes.value">
+                @if (mesAtual() === mes.value) {
+                  <!-- Radio selecionado (borda + círculo azul - menor) -->
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10.5" stroke="#0046C0" stroke-width="1.5" fill="none"/>
+                    <circle cx="12" cy="12" r="8" fill="#0046C0"/>
+                  </svg>
+                } @else {
+                  <!-- Radio não selecionado (apenas borda) -->
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10.5" stroke="#0046C0" stroke-width="1.5" fill="none"/>
+                  </svg>
+                }
+              </span>
+            </button>
+          </li>
+        }
+      </ul>
+
+      <!-- Botões de Ação -->
+      <div class="modal-actions">
+        <button
+          type="button"
+          class="modal-btn modal-btn--cancel"
+          (click)="onCancelar()">
+          Cancelar
+        </button>
+
+        <button
+          type="button"
+          class="modal-btn modal-btn--confirm"
+          [disabled]="!podeConfirmar()"
+          (click)="onConfirmar()">
+          Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
