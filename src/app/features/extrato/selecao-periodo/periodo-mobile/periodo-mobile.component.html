@@ -79,6 +79,7 @@
   <!-- MODAIS -->
   <!-- Modal de Seleção de Mês -->
   <app-modal-select-generic
+    #modalMes
     [isOpen]="modalMesAberto()"
     [titulo]="'Selecione o mês'"
     [options]="meses"
@@ -90,6 +91,7 @@
 
   <!-- Modal de Seleção de Ano -->
   <app-modal-select-generic
+    #modalAno
     [isOpen]="modalAnoAberto()"
     [titulo]="'Selecione o ano'"
     [options]="anos"

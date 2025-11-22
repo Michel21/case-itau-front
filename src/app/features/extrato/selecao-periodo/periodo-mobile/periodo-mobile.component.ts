@@ -7,7 +7,8 @@ import {
   signal,
   type ElementRef,
   viewChild,
-  DestroyRef
+  DestroyRef,
+  AfterViewInit
 } from '@angular/core';
 import {
   FormBuilder,
@@ -89,7 +90,7 @@ const MESES: readonly OpcaoSelect[] = [
   styleUrls: ['./periodo-mobile.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PeriodoMobileComponent {
+export class PeriodoMobileComponent implements AfterViewInit {
   // ============================================================================
   // INJEÇÃO DE DEPENDÊNCIAS
   // ============================================================================
@@ -103,6 +104,8 @@ export class PeriodoMobileComponent {
   
   readonly campoMes = viewChild<ElementRef<HTMLSelectElement>>('campoMes');
   readonly campoAno = viewChild<ElementRef<HTMLSelectElement>>('campoAno');
+  readonly modalMes = viewChild<ModalSelectGenericComponent<string>>('modalMes');
+  readonly modalAno = viewChild<ModalSelectGenericComponent<string>>('modalAno');
 
   // ============================================================================
   // CONSTANTES PÚBLICAS
@@ -221,6 +224,36 @@ export class PeriodoMobileComponent {
       const tipo = this.tipoPeriodo();
       console.log('🔘 Tipo de período mudou para:', tipo);
     });
+  }
+
+  // ============================================================================
+  // LIFECYCLE HOOKS
+  // ============================================================================
+
+  /**
+   * Customiza narrações dos modais após view inicializar
+   * Exemplo de controle personalizado via JavaScript/Angular
+   */
+  ngAfterViewInit(): void {
+    // Customizar narração do modal de mês
+    const modalMes = this.modalMes();
+    if (modalMes) {
+      // Narração minimalista ao abrir - apenas o título
+      modalMes.setCustomOpeningMessage((titulo) => titulo);
+      
+      // Narração ao selecionar - apenas o nome do mês
+      modalMes.setSelectionMessageFormatter((option) => option.label);
+    }
+
+    // Customizar narração do modal de ano
+    const modalAno = this.modalAno();
+    if (modalAno) {
+      // Narração ao abrir - apenas o título
+      modalAno.setCustomOpeningMessage((titulo) => titulo);
+      
+      // Narração ao selecionar - apenas o ano
+      modalAno.setSelectionMessageFormatter((option) => option.label);
+    }
   }
 
   // ============================================================================
