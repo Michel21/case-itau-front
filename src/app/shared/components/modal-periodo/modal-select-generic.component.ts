@@ -166,6 +166,18 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
   private isItemProcessingKey = false;
 
   /**
+   * Flag para indicar se o modal já foi aberto alguma vez
+   * Usado para evitar narração de "modal fechada" na inicialização
+   */
+  private hasBeenOpened = false;
+  
+  /**
+   * Estado anterior do isOpen para detectar transições reais
+   * Usado para evitar narrações incorretas durante oscilações de estado
+   */
+  private previousIsOpen = false;
+
+  /**
    * Referências para os handlers de eventos (bound methods)
    * Necessário para poder remover os listeners corretamente
    */
@@ -185,29 +197,31 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
   // ============================================================================
 
   /**
-   * Effect para limpar narrações quando modal fecha
-   * Controle personalizado de limpeza
+   * Effect para limpar narração quando modal fecha
+   * A narração de abertura é feita pelo método announceModalOpening()
    */
   private readonly modalOpeningEffect = effect(() => {
     const isOpen = this.isOpen();
     
     if (!isOpen) {
-      // Limpar todas as narrações quando modal fecha
+      // Limpar narração quando modal fecha
       this.modalOpeningAnnouncement.set('');
       this.titleAnnouncement.set('');
-      this.anuncioSelecao.set('');
       this.liveAnnouncer.clear();
-      this.cdr.detectChanges();
     }
   });
 
   /**
    * Effect para anunciar título quando recebe foco
-   * DESABILITADO - narração controlada manualmente
+   * Reativo - atualiza automaticamente quando necessário
    */
   private readonly titleFocusEffect = effect(() => {
-    // Desabilitado - a narração do título é feita apenas na abertura
-    // Isso evita duplicações quando o título recebe foco
+    const titleAnnouncement = this.titleAnnouncement();
+    
+    if (titleAnnouncement && this.isOpen()) {
+      // Anunciar título de forma polida quando recebe foco
+      this.announceWithLiveAnnouncer(titleAnnouncement, 'polite');
+    }
   });
 
   // ============================================================================
@@ -229,12 +243,23 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
     }, { allowSignalWrites: true });
 
     // Effect: Gerenciar abertura/fechamento
+    // Usa estado anterior para detectar transições reais
     effect(() => {
-      if (this.isOpen()) {
+      const currentIsOpen = this.isOpen();
+      const wasOpen = this.previousIsOpen;
+      
+      // Atualizar estado anterior
+      this.previousIsOpen = currentIsOpen;
+      
+      // Só processar se houver mudança real de estado
+      if (currentIsOpen && !wasOpen) {
+        // Mudou de fechado para aberto
         this.handleModalOpen();
-      } else {
+      } else if (!currentIsOpen && wasOpen) {
+        // Mudou de aberto para fechado
         this.handleModalClose();
       }
+      // Se não houve mudança (inicialização ou mesmo estado), não fazer nada
     }, { allowSignalWrites: true });
 
     // Configurar cleanup quando componente for destruído
@@ -271,35 +296,70 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
 
   /**
    * Manipula abertura da modal
-   * Controle personalizado da narração via JavaScript
+   * REFATORADO: Reconfigura event listeners quando modal abre
    */
   private handleModalOpen(): void {
+    // Marcar que foi aberto
+    this.hasBeenOpened = true;
+    
+    // Limpar qualquer narração pendente de fechamento
+    this.liveAnnouncer.clear();
+    this.modalOpeningAnnouncement.set('');
+    this.anuncioSelecao.set('');
+    
     this.resetState();
     
-    // 1. Aguardar modal estar no DOM
+    // Aguardar modal estar no DOM antes de ocultar conteúdo da página
     requestAnimationFrame(() => {
       this.hidePageContent();
       this.setupTitleEventListeners();
+      
+      // Anunciar abertura imediatamente após DOM estar pronto
+      if (this.isOpen()) {
+        this.announceModalOpening();
+      }
+      
+      // Focar no título logo após anunciar (delay mínimo)
+      requestAnimationFrame(() => {
+        if (this.isOpen()) {
+          this.setupInitialFocus();
+        }
+      });
     });
-    
-    // 2. Anunciar abertura de forma controlada (150ms)
-    setTimeout(() => {
-      this.announceModalOpening();
-    }, 150);
-    
-    // 3. Focar no título após narração completar (600ms)
-    setTimeout(() => {
-      this.setupInitialFocus();
-    }, 600);
   }
 
   /**
    * Manipula fechamento da modal
-   * REFATORADO: Limpa event listeners quando modal fecha
+   * REFATORADO: Limpa event listeners quando modal fecha e anuncia fechamento
    */
   private handleModalClose(): void {
+    // Só processar fechamento se realmente estava aberto antes
+    if (!this.hasBeenOpened) {
+      // Modal nunca foi aberto, apenas restaurar conteúdo e sair
+      this.restorePageContent();
+      return;
+    }
+    
     this.restorePageContent();
     this.resetState();
+    
+    // Anunciar fechamento do modal
+    const titulo = this.titulo();
+    const mensagem = titulo ? `${titulo} fechada` : 'Modal fechada';
+    
+    // Limpar narrações de abertura antes de anunciar fechamento
+    this.modalOpeningAnnouncement.set('');
+    this.anuncioSelecao.set('');
+    this.liveAnnouncer.clear();
+    
+    // Pequeno delay para garantir que o foco voltou para o elemento anterior
+    setTimeout(() => {
+      // Verificar novamente se ainda está fechado antes de narrar
+      if (!this.isOpen()) {
+        this.liveAnnouncer.announce(mensagem, 'assertive');
+      }
+    }, 150);
+    
     // Não remover listeners aqui - serão removidos no ngOnDestroy
     // Mas podemos limpar estado específico se necessário
   }
@@ -380,59 +440,25 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
   }
 
   /**
-   * Anuncia abertura da modal de forma personalizada
-   * Controle total via JavaScript/Angular
+   * Anuncia abertura da modal e título
+   * REFATORADO: Narração imediata sem delays desnecessários
    */
   private announceModalOpening(): void {
     const titulo = this.titulo();
-    if (!titulo) return;
-    
-    // Narração personalizada via método público
-    this.announceCustomMessage(`${titulo}`);
-  }
-  
-  /**
-   * Método público para anunciar mensagens customizadas
-   * Permite controle total da narração via JavaScript
-   * 
-   * @param message - Mensagem a ser narrada
-   * @param priority - Prioridade da narração ('assertive' ou 'polite')
-   * @example
-   * // Narrar apenas o título
-   * this.announceCustomMessage('Selecione o mês');
-   * 
-   * // Narrar com contexto
-   * this.announceCustomMessage('Selecione o mês, lista com 12 itens', 'assertive');
-   */
-  public announceCustomMessage(message: string, priority: 'assertive' | 'polite' = 'assertive'): void {
-    // Limpar narrações anteriores
-    this.modalOpeningAnnouncement.set('');
-    this.anuncioSelecao.set('');
-    this.liveAnnouncer.clear();
-    this.cdr.detectChanges();
-    
-    // Anunciar nova mensagem
-    setTimeout(() => {
-      this.liveAnnouncer.announce(message, priority);
-      this.modalOpeningAnnouncement.set(message);
-      this.cdr.detectChanges();
-    }, 100);
-  }
-  
-  /**
-   * Método público para customizar narração de abertura
-   * Sobrescreve comportamento padrão
-   * 
-   * @param customMessage - Função que retorna mensagem customizada baseada no título
-   * @example
-   * // Customizar narração completa
-   * modal.setCustomOpeningMessage((titulo) => `${titulo}, escolha uma opção`);
-   */
-  public setCustomOpeningMessage(customMessage: (titulo: string) => string): void {
-    const titulo = this.titulo();
     if (titulo) {
-      const message = customMessage(titulo);
-      this.announceCustomMessage(message);
+      // Narração personalizada: "Selecione o mês, modal aberta"
+      const mensagem = `${titulo}, modal aberta`;
+      
+      // Limpar e definir mensagem imediatamente
+      this.modalOpeningAnnouncement.set('');
+      this.cdr.detectChanges();
+      
+      // Usar requestAnimationFrame para garantir que a mudança seja detectada
+      requestAnimationFrame(() => {
+        this.modalOpeningAnnouncement.set(mensagem);
+        this.liveAnnouncer.announce(mensagem, 'assertive');
+        this.cdr.detectChanges();
+      });
     }
   }
 
@@ -599,25 +625,18 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
 
   /**
    * Gera mensagem de narração customizada para um item
-   * Prioridade: customSelectionFormatter > ariaLabelFn > padrão
    */
   getCustomAnnouncement(option: ModalSelectOption<T>, index: number): string {
     const position = index + 1;
     const total = this.options().length;
+    const status = this.isSelected(option.value) ? 'selecionado' : 'não selecionado';
     
-    // 1ª prioridade: formatter customizado via setSelectionMessageFormatter
-    if (this.customSelectionFormatter) {
-      return this.customSelectionFormatter(option, position, total);
-    }
-    
-    // 2ª prioridade: ariaLabelFn
     const customFn = this.ariaLabelFn();
     if (customFn) {
       return customFn(option, index, total, this.isSelected(option.value));
     }
     
-    // 3ª prioridade: formato padrão limpo
-    const status = this.isSelected(option.value) ? 'selecionado' : 'não selecionado';
+    // Formato limpo: sem "grupo", sem "radio button", apenas informações essenciais
     return `${position} de ${total}, ${status}, ${option.label}`;
   }
 
@@ -679,14 +698,21 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
 
   /**
    * Handler quando o título recebe foco
-   * NÃO narrar novamente - já foi narrado na abertura
+   * REFATORADO: Método privado usado por event listener nativo
    */
   private handleTitleFocus(): void {
     if (!this.isOpen()) return;
     
-    // Não anunciar nada quando o título recebe foco
-    // A narração já foi feita na abertura do modal via announceModalOpening()
-    // Isso evita duplicação de narrações
+    // Atualizar signal de narração do título
+    // O effect titleFocusEffect irá anunciar automaticamente
+    const titulo = this.titulo();
+    if (titulo) {
+      // Narrar apenas o título quando receber foco (sem "caixa de diálogo")
+      this.titleAnnouncement.set(titulo);
+    }
+    
+    // Não resetar isNavigating aqui para evitar interferir com navegação em andamento
+    // O estado de navegação é gerenciado pelos métodos de navegação
   }
 
   /**
@@ -1005,28 +1031,6 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
       }
     });
   }
-
-  // ============================================================================
-  // MÉTODOS PÚBLICOS - CONTROLE DE NARRAÇÃO PERSONALIZADA
-  // ============================================================================
-
-  /**
-   * Customiza a mensagem de narração ao selecionar um item
-   * Esta função tem prioridade sobre ariaLabelFn para seleção
-   * 
-   * @param formatter - Função que formata a mensagem baseada na opção, posição e total
-   * @example
-   * modal.setSelectionMessageFormatter((option, position, total) => 
-   *   `${option.label} selecionado`
-   * );
-   */
-  public setSelectionMessageFormatter(
-    formatter: (option: ModalSelectOption<T>, position: number, total: number) => string
-  ): void {
-    this.customSelectionFormatter = formatter;
-  }
-
-  private customSelectionFormatter?: (option: ModalSelectOption<T>, position: number, total: number) => string;
 
   // ============================================================================
   // MÉTODOS PÚBLICOS - AÇÕES

@@ -4,18 +4,23 @@
     class="modal-backdrop" 
     [class]="config().backdropClass || ''"
     (click)="onBackdropClick($event)"
+    role="none"
     aria-hidden="true">
     
     <!-- 
       MODAL CONTENT
-      - Sem role para evitar narração "grupo"
+      - Dialog semântico com role="dialog" (WCAG 4.1.2)
+      - aria-labelledby referencia o título para leitores de tela
+      - aria-modal="true" indica que é um modal bloqueante
       - Focus trap garante que o foco permanece dentro do modal
-      - Narração controlada via aria-live regions
     -->
     <div
       #modalContent
       class="modal-content"
       [class]="config().contentClass || ''"
+      role="dialog"
+      [attr.aria-label]="titulo()"
+      [attr.aria-modal]="true"
       (click)="onModalClick($event)"
       appFocusTrap
       [trapActive]="isOpen()"
@@ -24,19 +29,22 @@
       
       <!-- 
         TÍTULO DO MODAL
-        - Visível e focável
-        - Sem aria-hidden para permitir narração
-        - tabindex="-1" permite foco programático
+        - Completamente oculto do leitor de tela (aria-hidden)
+        - O diálogo usa aria-label diretamente para evitar "grupo"
+        - Focável apenas para navegação por teclado (setas)
+        - tabindex="-1" permite foco programático mas não via Tab
       -->
       <div
         #modalTitle
         [id]="'modal-title-' + modalId"
         class="modal-title"
+        role="presentation"
+        aria-hidden="true"
         tabindex="-1"
         (keydown)="onDialogKeyDown($event)"
         (focus)="onTitleFocus()"
         (blur)="onTitleBlur()">
-        {{ titulo() }}
+        <span aria-hidden="true">{{ titulo() }}</span>
       </div>
 
       <!-- Container de scroll (COMPLETAMENTE OCULTO de leitores de tela) -->
@@ -44,6 +52,7 @@
         class="modal-scroll-container"
         [style.max-height]="config().maxHeight || '227px'"
         aria-hidden="true"
+        role="presentation"
         tabindex="-1">
 
         <!-- Itens focáveis usando button para evitar narração "grupo" -->
@@ -119,6 +128,7 @@
 <div 
   #modalAnnouncer
   class="sr-only" 
+  role="status" 
   aria-live="assertive" 
   aria-atomic="true">
   {{ modalOpeningAnnouncement() || anuncioSelecao() }}
@@ -127,6 +137,7 @@
 <!-- Announcer para navegação e seleção de itens -->
 <div 
   class="sr-only" 
+  role="log" 
   aria-live="polite" 
   aria-atomic="true"
   aria-relevant="additions text">
