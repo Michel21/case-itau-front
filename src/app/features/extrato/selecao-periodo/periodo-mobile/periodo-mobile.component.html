@@ -45,6 +45,7 @@
         <div class="fields">
           <!-- Campo Mês (abre modal) -->
           <app-input-select
+            #campoMes
             label="Mês"
             [value]="nomeMesSelecionado()"
             placeholder="Selecione o mês"
@@ -55,6 +56,7 @@
 
           <!-- Campo Ano (abre modal) -->
           <app-input-select
+            #campoAno
             label="Ano"
             [value]="anoSelecionado()"
             placeholder="Selecione o ano"
@@ -67,6 +69,7 @@
 
       <!-- Botão Aplicar Filtro -->
       <button
+        #btnAplicar
         type="submit"
         class="submit-btn"
         [disabled]="!botaoHabilitado()"

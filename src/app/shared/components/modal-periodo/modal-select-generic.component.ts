@@ -185,6 +185,12 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
   private titleFocusHandler: (() => void) | null = null;
   private titleBlurHandler: (() => void) | null = null;
 
+  /**
+   * Elemento que tinha o foco antes do modal abrir
+   * Usado para restaurar o foco ao fechar
+   */
+  private elementFocusedBeforeModal: HTMLElement | null = null;
+
   readonly canConfirm = computed(() => this.currentValue() !== null);
   
   readonly currentOption = computed(() => {
@@ -206,6 +212,7 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
     if (!isOpen) {
       // Limpar narração quando modal fecha
       this.modalOpeningAnnouncement.set('');
+      this.anuncioSelecao.set('');
       this.titleAnnouncement.set('');
       this.liveAnnouncer.clear();
     }
@@ -213,16 +220,8 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
 
   /**
    * Effect para anunciar título quando recebe foco
-   * Reativo - atualiza automaticamente quando necessário
+   * REMOVIDO: Não é mais necessário pois o título está oculto e a narração é feita via modalOpeningAnnouncement
    */
-  private readonly titleFocusEffect = effect(() => {
-    const titleAnnouncement = this.titleAnnouncement();
-    
-    if (titleAnnouncement && this.isOpen()) {
-      // Anunciar título de forma polida quando recebe foco
-      this.announceWithLiveAnnouncer(titleAnnouncement, 'polite');
-    }
-  });
 
   // ============================================================================
   // CONSTRUCTOR
@@ -254,6 +253,10 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
       // Só processar se houver mudança real de estado
       if (currentIsOpen && !wasOpen) {
         // Mudou de fechado para aberto
+        // Limpar qualquer estado anterior antes de abrir
+        this.modalOpeningAnnouncement.set('');
+        this.anuncioSelecao.set('');
+        this.titleAnnouncement.set('');
         this.handleModalOpen();
       } else if (!currentIsOpen && wasOpen) {
         // Mudou de aberto para fechado
@@ -299,6 +302,9 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
    * REFATORADO: Reconfigura event listeners quando modal abre
    */
   private handleModalOpen(): void {
+    // Capturar elemento focado antes de abrir
+    this.elementFocusedBeforeModal = document.activeElement as HTMLElement;
+
     // Marcar que foi aberto
     this.hasBeenOpened = true;
     
@@ -314,12 +320,12 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
       this.hidePageContent();
       this.setupTitleEventListeners();
       
-      // Anunciar abertura imediatamente após DOM estar pronto
+      // Anunciar abertura - o método já tem delay interno
       if (this.isOpen()) {
         this.announceModalOpening();
       }
       
-      // Focar no título logo após anunciar (delay mínimo)
+      // Focar no título (agora não faz nada pois título está oculto)
       requestAnimationFrame(() => {
         if (this.isOpen()) {
           this.setupInitialFocus();
@@ -354,6 +360,12 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
     
     // Pequeno delay para garantir que o foco voltou para o elemento anterior
     setTimeout(() => {
+      // Restaurar foco para o elemento que abriu o modal
+      if (this.elementFocusedBeforeModal && document.body.contains(this.elementFocusedBeforeModal)) {
+        this.elementFocusedBeforeModal.focus();
+        this.elementFocusedBeforeModal = null;
+      }
+
       // Verificar novamente se ainda está fechado antes de narrar
       if (!this.isOpen()) {
         this.liveAnnouncer.announce(mensagem, 'assertive');
@@ -406,60 +418,66 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
   }
 
   /**
-   * Configura foco inicial no título
+   * Configura foco inicial
+   * Foca no título do modal
    */
   private setupInitialFocus(): void {
     this.updateTabIndices();
     
-    // Focar no título após DOM estar pronto
-    requestAnimationFrame(() => {
-      const titleElement = this.modalTitle()?.nativeElement;
-      if (titleElement) {
-        titleElement.focus();
-      }
-    });
+    // Focar no título
+    const titleElement = this.modalTitle()?.nativeElement;
+    if (titleElement) {
+      titleElement.focus();
+    }
   }
 
   /**
    * Anuncia mensagem usando LiveAnnouncer do Angular CDK
    * Método centralizado para narração profissional
+   * CORRIGIDO: Usa apenas signal para evitar duplicação (template já tem aria-live)
    */
   private announceWithLiveAnnouncer(message: string, priority: 'polite' | 'assertive' = 'assertive'): void {
     if (!message?.trim()) return;
     
     // Limpar anúncios anteriores para evitar sobreposição
-    this.liveAnnouncer.clear();
+    this.anuncioSelecao.set('');
     
     // Aguardar um frame para garantir que a limpeza foi processada
+    // Apenas atualizar signal - o template já tem aria-live que fará a narração
     requestAnimationFrame(() => {
-      this.liveAnnouncer.announce(message, priority);
-      
-      // Atualizar signal para sincronização com aria-live
       this.anuncioSelecao.set(message);
     });
   }
 
   /**
    * Anuncia abertura da modal e título
-   * REFATORADO: Narração imediata sem delays desnecessários
+   * CORRIGIDO: Usa setTimeout com delay adequado para garantir que leitor de tela está pronto
    */
   private announceModalOpening(): void {
     const titulo = this.titulo();
-    if (titulo) {
-      // Narração personalizada: "Selecione o mês, modal aberta"
-      const mensagem = `${titulo}, modal aberta`;
+    if (!titulo || !this.isOpen()) return;
+    
+    // Narração personalizada: "Selecione o mês, modal aberta"
+    const mensagem = `${titulo}, modal aberta`;
+    
+    // Limpar outros anúncios que possam interferir (mas não limpar liveAnnouncer aqui)
+    this.anuncioSelecao.set('');
+    this.titleAnnouncement.set('');
+    
+    // Atualizar signal imediatamente
+    this.modalOpeningAnnouncement.set(mensagem);
+    this.cdr.detectChanges();
+    
+    // Usar setTimeout com delay adequado para garantir que:
+    // 1. O DOM está completamente renderizado
+    // 2. O leitor de tela está pronto para receber anúncios
+    // 3. Não há conflitos com outras narrações
+    setTimeout(() => {
+      if (!this.isOpen()) return;
       
-      // Limpar e definir mensagem imediatamente
-      this.modalOpeningAnnouncement.set('');
-      this.cdr.detectChanges();
-      
-      // Usar requestAnimationFrame para garantir que a mudança seja detectada
-      requestAnimationFrame(() => {
-        this.modalOpeningAnnouncement.set(mensagem);
-        this.liveAnnouncer.announce(mensagem, 'assertive');
-        this.cdr.detectChanges();
-      });
-    }
+      // Usar LiveAnnouncer (método mais confiável)
+      this.liveAnnouncer.announce(mensagem, 'assertive');
+    }, 1000);
   }
 
   /**
@@ -539,10 +557,19 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
     item.removeAttribute('aria-hidden');
 
     // Garantir que o container de scroll permaneça oculto
+    // Usar role="presentation" ao invés de "none" para melhor compatibilidade
     const scrollContainer = item.closest('.modal-scroll-container');
     if (scrollContainer) {
       scrollContainer.setAttribute('aria-hidden', 'true');
-      scrollContainer.setAttribute('role', 'none');
+      scrollContainer.setAttribute('role', 'presentation');
+    }
+    
+    // Garantir que o modal-content também não crie contexto de grupo
+    // Não usar aria-hidden aqui pois o modal precisa estar acessível
+    const modalContent = item.closest('.modal-content');
+    if (modalContent) {
+      // Remover role presentation se tiver, pois container é focado
+      modalContent.removeAttribute('role');
     }
   }
 
@@ -698,21 +725,11 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
 
   /**
    * Handler quando o título recebe foco
-   * REFATORADO: Método privado usado por event listener nativo
+   * REMOVIDO: Título agora está oculto (aria-hidden="true") e não recebe foco
+   * A narração é feita apenas via modalOpeningAnnouncement
    */
   private handleTitleFocus(): void {
-    if (!this.isOpen()) return;
-    
-    // Atualizar signal de narração do título
-    // O effect titleFocusEffect irá anunciar automaticamente
-    const titulo = this.titulo();
-    if (titulo) {
-      // Narrar apenas o título quando receber foco (sem "caixa de diálogo")
-      this.titleAnnouncement.set(titulo);
-    }
-    
-    // Não resetar isNavigating aqui para evitar interferir com navegação em andamento
-    // O estado de navegação é gerenciado pelos métodos de navegação
+    // Não fazer nada - título está oculto
   }
 
   /**
@@ -902,27 +919,35 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
       item.removeAttribute('aria-owns');
       item.removeAttribute('aria-describedby');
       item.removeAttribute('aria-controls');
-      // Remover role="presentation" quando focado para que aria-label funcione
-      // Mas manter sem role para evitar semântica de grupo
+      // Remover qualquer role do button - deixar semântica nativa
+      // Button nativo sem role adicional evita narração de "grupo"
       item.removeAttribute('role');
       item.removeAttribute('aria-expanded');
       item.removeAttribute('aria-haspopup');
       item.removeAttribute('aria-selected');
+      item.removeAttribute('aria-checked');
       
       // Garantir que o container pai permaneça completamente oculto
+      // Usar role="presentation" + aria-hidden="true" para remover completamente semântica
       const scrollContainer = item.closest('.modal-scroll-container');
       if (scrollContainer) {
         scrollContainer.setAttribute('aria-hidden', 'true');
         scrollContainer.setAttribute('role', 'presentation');
         scrollContainer.removeAttribute('aria-label');
         scrollContainer.removeAttribute('aria-labelledby');
+        scrollContainer.removeAttribute('aria-describedby');
+        scrollContainer.removeAttribute('aria-owns');
       }
       
-      // Garantir que o diálogo não tenha atributos que possam causar "grupo"
-      const dialog = item.closest('[role="dialog"]');
-      if (dialog) {
-        dialog.removeAttribute('aria-describedby');
-        dialog.removeAttribute('aria-owns');
+      // Garantir que o modal-content não tenha atributos que possam causar "grupo"
+      const modalContent = item.closest('.modal-content');
+      if (modalContent) {
+        // Manter sem role para não interferir
+        modalContent.removeAttribute('role');
+        modalContent.removeAttribute('aria-describedby');
+        modalContent.removeAttribute('aria-owns');
+        modalContent.removeAttribute('aria-label');
+        modalContent.removeAttribute('aria-labelledby');
       }
       
       // Ocultar todos os outros itens para evitar que sejam interpretados como grupo
@@ -983,6 +1008,7 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
   /**
    * Anuncia seleção de um item
    * IMPORTANTE: Mantém foco no item, não volta para título
+   * CORRIGIDO: Usa apenas signal para evitar duplicação (template já tem aria-live)
    */
   private announceSelection(message: string): void {
     const currentFocusedElement = document.activeElement as HTMLElement;
@@ -991,10 +1017,9 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
     const isItemFocused = currentFocusedElement?.closest('.modal-label') !== null || 
                           currentFocusedElement?.classList.contains('modal-label') === true;
     
-    // Se não está em um item, não fazer nada (evitar redirecionar foco)
+    // Se não está em um item, apenas atualizar signal
     if (!isItemFocused) {
       this.anuncioSelecao.set(message);
-      this.liveAnnouncer.announce(message, 'assertive');
       return;
     }
     
@@ -1004,8 +1029,8 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
     }
     
     setTimeout(() => {
+      // Apenas atualizar signal - o template já tem aria-live que fará a narração
       this.anuncioSelecao.set(message);
-      this.liveAnnouncer.announce(message, 'assertive');
       
       // Restaurar foco APENAS se ainda for um item (não título)
       setTimeout(() => {

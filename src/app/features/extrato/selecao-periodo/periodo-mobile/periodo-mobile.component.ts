@@ -101,8 +101,9 @@ export class PeriodoMobileComponent {
   // VIEW CHILDREN
   // ============================================================================
   
-  readonly campoMes = viewChild<ElementRef<HTMLSelectElement>>('campoMes');
-  readonly campoAno = viewChild<ElementRef<HTMLSelectElement>>('campoAno');
+  readonly campoMes = viewChild<InputSelectComponent>('campoMes');
+  readonly campoAno = viewChild<InputSelectComponent>('campoAno');
+  readonly btnAplicar = viewChild<ElementRef<HTMLButtonElement>>('btnAplicar');
 
   // ============================================================================
   // CONSTANTES PÚBLICAS
@@ -277,6 +278,12 @@ export class PeriodoMobileComponent {
     this.filtroForm.patchValue({ mes: option.value });
     this.modalMesAberto.set(false);
     console.log('✅ Mês selecionado:', option.label);
+    
+    // Focar no próximo campo (Ano) após o modal fechar e restaurar foco
+    // Delay maior que 150ms do modal genérico para garantir a sequência
+    setTimeout(() => {
+      this.campoAno()?.focus();
+    }, 250);
   }
 
   /**
@@ -286,6 +293,11 @@ export class PeriodoMobileComponent {
     this.filtroForm.patchValue({ ano: option.value });
     this.modalAnoAberto.set(false);
     console.log('✅ Ano selecionado:', option.label);
+    
+    // Focar no botão aplicar após o modal fechar
+    setTimeout(() => {
+      this.btnAplicar()?.nativeElement.focus();
+    }, 250);
   }
 
   /**

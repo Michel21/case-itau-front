@@ -8,7 +8,9 @@ import {
   output,
   signal,
   DestroyRef,
-  forwardRef
+  forwardRef,
+  viewChild,
+  ElementRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -88,6 +90,8 @@ export class InputSelectComponent implements ControlValueAccessor {
   // ============================================================================
 
   private readonly destroyRef = inject(DestroyRef);
+  
+  readonly buttonRef = viewChild<ElementRef<HTMLButtonElement>>('buttonRef');
 
   // ============================================================================
   // STATE
@@ -220,6 +224,13 @@ export class InputSelectComponent implements ControlValueAccessor {
    */
   onBlur(): void {
     this.onTouched();
+  }
+
+  /**
+   * Foca no botão do input
+   */
+  focus(): void {
+    this.buttonRef()?.nativeElement.focus();
   }
 }
 

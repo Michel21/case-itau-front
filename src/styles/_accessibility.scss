@@ -192,6 +192,23 @@ div[role="group"][aria-hidden="true"] {
   }
 }
 
+// Garantir que botões dentro de containers com role="presentation" não criem contexto de grupo
+.modal-content[role="presentation"],
+.modal-scroll-container[role="presentation"] {
+  // Remover qualquer semântica de grupo
+  speak: none;
+  
+  // Botões dentro não devem herdar contexto de grupo
+  & button {
+    // Remover qualquer atributo que possa criar contexto de grupo
+    &[aria-posinset],
+    &[aria-setsize],
+    &[aria-owns] {
+      // Esses atributos são removidos programaticamente, mas garantir via CSS também
+    }
+  }
+}
+
 // ============================================================================
 // SUPORTE CROSS-BROWSER
 // ============================================================================

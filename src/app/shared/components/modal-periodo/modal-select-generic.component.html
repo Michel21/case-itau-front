@@ -4,48 +4,37 @@
     class="modal-backdrop" 
     [class]="config().backdropClass || ''"
     (click)="onBackdropClick($event)"
-    role="none"
     aria-hidden="true">
     
     <!-- 
       MODAL CONTENT
-      - Dialog semântico com role="dialog" (WCAG 4.1.2)
-      - aria-labelledby referencia o título para leitores de tela
-      - aria-modal="true" indica que é um modal bloqueante
+      - Sem role="dialog" para evitar narração "caixa de diálogo"
+      - Narração controlada apenas via aria-live regions
       - Focus trap garante que o foco permanece dentro do modal
     -->
     <div
       #modalContent
       class="modal-content"
       [class]="config().contentClass || ''"
-      role="dialog"
-      [attr.aria-label]="titulo()"
-      [attr.aria-modal]="true"
       (click)="onModalClick($event)"
       appFocusTrap
       [trapActive]="isOpen()"
-      [autoFocus]="false"
-      tabindex="-1">
-      
+      [autoFocus]="false">
+
       <!-- 
-        TÍTULO DO MODAL
-        - Completamente oculto do leitor de tela (aria-hidden)
-        - O diálogo usa aria-label diretamente para evitar "grupo"
-        - Focável apenas para navegação por teclado (setas)
-        - tabindex="-1" permite foco programático mas não via Tab
+        TÍTULO DO MODAL (Alvo do Foco Inicial)
+        - Recebe foco ao abrir
+        - Sem role="heading" para evitar narração "nível de título"
+        - Apenas div focado com aria-label narra o texto puro
       -->
-      <div
+      <h2
         #modalTitle
         [id]="'modal-title-' + modalId"
         class="modal-title"
-        role="presentation"
-        aria-hidden="true"
         tabindex="-1"
-        (keydown)="onDialogKeyDown($event)"
-        (focus)="onTitleFocus()"
-        (blur)="onTitleBlur()">
-        <span aria-hidden="true">{{ titulo() }}</span>
-      </div>
+        [attr.aria-label]="titulo() + ', modal aberta'">
+        {{ titulo() }}
+      </h2>
 
       <!-- Container de scroll (COMPLETAMENTE OCULTO de leitores de tela) -->
       <div
@@ -62,7 +51,6 @@
             [id]="'option-' + getOptionId(option.value)"
             class="modal-label"
             [class.modal-label--selected]="isSelected(option.value)"
-            role="none"
             [attr.aria-label]="getCustomAnnouncement(option, idx)"
             [attr.aria-hidden]="null"
             [attr.tabindex]="-1"
