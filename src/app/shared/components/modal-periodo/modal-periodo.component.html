@@ -42,15 +42,15 @@
               
               <span class="modal-check" [class.modal-check--active]="mesAtual() === mes.value">
                 @if (mesAtual() === mes.value) {
-                  <!-- Radio selecionado (borda + círculo azul - menor) -->
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10.5" stroke="#0046C0" stroke-width="1.5" fill="none"/>
-                    <circle cx="12" cy="12" r="8" fill="#0046C0"/>
+                  <!-- Radio selecionado (borda + círculo azul) -->
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="10" r="8.5" stroke="#0046C0" stroke-width="1.5" fill="none"/>
+                    <circle cx="10" cy="10" r="5" fill="#0046C0"/>
                   </svg>
                 } @else {
                   <!-- Radio não selecionado (apenas borda) -->
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10.5" stroke="#0046C0" stroke-width="1.5" fill="none"/>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="10" r="8.5" stroke="#0046C0" stroke-width="1.5" fill="none"/>
                   </svg>
                 }
               </span>
