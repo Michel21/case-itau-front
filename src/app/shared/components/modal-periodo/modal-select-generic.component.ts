@@ -259,10 +259,8 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
   /** Estado anterior do isOpen (detecta transições reais) */
   private previousIsOpen = false;
 
-  /** Handlers de eventos (para cleanup correto) */
+  /** Handler de evento de teclado (para cleanup correto) */
   private titleKeyDownHandler: ((event: KeyboardEvent) => void) | null = null;
-  private titleFocusHandler: (() => void) | null = null;
-  private titleBlurHandler: (() => void) | null = null;
 
   /** Elemento que tinha foco antes do modal abrir */
   private elementFocusedBeforeModal: HTMLElement | null = null;
@@ -763,12 +761,7 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
     if (!titleElement) return;
 
     this.titleKeyDownHandler = (event: KeyboardEvent) => this.handleTitleKeyDown(event);
-    this.titleFocusHandler = () => this.handleTitleFocus();
-    this.titleBlurHandler = () => this.handleTitleBlur();
-
     titleElement.addEventListener('keydown', this.titleKeyDownHandler, { passive: false });
-    titleElement.addEventListener('focus', this.titleFocusHandler);
-    titleElement.addEventListener('blur', this.titleBlurHandler);
   }
 
   /**
@@ -782,30 +775,6 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
       titleElement.removeEventListener('keydown', this.titleKeyDownHandler);
       this.titleKeyDownHandler = null;
     }
-
-    if (this.titleFocusHandler) {
-      titleElement.removeEventListener('focus', this.titleFocusHandler);
-      this.titleFocusHandler = null;
-    }
-
-    if (this.titleBlurHandler) {
-      titleElement.removeEventListener('blur', this.titleBlurHandler);
-      this.titleBlurHandler = null;
-    }
-  }
-
-  /**
-   * Handler quando título recebe foco
-   */
-  private handleTitleFocus(): void {
-    // Título está oculto - não fazer nada
-  }
-
-  /**
-   * Handler quando título perde foco
-   */
-  private handleTitleBlur(): void {
-    // Reservado para futuras implementações
   }
 
   /**
@@ -1062,19 +1031,5 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
    */
   isSelected(value: T): boolean {
     return this.currentValue() === value;
-  }
-
-  /**
-   * Retorna ID do modal
-   */
-  getModalId(): string {
-    return 'modal-select-generic';
-  }
-
-  /**
-   * Obtém aria-label para uma opção
-   */
-  getAriaLabel(option: ModalSelectOption<T>, index: number): string {
-    return this.getCustomAnnouncement(option, index);
   }
 }
