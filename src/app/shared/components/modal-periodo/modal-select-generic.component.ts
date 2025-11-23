@@ -19,29 +19,43 @@ import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { FocusTrapDirective } from '../../directives/focus-trap.directive';
 
 // ============================================================================
-// INTERFACES
+// TYPES & INTERFACES
 // ============================================================================
 
 /**
- * Interface genérica para opções do modal
+ * Opção genérica para seleção no modal
+ * 
+ * @template T - Tipo do valor da opção (padrão: string)
  */
 export interface ModalSelectOption<T = string> {
+  /** Valor único que identifica a opção */
   readonly value: T;
+  /** Texto exibido para o usuário */
   readonly label: string;
 }
 
 /**
- * Configuração de estilo do modal
+ * Configuração de estilo e comportamento do modal
  */
 export interface ModalSelectConfig {
+  /** Exibir ícone de check na opção selecionada */
   readonly showCheckIcon?: boolean;
+  /** Altura máxima do container de scroll */
   readonly maxHeight?: string;
+  /** Classes CSS customizadas para o backdrop */
   readonly backdropClass?: string;
+  /** Classes CSS customizadas para o content */
   readonly contentClass?: string;
 }
 
 /**
- * Função para customizar a narração de acessibilidade de um item.
+ * Função para customizar a narração ARIA de um item
+ * 
+ * @param option - Opção sendo narrada
+ * @param index - Índice da opção (base 0)
+ * @param total - Total de opções
+ * @param isSelected - Se a opção está selecionada
+ * @returns Texto customizado para narração
  */
 export type AriaLabelGeneratorFn<T> = (
   option: ModalSelectOption<T>,
@@ -51,7 +65,14 @@ export type AriaLabelGeneratorFn<T> = (
 ) => string;
 
 /**
- * Função para customizar a narração durante a navegação (foco em um item).
+ * Função para customizar narração durante navegação por teclado
+ * 
+ * @param option - Opção recebendo foco
+ * @param index - Índice da opção
+ * @param total - Total de opções
+ * @param isSelected - Se a opção está selecionada
+ * @param navigationKey - Tecla pressionada ('ArrowDown', 'Home', etc)
+ * @returns Texto customizado para anunciar
  */
 export type NavigationAnnouncementFn<T> = (
   option: ModalSelectOption<T>,
@@ -62,25 +83,65 @@ export type NavigationAnnouncementFn<T> = (
 ) => string;
 
 /**
- * Função para customizar o comportamento de navegação.
- * Permite definir como calcular o próximo índice baseado na tecla pressionada.
+ * Função para customizar comportamento de navegação
+ * 
+ * @param key - Tecla pressionada
+ * @param currentIndex - Índice atual
+ * @param total - Total de opções
+ * @param options - Array de todas as opções
+ * @returns Novo índice ou null para usar comportamento padrão
  */
 export type NavigationHandlerFn<T> = (
   key: string,
   currentIndex: number,
   total: number,
   options: readonly ModalSelectOption<T>[]
-) => number | null; // Retorna null para usar comportamento padrão
+) => number | null;
 
 // ============================================================================
-// COMPONENTE
+// COMPONENTE PRINCIPAL
 // ============================================================================
 
 /**
- * Modal de Seleção Genérico - Componente Profissional e Acessível
+ * Modal de Seleção Genérico e Acessível
  * 
- * Modal completamente parametrizável e agnóstico para seleção de itens.
- * Implementa as melhores práticas de acessibilidade (WCAG 2.1 AA).
+ * Componente profissional para seleção de itens em modais, implementando:
+ * - WCAG 2.1 Level AA (acessibilidade completa)
+ * - Navegação por teclado (setas, Home, End, Enter, Esc)
+ * - Suporte a leitores de tela (VoiceOver, NVDA, JAWS)
+ * - Gestão de foco com restauração automática
+ * - Anúncios ao vivo (LiveAnnouncer)
+ * - Customização completa de narração e navegação
+ * - Tipagem genérica TypeScript
+ * 
+ * @template T - Tipo do valor das opções (padrão: string)
+ * 
+ * @example
+ * ```html
+ * <app-modal-select-generic
+ *   [isOpen]="modalAberto"
+ *   titulo="Selecione o mês"
+ *   [options]="meses"
+ *   [selectedValue]="mesSelecionado"
+ *   (confirmar)="aoConfirmar($event)"
+ *   (cancelar)="aoCancelar()"
+ * />
+ * ```
+ * 
+ * @example Com customização avançada
+ * ```html
+ * <app-modal-select-generic
+ *   [isOpen]="isOpen"
+ *   titulo="Escolha um produto"
+ *   [options]="produtos"
+ *   [selectedValue]="produtoAtual"
+ *   [ariaLabelFn]="customAriaLabel"
+ *   [navigationHandlerFn]="customNavigation"
+ *   [config]="{showCheckIcon: true, maxHeight: '300px'}"
+ *   (confirmar)="onConfirm($event)"
+ *   (cancelar)="onCancel()"
+ * />
+ * ```
  */
 @Component({
   selector: 'app-modal-select-generic',
@@ -96,132 +157,146 @@ export type NavigationHandlerFn<T> = (
 })
 export class ModalSelectGenericComponent<T = string> implements AfterViewInit, OnDestroy {
   // ============================================================================
-  // INPUTS
+  // INPUTS - Configuração do Componente
   // ============================================================================
   
+  /** Se o modal está aberto ou fechado */
   readonly isOpen = input.required<boolean>();
+  
+  /** Título exibido no topo do modal */
   readonly titulo = input.required<string>();
+  
+  /** Lista de opções disponíveis para seleção */
   readonly options = input.required<readonly ModalSelectOption<T>[]>();
+  
+  /** Valor atualmente selecionado (pode ser null) */
   readonly selectedValue = input<T | null>(null);
+  
+  /** Função customizada para gerar aria-label dos itens */
   readonly ariaLabelFn = input<AriaLabelGeneratorFn<T> | undefined>(undefined);
+  
+  /** Função customizada para narração durante navegação */
   readonly navigationAnnouncementFn = input<NavigationAnnouncementFn<T> | undefined>(undefined);
+  
+  /** Função customizada para controlar navegação por teclado */
   readonly navigationHandlerFn = input<NavigationHandlerFn<T> | undefined>(undefined);
+  
+  /** Texto do botão de cancelar */
   readonly cancelText = input<string>('Cancelar');
+  
+  /** Texto do botão de confirmar */
   readonly confirmText = input<string>('Confirmar');
+  
+  /** Configurações de estilo e comportamento */
   readonly config = input<ModalSelectConfig>({
     showCheckIcon: true,
     maxHeight: '227px'
   });
 
   // ============================================================================
-  // OUTPUTS
+  // OUTPUTS - Eventos Emitidos
   // ============================================================================
   
+  /** Emitido quando usuário confirma uma seleção */
   readonly confirmar = output<ModalSelectOption<T>>();
+  
+  /** Emitido quando usuário cancela o modal */
   readonly cancelar = output<void>();
 
   // ============================================================================
-  // INJEÇÃO DE DEPENDÊNCIAS
+  // DEPENDÊNCIAS INJETADAS
   // ============================================================================
   
+  /** Serviço para anúncios ao vivo (leitores de tela) */
   private readonly liveAnnouncer = inject(LiveAnnouncer);
+  
+  /** Referência para cleanup automático */
   private readonly destroyRef = inject(DestroyRef);
+  
+  /** Para forçar detecção de mudanças quando necessário */
   private readonly cdr = inject(ChangeDetectorRef);
   
+  /** Referência para o elemento de anúncios (aria-live) */
   readonly modalAnnouncer = viewChild<ElementRef<HTMLElement>>('modalAnnouncer');
+  
+  /** Referência para o container principal do modal */
   readonly modalContent = viewChild<ElementRef<HTMLElement>>('modalContent');
+  
+  /** Referência para o elemento de título */
   readonly modalTitle = viewChild<ElementRef<HTMLElement>>('modalTitle');
 
   // ============================================================================
-  // STATE
+  // ESTADO INTERNO - Signals Reativos
   // ============================================================================
   
-  /**
-   * ID único para o modal (usado para aria-labelledby)
-   */
+  /** ID único para ARIA (aria-labelledby) */
   readonly modalId = `modal-${Math.random().toString(36).substring(2, 9)}`;
   
+  /** Valor atualmente selecionado internamente */
   readonly currentValue = signal<T | null>(null);
+  
+  /** Índice do item com foco */
   readonly focusedIndex = signal<number>(0);
+  
+  /** Mensagem de anúncio de seleção */
   readonly anuncioSelecao = signal<string>('');
+  
+  /** Se está navegando por teclado */
   readonly isNavigating = signal<boolean>(false);
   
-  /**
-   * Signal para controlar narração da abertura do modal
-   * Reativo - atualiza automaticamente quando o modal abre
-   * Público para uso no template
-   */
+  /** Mensagem de abertura do modal */
   readonly modalOpeningAnnouncement = signal<string>('');
   
-  /**
-   * Signal para controlar narração do título
-   * Reativo - atualiza quando o título muda ou recebe foco
-   */
+  /** Mensagem de título (uso interno) */
   private readonly titleAnnouncement = signal<string>('');
   
-  /**
-   * Flag para indicar que um item está processando evento de teclado
-   * Usado para evitar que o título interfira na navegação
-   */
+  /** Flag para evitar conflitos de navegação */
   private isItemProcessingKey = false;
 
-  /**
-   * Flag para indicar se o modal já foi aberto alguma vez
-   * Usado para evitar narração de "modal fechada" na inicialização
-   */
+  /** Se o modal já foi aberto alguma vez (evita narração inicial incorreta) */
   private hasBeenOpened = false;
   
-  /**
-   * Estado anterior do isOpen para detectar transições reais
-   * Usado para evitar narrações incorretas durante oscilações de estado
-   */
+  /** Estado anterior do isOpen (detecta transições reais) */
   private previousIsOpen = false;
 
-  /**
-   * Referências para os handlers de eventos (bound methods)
-   * Necessário para poder remover os listeners corretamente
-   */
+  /** Handlers de eventos (para cleanup correto) */
   private titleKeyDownHandler: ((event: KeyboardEvent) => void) | null = null;
   private titleFocusHandler: (() => void) | null = null;
   private titleBlurHandler: (() => void) | null = null;
 
-  /**
-   * Elemento que tinha o foco antes do modal abrir
-   * Usado para restaurar o foco ao fechar
-   */
+  /** Elemento que tinha foco antes do modal abrir */
   private elementFocusedBeforeModal: HTMLElement | null = null;
 
+  // ============================================================================
+  // COMPUTED - Valores Derivados
+  // ============================================================================
+
+  /** Se pode confirmar (tem valor selecionado) */
   readonly canConfirm = computed(() => this.currentValue() !== null);
   
+  /** Opção atualmente selecionada (objeto completo) */
   readonly currentOption = computed(() => {
     const value = this.currentValue();
     return this.options().find(opt => opt.value === value) || null;
   });
 
   // ============================================================================
-  // EFFECTS - Controle Reativo de Narração (Angular Signals)
+  // EFFECTS - Reatividade Automática
   // ============================================================================
 
   /**
    * Effect para limpar narração quando modal fecha
-   * A narração de abertura é feita pelo método announceModalOpening()
    */
   private readonly modalOpeningEffect = effect(() => {
     const isOpen = this.isOpen();
     
     if (!isOpen) {
-      // Limpar narração quando modal fecha
       this.modalOpeningAnnouncement.set('');
       this.anuncioSelecao.set('');
       this.titleAnnouncement.set('');
       this.liveAnnouncer.clear();
     }
   });
-
-  /**
-   * Effect para anunciar título quando recebe foco
-   * REMOVIDO: Não é mais necessário pois o título está oculto e a narração é feita via modalOpeningAnnouncement
-   */
 
   // ============================================================================
   // CONSTRUCTOR
@@ -241,91 +316,80 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
       }
     }, { allowSignalWrites: true });
 
-    // Effect: Gerenciar abertura/fechamento
-    // Usa estado anterior para detectar transições reais
+    // Gerenciar abertura/fechamento
     effect(() => {
       const currentIsOpen = this.isOpen();
       const wasOpen = this.previousIsOpen;
       
-      // Atualizar estado anterior
       this.previousIsOpen = currentIsOpen;
       
-      // Só processar se houver mudança real de estado
       if (currentIsOpen && !wasOpen) {
-        // Mudou de fechado para aberto
-        // Limpar qualquer estado anterior antes de abrir
+        // Abriu
         this.modalOpeningAnnouncement.set('');
         this.anuncioSelecao.set('');
         this.titleAnnouncement.set('');
         this.handleModalOpen();
       } else if (!currentIsOpen && wasOpen) {
-        // Mudou de aberto para fechado
+        // Fechou
         this.handleModalClose();
       }
-      // Se não houve mudança (inicialização ou mesmo estado), não fazer nada
     }, { allowSignalWrites: true });
 
-    // Configurar cleanup quando componente for destruído
+    // Cleanup automático
     this.destroyRef.onDestroy(() => {
       this.cleanupTitleEventListeners();
     });
   }
 
   // ============================================================================
-  // LIFECYCLE HOOKS - Gerenciamento de Event Listeners via JavaScript
+  // LIFECYCLE HOOKS
   // ============================================================================
 
   /**
-   * Configura event listeners nativos após a view ser inicializada
-   * REFATORADO: Usa JavaScript nativo ao invés de event bindings do Angular
+   * Configura event listeners após view estar pronta
    */
   ngAfterViewInit(): void {
-    // Aguardar próximo ciclo para garantir que o elemento está no DOM
     requestAnimationFrame(() => {
       this.setupTitleEventListeners();
     });
   }
 
   /**
-   * Limpa event listeners quando componente é destruído
+   * Limpa event listeners ao destruir componente
    */
   ngOnDestroy(): void {
     this.cleanupTitleEventListeners();
   }
 
   // ============================================================================
-  // MÉTODOS PRIVADOS - LÓGICA DE NEGÓCIO
+  // MÉTODOS PRIVADOS - Abertura/Fechamento
   // ============================================================================
 
   /**
-   * Manipula abertura da modal
-   * REFATORADO: Reconfigura event listeners quando modal abre
+   * Manipula abertura do modal
+   * - Captura elemento com foco anterior
+   * - Oculta conteúdo da página
+   * - Configura foco inicial
+   * - Anuncia abertura para leitores de tela
    */
   private handleModalOpen(): void {
-    // Capturar elemento focado antes de abrir
     this.elementFocusedBeforeModal = document.activeElement as HTMLElement;
-
-    // Marcar que foi aberto
     this.hasBeenOpened = true;
     
-    // Limpar qualquer narração pendente de fechamento
     this.liveAnnouncer.clear();
     this.modalOpeningAnnouncement.set('');
     this.anuncioSelecao.set('');
     
     this.resetState();
     
-    // Aguardar modal estar no DOM antes de ocultar conteúdo da página
     requestAnimationFrame(() => {
       this.hidePageContent();
       this.setupTitleEventListeners();
       
-      // Anunciar abertura - o método já tem delay interno
       if (this.isOpen()) {
         this.announceModalOpening();
       }
       
-      // Focar no título (agora não faz nada pois título está oculto)
       requestAnimationFrame(() => {
         if (this.isOpen()) {
           this.setupInitialFocus();
@@ -335,13 +399,13 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
   }
 
   /**
-   * Manipula fechamento da modal
-   * REFATORADO: Limpa event listeners quando modal fecha e anuncia fechamento
+   * Manipula fechamento do modal
+   * - Restaura visibilidade do conteúdo da página
+   * - Restaura foco para elemento anterior
+   * - Anuncia fechamento para leitores de tela
    */
   private handleModalClose(): void {
-    // Só processar fechamento se realmente estava aberto antes
     if (!this.hasBeenOpened) {
-      // Modal nunca foi aberto, apenas restaurar conteúdo e sair
       this.restorePageContent();
       return;
     }
@@ -349,35 +413,27 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
     this.restorePageContent();
     this.resetState();
     
-    // Anunciar fechamento do modal
     const titulo = this.titulo();
     const mensagem = titulo ? `${titulo} fechada` : 'Modal fechada';
     
-    // Limpar narrações de abertura antes de anunciar fechamento
     this.modalOpeningAnnouncement.set('');
     this.anuncioSelecao.set('');
     this.liveAnnouncer.clear();
     
-    // Pequeno delay para garantir que o foco voltou para o elemento anterior
     setTimeout(() => {
-      // Restaurar foco para o elemento que abriu o modal
       if (this.elementFocusedBeforeModal && document.body.contains(this.elementFocusedBeforeModal)) {
         this.elementFocusedBeforeModal.focus();
         this.elementFocusedBeforeModal = null;
       }
 
-      // Verificar novamente se ainda está fechado antes de narrar
       if (!this.isOpen()) {
         this.liveAnnouncer.announce(mensagem, 'assertive');
       }
     }, 150);
-    
-    // Não remover listeners aqui - serão removidos no ngOnDestroy
-    // Mas podemos limpar estado específico se necessário
   }
 
   /**
-   * Oculta conteúdo da página (exceto modal)
+   * Oculta conteúdo da página (aria-hidden) exceto o modal
    */
   private hidePageContent(): void {
     const selectors = [
@@ -409,7 +465,7 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
   }
 
   /**
-   * Reseta estado interno
+   * Reseta estado interno do modal
    */
   private resetState(): void {
     this.isNavigating.set(false);
@@ -418,13 +474,11 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
   }
 
   /**
-   * Configura foco inicial
-   * Foca no título do modal
+   * Configura foco inicial no título do modal
    */
   private setupInitialFocus(): void {
     this.updateTabIndices();
     
-    // Focar no título
     const titleElement = this.modalTitle()?.nativeElement;
     if (titleElement) {
       titleElement.focus();
@@ -432,53 +486,30 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
   }
 
   /**
-   * Anuncia mensagem usando LiveAnnouncer do Angular CDK
-   * Método centralizado para narração profissional
-   * CORRIGIDO: Usa apenas signal para evitar duplicação (template já tem aria-live)
-   */
-  private announceWithLiveAnnouncer(message: string, priority: 'polite' | 'assertive' = 'assertive'): void {
-    if (!message?.trim()) return;
-    
-    // Limpar anúncios anteriores para evitar sobreposição
-    this.anuncioSelecao.set('');
-    
-    // Aguardar um frame para garantir que a limpeza foi processada
-    // Apenas atualizar signal - o template já tem aria-live que fará a narração
-    requestAnimationFrame(() => {
-      this.anuncioSelecao.set(message);
-    });
-  }
-
-  /**
-   * Anuncia abertura da modal e título
-   * CORRIGIDO: Usa setTimeout com delay adequado para garantir que leitor de tela está pronto
+   * Anuncia abertura do modal para leitores de tela
+   * Usa delay adequado para garantir que leitor está pronto
    */
   private announceModalOpening(): void {
     const titulo = this.titulo();
     if (!titulo || !this.isOpen()) return;
     
-    // Narração personalizada: "Selecione o mês, modal aberta"
     const mensagem = `${titulo}, modal aberta`;
     
-    // Limpar outros anúncios que possam interferir (mas não limpar liveAnnouncer aqui)
     this.anuncioSelecao.set('');
     this.titleAnnouncement.set('');
     
-    // Atualizar signal imediatamente
     this.modalOpeningAnnouncement.set(mensagem);
     this.cdr.detectChanges();
     
-    // Usar setTimeout com delay adequado para garantir que:
-    // 1. O DOM está completamente renderizado
-    // 2. O leitor de tela está pronto para receber anúncios
-    // 3. Não há conflitos com outras narrações
     setTimeout(() => {
       if (!this.isOpen()) return;
-      
-      // Usar LiveAnnouncer (método mais confiável)
       this.liveAnnouncer.announce(mensagem, 'assertive');
     }, 1000);
   }
+
+  // ============================================================================
+  // MÉTODOS PRIVADOS - Navegação e Foco
+  // ============================================================================
 
   /**
    * Encontra índice de uma opção pelo valor
@@ -488,7 +519,7 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
   }
 
   /**
-   * Calcula próximo índice baseado na tecla e índice atual
+   * Calcula próximo índice baseado na tecla pressionada
    */
   private calculateNextIndex(key: string, currentIndex: number, total: number): number {
     const isFromTitle = currentIndex === -1;
@@ -529,7 +560,7 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
   }
 
   /**
-   * Atualiza tabindex de todos os itens
+   * Atualiza tabindex de todos os itens (roving tabindex pattern)
    */
   private updateTabIndices(): void {
     const focusedIdx = this.focusedIndex();
@@ -542,7 +573,7 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
   }
 
   /**
-   * Obtém elemento DOM de um item
+   * Obtém elemento DOM de um item pelo valor
    */
   private getItemElement(value: T): HTMLElement | null {
     const id = `option-${this.getOptionId(value)}`;
@@ -550,51 +581,41 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
   }
 
   /**
-   * Torna item acessível (remove aria-hidden)
-   * CORRIGIDO: Containers intermediários removidos para evitar narração "grupo"
+   * Torna item acessível (remove aria-hidden e configura containers)
    */
   private makeItemAccessible(item: HTMLElement): void {
     item.removeAttribute('aria-hidden');
 
-    // Garantir que o container de scroll permaneça oculto
-    // Usar role="presentation" ao invés de "none" para melhor compatibilidade
     const scrollContainer = item.closest('.modal-scroll-container');
     if (scrollContainer) {
       scrollContainer.setAttribute('aria-hidden', 'true');
       scrollContainer.setAttribute('role', 'presentation');
     }
     
-    // Garantir que o modal-content também não crie contexto de grupo
-    // Não usar aria-hidden aqui pois o modal precisa estar acessível
     const modalContent = item.closest('.modal-content');
     if (modalContent) {
-      // Remover role presentation se tiver, pois container é focado
       modalContent.removeAttribute('role');
     }
   }
 
   /**
    * Foca em um item específico
-   * IMPORTANTE: Garante que o foco fica no item, nunca volta para o título
+   * Garante que foco fica no item e anuncia para leitores de tela
    */
   private focusItem(index: number, option: ModalSelectOption<T>, navigationKey?: string): void {
     const item = this.getItemElement(option.value);
     if (!item) return;
 
-    // Preparar item para foco
     item.setAttribute('tabindex', '0');
     this.makeItemAccessible(item);
     this.updateTabIndices();
     this.cdr.markForCheck();
 
-    // Aplicar foco com múltiplas tentativas para garantir
     const applyFocus = (): boolean => {
       try {
         item.focus({ preventScroll: true });
         
-        // Verificar se o foco foi aplicado corretamente
         if (document.activeElement === item) {
-          // Narrar apenas se estiver navegando (não ao abrir)
           if (this.isNavigating()) {
             this.announceItem(option, index, navigationKey);
           }
@@ -606,30 +627,17 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
       return false;
     };
 
-    // Tentar focar imediatamente
-    if (applyFocus()) {
-      return;
-    }
+    if (applyFocus()) return;
 
-    // Tentar após requestAnimationFrame
     requestAnimationFrame(() => {
-      if (applyFocus()) {
-        return;
-      }
+      if (applyFocus()) return;
       
-      // Última tentativa após pequeno delay
-      setTimeout(() => {
-        applyFocus();
-      }, 50);
+      setTimeout(() => applyFocus(), 50);
     });
   }
 
   /**
-   * Anuncia um item
-   */
-  /**
-   * Anuncia item durante navegação
-   * Usa função customizada se fornecida, senão usa a padrão
+   * Anuncia item para leitor de tela durante navegação
    */
   private announceItem(option: ModalSelectOption<T>, index: number, navigationKey?: string): void {
     const customNavFn = this.navigationAnnouncementFn();
@@ -640,73 +648,136 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
       const announcement = customNavFn(option, index, total, isSelected, navigationKey);
       this.announceCustom(announcement, 'polite');
     } else {
-      // Usar narração padrão (aria-label)
       const announcement = this.getCustomAnnouncement(option, index);
       this.announceCustom(announcement, 'polite');
     }
   }
 
-  // ============================================================================
-  // MÉTODOS PÚBLICOS - ACESSIBILIDADE
-  // ============================================================================
-
   /**
-   * Gera mensagem de narração customizada para um item
+   * Anuncia mensagem usando aria-live
    */
-  getCustomAnnouncement(option: ModalSelectOption<T>, index: number): string {
-    const position = index + 1;
-    const total = this.options().length;
-    const status = this.isSelected(option.value) ? 'selecionado' : 'não selecionado';
+  private announceWithLiveAnnouncer(message: string, priority: 'polite' | 'assertive' = 'assertive'): void {
+    if (!message?.trim()) return;
     
-    const customFn = this.ariaLabelFn();
-    if (customFn) {
-      return customFn(option, index, total, this.isSelected(option.value));
-    }
+    this.anuncioSelecao.set('');
     
-    // Formato limpo: sem "grupo", sem "radio button", apenas informações essenciais
-    return `${position} de ${total}, ${status}, ${option.label}`;
+    requestAnimationFrame(() => {
+      this.anuncioSelecao.set(message);
+    });
   }
 
   /**
-   * Anuncia mensagem usando LiveAnnouncer
-   * REFATORADO: Usa método centralizado para consistência
+   * Anuncia mensagem customizada
    */
   private announceCustom(message: string, priority: 'polite' | 'assertive' = 'polite'): void {
     this.announceWithLiveAnnouncer(message, priority);
   }
 
   /**
-   * Configura event listeners nativos no título do modal
-   * REFATORADO: Usa JavaScript puro ao invés de event bindings do Angular
+   * Navega para um item específico
+   * Usa função customizada se fornecida
+   */
+  private navigateToItem(key: string, currentIndex: number): void {
+    const options = this.options();
+    if (options.length === 0) return;
+
+    const customNavFn = this.navigationHandlerFn();
+    let nextIndex: number | null = null;
+    
+    if (customNavFn) {
+      nextIndex = customNavFn(key, currentIndex, options.length, options);
+    }
+    
+    if (nextIndex === null) {
+      nextIndex = this.calculateNextIndex(key, currentIndex, options.length);
+    }
+    
+    if (nextIndex < 0 || nextIndex >= options.length) return;
+    
+    const nextOption = options[nextIndex];
+    if (!nextOption) return;
+
+    this.focusedIndex.set(nextIndex);
+    this.cdr.markForCheck();
+    
+    requestAnimationFrame(() => {
+      this.focusItem(nextIndex!, nextOption, key);
+    });
+  }
+
+  /**
+   * Anuncia seleção de um item
+   * Mantém foco no item selecionado
+   */
+  private announceSelection(message: string): void {
+    const currentFocusedElement = document.activeElement as HTMLElement;
+    
+    const isItemFocused = currentFocusedElement?.closest('.modal-label') !== null || 
+                          currentFocusedElement?.classList.contains('modal-label') === true;
+    
+    if (!isItemFocused) {
+      this.anuncioSelecao.set(message);
+      return;
+    }
+    
+    if (currentFocusedElement) {
+      currentFocusedElement.blur();
+    }
+    
+    setTimeout(() => {
+      this.anuncioSelecao.set(message);
+      
+      setTimeout(() => {
+        if (currentFocusedElement && 
+            document.body.contains(currentFocusedElement) &&
+            (currentFocusedElement.closest('.modal-label') !== null ||
+             currentFocusedElement.classList.contains('modal-label') === true)) {
+          currentFocusedElement.focus();
+        }
+      }, 350);
+    }, 50);
+  }
+
+  /**
+   * Atualiza aria-labels de todos os itens
+   */
+  private updateAllAriaLabels(): void {
+    this.options().forEach((opt, idx) => {
+      const item = this.getItemElement(opt.value);
+      if (item) {
+        const newAriaLabel = this.getCustomAnnouncement(opt, idx);
+        item.setAttribute('aria-label', newAriaLabel);
+      }
+    });
+  }
+
+  // ============================================================================
+  // EVENT LISTENERS - Título do Modal
+  // ============================================================================
+
+  /**
+   * Configura event listeners no título
    */
   private setupTitleEventListeners(): void {
     const titleElement = this.modalTitle()?.nativeElement;
-    if (!titleElement) {
-      return;
-    }
+    if (!titleElement) return;
 
-    // Criar handlers bound para poder remover depois
     this.titleKeyDownHandler = (event: KeyboardEvent) => this.handleTitleKeyDown(event);
     this.titleFocusHandler = () => this.handleTitleFocus();
     this.titleBlurHandler = () => this.handleTitleBlur();
 
-    // Adicionar listeners nativos
     titleElement.addEventListener('keydown', this.titleKeyDownHandler, { passive: false });
     titleElement.addEventListener('focus', this.titleFocusHandler);
     titleElement.addEventListener('blur', this.titleBlurHandler);
   }
 
   /**
-   * Remove event listeners do título
-   * Previne memory leaks
+   * Remove event listeners do título (previne memory leaks)
    */
   private cleanupTitleEventListeners(): void {
     const titleElement = this.modalTitle()?.nativeElement;
-    if (!titleElement) {
-      return;
-    }
+    if (!titleElement) return;
 
-    // Remover listeners se existirem
     if (this.titleKeyDownHandler) {
       titleElement.removeEventListener('keydown', this.titleKeyDownHandler);
       this.titleKeyDownHandler = null;
@@ -724,90 +795,55 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
   }
 
   /**
-   * Handler quando o título recebe foco
-   * REMOVIDO: Título agora está oculto (aria-hidden="true") e não recebe foco
-   * A narração é feita apenas via modalOpeningAnnouncement
+   * Handler quando título recebe foco
    */
   private handleTitleFocus(): void {
-    // Não fazer nada - título está oculto
+    // Título está oculto - não fazer nada
   }
 
   /**
-   * Handler quando o título perde foco
-   * REFATORADO: Método privado usado por event listener nativo
+   * Handler quando título perde foco
    */
   private handleTitleBlur(): void {
-    // Não fazer nada aqui - deixar a navegação gerenciar o estado
-    // Este handler pode ser usado para logging, analytics, etc. no futuro
+    // Reservado para futuras implementações
   }
 
   /**
    * Handler de teclado no título
-   * REFATORADO: Método privado usado por event listener nativo
-   * IMPORTANTE: Só processa quando foco está NO TÍTULO, não interfere na navegação da lista
-   * CORRIGIDO: Usa flag para garantir que itens têm prioridade absoluta
+   * Apenas processa quando foco está no título
    */
   private handleTitleKeyDown(event: KeyboardEvent): void {
-    // PRIORIDADE MÁXIMA: Se um item está processando, NÃO fazer NADA
-    if (this.isItemProcessingKey) {
-      return;
-    }
+    if (this.isItemProcessingKey) return;
+    if (!this.isOpen()) return;
     
-    // Verificação inicial: modal deve estar aberto
-    if (!this.isOpen()) {
-      return;
-    }
-    
-    // Obter elemento ativo de forma segura
     const activeElement = document.activeElement as HTMLElement;
     const titleElement = this.modalTitle()?.nativeElement;
     
-    if (!activeElement || !titleElement) {
-      return;
-    }
+    if (!activeElement || !titleElement) return;
     
-    // PRIORIDADE 1: Se o foco está em um item, NÃO processar aqui
     const isItemFocused = activeElement.classList.contains('modal-label') ||
                           activeElement.closest('.modal-label') !== null;
     
-    if (isItemFocused) {
-      return;
-    }
+    if (isItemFocused) return;
     
-    // PRIORIDADE 2: Verificar se o foco está REALMENTE no título
     const isTitleFocused = activeElement === titleElement;
+    if (!isTitleFocused) return;
     
-    if (!isTitleFocused) {
-      return;
-    }
-    
-    // PRIORIDADE 3: Verificar se o evento veio do título
     const target = event.target as HTMLElement;
     const isEventFromTitle = target === titleElement;
+    if (!isEventFromTitle) return;
     
-    if (!isEventFromTitle) {
-      return;
-    }
+    if (event.key === 'Tab' || event.key === 'Escape') return;
     
-    // Permitir Tab e Escape passarem normalmente (navegação padrão)
-    if (event.key === 'Tab' || event.key === 'Escape') {
-      return;
-    }
-    
-    // Só processar teclas de navegação quando foco está no título
     const navigationKeys = ['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft', 'Home', 'End'];
     const isNavigationKey = navigationKeys.includes(event.key);
     
-    if (!isNavigationKey) {
-      return;
-    }
+    if (!isNavigationKey) return;
     
-    // Prevenir comportamento padrão e propagação ANTES de processar
     event.preventDefault();
     event.stopPropagation();
     event.stopImmediatePropagation();
     
-    // Marcar que está navegando e navegar imediatamente
     this.isNavigating.set(true);
     
     requestAnimationFrame(() => {
@@ -815,26 +851,25 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
     });
   }
 
+  // ============================================================================
+  // MÉTODOS PÚBLICOS - Handlers de Eventos
+  // ============================================================================
+
   /**
    * Handler de teclado em um item
-   * IMPORTANTE: Impede que eventos façam bubble e redirecionem foco
-   * CORRIGIDO: Usa flag para garantir prioridade absoluta sobre o título
+   * Gerencia navegação e seleção
    */
   onKeyDown(event: KeyboardEvent, currentValue: T, currentIndex: number): void {
     if (!this.isOpen()) return;
     
-    // PRIORIDADE MÁXIMA: Marcar que item está processando ANTES de qualquer coisa
     this.isItemProcessingKey = true;
-    
-    // Parar propagação IMEDIATAMENTE - isso impede que o título processe
     event.stopImmediatePropagation();
     event.stopPropagation();
     
-    // Seleção
+    // Seleção com Space/Enter
     if (event.key === ' ' || event.key === 'Enter') {
       event.preventDefault();
       this.selectOption(currentValue);
-      // Desmarcar flag após processar
       requestAnimationFrame(() => {
         this.isItemProcessingKey = false;
       });
@@ -844,91 +879,45 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
     // Navegação
     const isNavigationKey = ['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(event.key);
     if (!isNavigationKey) {
-      // Não é tecla de navegação - desmarcar e permitir comportamento padrão
       requestAnimationFrame(() => {
         this.isItemProcessingKey = false;
       });
       return;
     }
 
-    // Prevenir comportamento padrão para teclas de navegação
     event.preventDefault();
     
-    // Marcar navegação e processar
     this.isNavigating.set(true);
     this.navigateToItem(event.key, currentIndex);
     
-    // Desmarcar flag após navegação ser iniciada
     requestAnimationFrame(() => {
       this.isItemProcessingKey = false;
     });
   }
 
   /**
-   * Navega para um item específico
-   * Usa função customizada de navegação se fornecida
-   */
-  private navigateToItem(key: string, currentIndex: number): void {
-    const options = this.options();
-    if (options.length === 0) return;
-
-    // Tentar usar função customizada de navegação
-    const customNavFn = this.navigationHandlerFn();
-    let nextIndex: number | null = null;
-    
-    if (customNavFn) {
-      nextIndex = customNavFn(key, currentIndex, options.length, options);
-    }
-    
-    // Se função customizada retornou null ou não existe, usar comportamento padrão
-    if (nextIndex === null) {
-      nextIndex = this.calculateNextIndex(key, currentIndex, options.length);
-    }
-    
-    // Validar índice
-    if (nextIndex < 0 || nextIndex >= options.length) {
-      return;
-    }
-    
-    const nextOption = options[nextIndex];
-    if (!nextOption) return;
-
-    this.focusedIndex.set(nextIndex);
-    this.cdr.markForCheck();
-    
-    requestAnimationFrame(() => {
-      this.focusItem(nextIndex!, nextOption, key);
-    });
-  }
-
-  /**
-   * Handler ao focar em um item
-   * IMPORTANTE: Garante que o foco permanece no item
+   * Handler quando item recebe foco
+   * Garante acessibilidade completa
    */
   onItemFocus(index: number, option: ModalSelectOption<T>): void {
     const item = this.getItemElement(option.value);
     if (item) {
       this.makeItemAccessible(item);
       
-      // Garantir que o item tem tabindex="0" quando recebe foco
       item.setAttribute('tabindex', '0');
       
-      // Remover qualquer atributo que possa causar narração "grupo" ou "com X itens"
+      // Limpar atributos que possam causar narração de "grupo"
       item.removeAttribute('aria-posinset');
       item.removeAttribute('aria-setsize');
       item.removeAttribute('aria-owns');
       item.removeAttribute('aria-describedby');
       item.removeAttribute('aria-controls');
-      // Remover qualquer role do button - deixar semântica nativa
-      // Button nativo sem role adicional evita narração de "grupo"
       item.removeAttribute('role');
       item.removeAttribute('aria-expanded');
       item.removeAttribute('aria-haspopup');
       item.removeAttribute('aria-selected');
       item.removeAttribute('aria-checked');
       
-      // Garantir que o container pai permaneça completamente oculto
-      // Usar role="presentation" + aria-hidden="true" para remover completamente semântica
       const scrollContainer = item.closest('.modal-scroll-container');
       if (scrollContainer) {
         scrollContainer.setAttribute('aria-hidden', 'true');
@@ -939,10 +928,8 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
         scrollContainer.removeAttribute('aria-owns');
       }
       
-      // Garantir que o modal-content não tenha atributos que possam causar "grupo"
       const modalContent = item.closest('.modal-content');
       if (modalContent) {
-        // Manter sem role para não interferir
         modalContent.removeAttribute('role');
         modalContent.removeAttribute('aria-describedby');
         modalContent.removeAttribute('aria-owns');
@@ -950,7 +937,7 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
         modalContent.removeAttribute('aria-labelledby');
       }
       
-      // Ocultar todos os outros itens para evitar que sejam interpretados como grupo
+      // Ocultar outros itens
       const allItems = document.querySelectorAll('.modal-label');
       allItems.forEach((otherItem) => {
         if (otherItem !== item) {
@@ -958,26 +945,23 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
         }
       });
       
-      // Garantir que o item focado está visível
       item.removeAttribute('aria-hidden');
     }
     
     this.focusedIndex.set(index);
     this.updateTabIndices();
     
-    // Verificar se o foco realmente está no item (não no título)
+    // Garantir foco no item
     requestAnimationFrame(() => {
       const activeElement = document.activeElement;
       const isStillOnItem = activeElement === item || 
                            activeElement?.closest('.modal-label') === item;
       
-      // Se o foco não está no item, forçar de volta
       if (!isStillOnItem && item) {
         item.focus({ preventScroll: true });
       }
     });
     
-    // Narrar apenas se estiver navegando
     if (this.isNavigating()) {
       this.announceItem(option, index);
     }
@@ -1006,65 +990,15 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
   }
 
   /**
-   * Anuncia seleção de um item
-   * IMPORTANTE: Mantém foco no item, não volta para título
-   * CORRIGIDO: Usa apenas signal para evitar duplicação (template já tem aria-live)
+   * Handler de clique em item
    */
-  private announceSelection(message: string): void {
-    const currentFocusedElement = document.activeElement as HTMLElement;
-    
-    // Verificar se o foco está em um item (não no título)
-    const isItemFocused = currentFocusedElement?.closest('.modal-label') !== null || 
-                          currentFocusedElement?.classList.contains('modal-label') === true;
-    
-    // Se não está em um item, apenas atualizar signal
-    if (!isItemFocused) {
-      this.anuncioSelecao.set(message);
-      return;
-    }
-    
-    // Se está em um item, fazer blur temporário apenas para narração
-    if (currentFocusedElement) {
-      currentFocusedElement.blur();
-    }
-    
-    setTimeout(() => {
-      // Apenas atualizar signal - o template já tem aria-live que fará a narração
-      this.anuncioSelecao.set(message);
-      
-      // Restaurar foco APENAS se ainda for um item (não título)
-      setTimeout(() => {
-        if (currentFocusedElement && 
-            document.body.contains(currentFocusedElement) &&
-            (currentFocusedElement.closest('.modal-label') !== null ||
-             currentFocusedElement.classList.contains('modal-label') === true)) {
-          currentFocusedElement.focus();
-        }
-      }, 350);
-    }, 50);
-  }
-
-  /**
-   * Atualiza aria-labels de todos os itens
-   */
-  private updateAllAriaLabels(): void {
-    this.options().forEach((opt, idx) => {
-      const item = this.getItemElement(opt.value);
-      if (item) {
-        const newAriaLabel = this.getCustomAnnouncement(opt, idx);
-        item.setAttribute('aria-label', newAriaLabel);
-      }
-    });
-  }
-
-  // ============================================================================
-  // MÉTODOS PÚBLICOS - AÇÕES
-  // ============================================================================
-
   onItemClick(value: T): void {
     this.selectOption(value);
   }
 
+  /**
+   * Handler de confirmação
+   */
   onConfirmar(): void {
     const option = this.currentOption();
     if (option) {
@@ -1072,36 +1006,74 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
     }
   }
 
+  /**
+   * Handler de cancelamento
+   */
   onCancelar(): void {
     this.cancelar.emit();
   }
 
+  /**
+   * Handler de clique no backdrop
+   */
   onBackdropClick(event: MouseEvent): void {
     if (event.target === event.currentTarget) {
       this.onCancelar();
     }
   }
 
+  /**
+   * Handler de clique no modal (previne propagação)
+   */
   onModalClick(event: MouseEvent): void {
     event.stopPropagation();
   }
 
   // ============================================================================
-  // MÉTODOS PÚBLICOS - UTILITÁRIOS
+  // MÉTODOS PÚBLICOS - Utilitários
   // ============================================================================
 
+  /**
+   * Gera mensagem de narração customizada para um item
+   * Formato: "x de total, selecionado/não selecionado, label"
+   */
+  getCustomAnnouncement(option: ModalSelectOption<T>, index: number): string {
+    const position = index + 1;
+    const total = this.options().length;
+    const status = this.isSelected(option.value) ? 'selecionado' : 'não selecionado';
+    
+    const customFn = this.ariaLabelFn();
+    if (customFn) {
+      return customFn(option, index, total, this.isSelected(option.value));
+    }
+    
+    return `${position} de ${total}, ${status}, ${option.label}`;
+  }
+
+  /**
+   * Gera ID único para uma opção
+   */
   getOptionId(value: T): string {
     return String(value).replace(/\s+/g, '-').toLowerCase();
   }
 
+  /**
+   * Verifica se valor está selecionado
+   */
   isSelected(value: T): boolean {
     return this.currentValue() === value;
   }
 
+  /**
+   * Retorna ID do modal
+   */
   getModalId(): string {
     return 'modal-select-generic';
   }
 
+  /**
+   * Obtém aria-label para uma opção
+   */
   getAriaLabel(option: ModalSelectOption<T>, index: number): string {
     return this.getCustomAnnouncement(option, index);
   }

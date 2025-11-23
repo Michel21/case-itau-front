@@ -19,31 +19,75 @@ import {
   FormsModule
 } from '@angular/forms';
 
+// ============================================================================
+// TYPES & INTERFACES
+// ============================================================================
+
 /**
  * Configuração de estilo do input
  */
 export interface InputSelectStyleConfig {
+  /** Variante visual do input */
   readonly variant?: 'outline' | 'filled' | 'minimal';
+  /** Tamanho do input */
   readonly size?: 'sm' | 'md' | 'lg';
+  /** Se deve ocupar largura total do container */
   readonly fullWidth?: boolean;
+  /** Se é apenas leitura (não editável) */
   readonly readonly?: boolean;
+  /** Se deve exibir ícone de dropdown */
   readonly showIcon?: boolean;
 }
 
+// ============================================================================
+// COMPONENTE PRINCIPAL
+// ============================================================================
+
 /**
- * Input Select Customizável
+ * Input Select Customizável e Acessível
  * 
- * Componente de input que abre modal/dropdown para seleção.
- * Estilo baseado no design do Itaú.
+ * Componente de input que funciona como botão para abrir modals/dropdowns.
+ * Implementa ControlValueAccessor para integração com Angular Forms.
+ * Estilo baseado no design system do Itaú.
  * 
- * @example
+ * **Características:**
+ * - ✅ Acessível (ARIA, teclado, leitores de tela)
+ * - ✅ Integração com ngModel e Reactive Forms
+ * - ✅ Estados: disabled, error, required
+ * - ✅ Label flutuante quando tem valor
+ * - ✅ Customização completa de estilos
+ * - ✅ Suporte a hint e error messages
+ * 
+ * @example Uso básico
  * ```html
  * <app-input-select
  *   label="Mês"
- *   placeholder="Selecione"
+ *   placeholder="Selecione um mês"
  *   [value]="mesAtual"
- *   (click)="abrirModal()"
- *   [styleConfig]="{variant: 'outline'}"
+ *   (inputClick)="abrirModalMes()"
+ * />
+ * ```
+ * 
+ * @example Com ngModel
+ * ```html
+ * <app-input-select
+ *   label="Ano"
+ *   placeholder="Selecione"
+ *   [(ngModel)]="anoSelecionado"
+ *   [required]="true"
+ *   (inputClick)="abrirModal()"
+ * />
+ * ```
+ * 
+ * @example Com customização
+ * ```html
+ * <app-input-select
+ *   label="Categoria"
+ *   [value]="categoria"
+ *   [styleConfig]="{variant: 'filled', size: 'lg', fullWidth: true}"
+ *   [error]="erroCategoria"
+ *   hint="Escolha uma categoria disponível"
+ *   (inputClick)="abrirSelecao()"
  * />
  * ```
  */
@@ -64,47 +108,79 @@ export interface InputSelectStyleConfig {
 })
 export class InputSelectComponent implements ControlValueAccessor {
   // ============================================================================
-  // INPUTS
+  // INPUTS - Configuração do Componente
   // ============================================================================
 
+  /** Label exibida acima/dentro do input */
   readonly label = input.required<string>();
+  
+  /** Texto placeholder quando vazio */
   readonly placeholder = input<string>('Selecione');
+  
+  /** Valor atual do input */
   readonly value = input<string>('');
+  
+  /** Se o input está desabilitado */
   readonly disabled = input<boolean>(false);
+  
+  /** Se o input é obrigatório */
   readonly required = input<boolean>(false);
+  
+  /** Mensagem de erro (exibida em vermelho) */
   readonly error = input<string>('');
+  
+  /** Texto de ajuda (exibido abaixo do input) */
   readonly hint = input<string>('');
+  
+  /** Configurações de estilo */
   readonly styleConfig = input<InputSelectStyleConfig>({});
+  
+  /** ARIA label customizado */
   readonly ariaLabel = input<string>('');
+  
+  /** ID customizado para o input */
   readonly id = input<string>('');
 
   // ============================================================================
-  // OUTPUTS
+  // OUTPUTS - Eventos Emitidos
   // ============================================================================
 
+  /** Emitido quando o input é clicado */
   readonly inputClick = output<void>();
+  
+  /** Emitido quando o valor muda */
   readonly valueChange = output<string>();
 
   // ============================================================================
-  // INJEÇÃO DE DEPENDÊNCIAS
+  // DEPENDÊNCIAS INJETADAS
   // ============================================================================
 
+  /** Referência para cleanup automático */
   private readonly destroyRef = inject(DestroyRef);
   
+  /** Referência para o botão interno (usado para foco programático) */
   readonly buttonRef = viewChild<ElementRef<HTMLButtonElement>>('buttonRef');
 
   // ============================================================================
-  // STATE
+  // ESTADO INTERNO
   // ============================================================================
 
+  /** Valor interno do input (signal reativo) */
   readonly internalValue = signal<string>('');
+  
+  /** Callback onChange do ControlValueAccessor */
   private onChange: (value: string) => void = () => {};
+  
+  /** Callback onTouched do ControlValueAccessor */
   private onTouched: () => void = () => {};
 
   // ============================================================================
-  // COMPUTED
+  // COMPUTED - Valores Derivados
   // ============================================================================
 
+  /**
+   * Configuração de estilo computada (com valores padrão)
+   */
   readonly computedStyleConfig = computed(() => ({
     variant: 'outline' as const,
     size: 'md' as const,
@@ -114,6 +190,9 @@ export class InputSelectComponent implements ControlValueAccessor {
     ...this.styleConfig()
   }));
 
+  /**
+   * Classes CSS do host baseadas no estado atual
+   */
   readonly hostClasses = computed(() => {
     const config = this.computedStyleConfig();
     return {
@@ -126,18 +205,30 @@ export class InputSelectComponent implements ControlValueAccessor {
     };
   });
 
+  /**
+   * Valor para exibição (interno ou do input)
+   */
   readonly displayValue = computed(() => {
     return this.internalValue() || this.value();
   });
 
+  /**
+   * Se o input tem algum valor
+   */
   readonly hasValue = computed(() => {
     return !!this.displayValue();
   });
 
+  /**
+   * ARIA label computado (customizado ou gerado)
+   */
   readonly computedAriaLabel = computed(() => {
     return this.ariaLabel() || `${this.label()} - ${this.placeholder()}`;
   });
 
+  /**
+   * ID computado (customizado ou gerado aleatoriamente)
+   */
   readonly computedId = computed(() => {
     return this.id() || `input-select-${Math.random().toString(36).substr(2, 9)}`;
   });
@@ -147,7 +238,7 @@ export class InputSelectComponent implements ControlValueAccessor {
   // ============================================================================
 
   constructor() {
-    // Effect: Sincronizar valor interno com input value
+    // Sincronizar valor interno com input value
     effect(() => {
       const value = this.value();
       if (value !== this.internalValue()) {
@@ -155,7 +246,7 @@ export class InputSelectComponent implements ControlValueAccessor {
       }
     });
 
-    // Effect: Emitir mudanças
+    // Emitir mudanças de valor
     effect(() => {
       const value = this.internalValue();
       this.valueChange.emit(value);
@@ -164,31 +255,49 @@ export class InputSelectComponent implements ControlValueAccessor {
   }
 
   // ============================================================================
-  // CONTROL VALUE ACCESSOR
+  // CONTROL VALUE ACCESSOR - Integração com Angular Forms
   // ============================================================================
 
+  /**
+   * Escreve um novo valor no componente
+   * Chamado pelo Angular Forms quando o valor externo muda
+   */
   writeValue(value: string): void {
     this.internalValue.set(value || '');
   }
 
+  /**
+   * Registra callback para notificar mudanças de valor
+   * Chamado pelo Angular Forms durante inicialização
+   */
   registerOnChange(fn: (value: string) => void): void {
     this.onChange = fn;
   }
 
+  /**
+   * Registra callback para notificar quando componente foi tocado
+   * Chamado pelo Angular Forms durante inicialização
+   */
   registerOnTouched(fn: () => void): void {
     this.onTouched = fn;
   }
 
+  /**
+   * Define estado desabilitado do componente
+   * Chamado pelo Angular Forms quando disabled muda
+   */
   setDisabledState(isDisabled: boolean): void {
-    // O estado disabled é controlado pelo input signal
+    // Estado disabled é controlado pelo input signal
+    // Não é necessário fazer nada aqui
   }
 
   // ============================================================================
-  // MÉTODOS PÚBLICOS
+  // MÉTODOS PÚBLICOS - Handlers de Eventos
   // ============================================================================
 
   /**
    * Handler do clique no input
+   * Emite evento inputClick se não estiver desabilitado ou readonly
    */
   onInputClick(): void {
     if (!this.disabled() && !this.computedStyleConfig().readonly) {
@@ -199,13 +308,13 @@ export class InputSelectComponent implements ControlValueAccessor {
 
   /**
    * Handler do evento de teclado
+   * Enter ou Space abre o modal/dropdown
    */
   onKeyDown(event: KeyboardEvent): void {
     if (this.disabled() || this.computedStyleConfig().readonly) {
       return;
     }
 
-    // Enter ou Space abre o modal/dropdown
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       this.onInputClick();
@@ -214,23 +323,35 @@ export class InputSelectComponent implements ControlValueAccessor {
 
   /**
    * Handler do evento de foco
+   * Pode ser usado para adicionar estilos ou lógica customizada
    */
   onFocus(): void {
-    // Implementação opcional - pode ser usada para estilos ou lógica
+    // Reservado para futuras implementações
   }
 
   /**
    * Handler do evento de blur
+   * Notifica o Angular Forms que o componente foi tocado
    */
   onBlur(): void {
     this.onTouched();
   }
 
   /**
-   * Foca no botão do input
+   * Foca programaticamente no botão do input
+   * Útil para gerenciamento de foco após fechamento de modais
+   * 
+   * @example
+   * ```typescript
+   * // No componente pai
+   * readonly campoMes = viewChild<InputSelectComponent>('campoMes');
+   * 
+   * aoFecharModal() {
+   *   this.campoMes()?.focus();
+   * }
+   * ```
    */
   focus(): void {
     this.buttonRef()?.nativeElement.focus();
   }
 }
-

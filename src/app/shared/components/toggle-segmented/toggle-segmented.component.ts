@@ -18,13 +18,23 @@ import {
 } from '@angular/forms';
 import { ScrollIntoViewDirective } from '../../directives/scroll-into-view.directive';
 
+// ============================================================================
+// TYPES & INTERFACES
+// ============================================================================
+
 /**
- * Interface para opções do toggle
+ * Opção do toggle segmentado
+ * 
+ * @template T - Tipo do valor (padrão: string)
  */
 export interface ToggleOption<T = string> {
+  /** Valor único que identifica a opção */
   readonly value: T;
+  /** Texto exibido para o usuário */
   readonly label: string;
+  /** ARIA label customizado (opcional) */
   readonly ariaLabel?: string;
+  /** Se a opção está desabilitada */
   readonly disabled?: boolean;
 }
 
@@ -32,28 +42,78 @@ export interface ToggleOption<T = string> {
  * Configuração de estilo do toggle
  */
 export interface ToggleStyleConfig {
+  /** Variante visual do toggle */
   readonly variant?: 'outline' | 'filled' | 'solid' | 'pills' | 'underline' | 'ghost';
+  /** Tamanho do toggle */
   readonly size?: 'sm' | 'md' | 'lg' | 'xl';
+  /** Esquema de cor */
   readonly color?: 'primary' | 'secondary' | 'success' | 'danger' | 'neutral';
+  /** Se deve ocupar largura total */
   readonly fullWidth?: boolean;
+  /** Arredondamento das bordas */
   readonly rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full';
+  /** Espaçamento entre opções */
   readonly spacing?: 'none' | 'sm' | 'md' | 'lg';
 }
 
+// ============================================================================
+// COMPONENTE PRINCIPAL
+// ============================================================================
+
 /**
- * Toggle Segmentado Acessível
+ * Toggle Segmentado Acessível e Customizável
  * 
- * Componente genérico para seleção entre múltiplas opções.
- * Suporta navegação por teclado, leitores de tela e ControlValueAccessor.
+ * Componente profissional para seleção entre múltiplas opções em formato de toggle/pills.
+ * Implementa padrões de acessibilidade WCAG 2.1 AA e integração com Angular Forms.
  * 
- * @example
+ * **Características:**
+ * - ✅ Navegação por teclado (setas, Home, End, Tab)
+ * - ✅ Roving tabindex pattern (apenas uma opção focável por vez)
+ * - ✅ Anúncios para leitores de tela
+ * - ✅ ControlValueAccessor (ngModel, Reactive Forms)
+ * - ✅ Estados: disabled, selected
+ * - ✅ Altamente customizável (6 variantes, 4 tamanhos, 5 cores)
+ * - ✅ Sincronização visual-acessível perfeita
+ * - ✅ Tipagem genérica TypeScript
+ * 
+ * @template T - Tipo do valor das opções (padrão: string)
+ * 
+ * @example Uso básico
  * ```html
  * <app-toggle-segmented
  *   [options]="opcoes"
  *   [(ngModel)]="valorSelecionado"
- *   [styleConfig]="{variant: 'outline', size: 'md'}"
- *   ariaLabel="Selecione o tipo"
  * />
+ * ```
+ * 
+ * @example Com customização
+ * ```html
+ * <app-toggle-segmented
+ *   [options]="tipos"
+ *   [(ngModel)]="tipoSelecionado"
+ *   [styleConfig]="{
+ *     variant: 'pills',
+ *     size: 'lg',
+ *     color: 'primary',
+ *     fullWidth: true
+ *   }"
+ *   ariaLabel="Selecione o tipo de investimento"
+ *   [disabled]="false"
+ * />
+ * ```
+ * 
+ * @example Com opções tipadas
+ * ```typescript
+ * interface Produto {
+ *   id: number;
+ *   nome: string;
+ * }
+ * 
+ * opcoes: ToggleOption<number>[] = [
+ *   { value: 1, label: 'Opção 1' },
+ *   { value: 2, label: 'Opção 2', disabled: true },
+ *   { value: 3, label: 'Opção 3', ariaLabel: 'Terceira opção especial' }
+ * ];
  * ```
  */
 @Component({
@@ -76,28 +136,66 @@ export interface ToggleStyleConfig {
   }
 })
 export class ToggleSegmentedComponent<T = string> implements ControlValueAccessor {
-  // Inputs
-  readonly options = input.required<readonly ToggleOption<T>[]>();
-  readonly ariaLabel = input<string>('Selecione uma opção');
-  readonly disabled = input<boolean>(false);
-  readonly styleConfig = input<ToggleStyleConfig>({})
+  // ============================================================================
+  // INPUTS - Configuração do Componente
+  // ============================================================================
 
-  // Outputs
+  /** Lista de opções disponíveis */
+  readonly options = input.required<readonly ToggleOption<T>[]>();
+  
+  /** ARIA label para o grupo de opções */
+  readonly ariaLabel = input<string>('Selecione uma opção');
+  
+  /** Se o toggle está desabilitado */
+  readonly disabled = input<boolean>(false);
+  
+  /** Configurações de estilo */
+  readonly styleConfig = input<ToggleStyleConfig>({});
+
+  // ============================================================================
+  // OUTPUTS - Eventos Emitidos
+  // ============================================================================
+
+  /** Emitido quando o valor selecionado muda */
   readonly valueChange = output<T>();
 
-  // Estado interno
+  // ============================================================================
+  // ESTADO INTERNO
+  // ============================================================================
+
+  /** Valor interno selecionado (signal reativo) */
   readonly internalValue = signal<T | null>(null);
+  
+  /** Mensagem de anúncio para leitores de tela */
   readonly anuncioSelecao = signal<string>('');
+  
+  /** Nome único do radio group */
   readonly radioGroupName = `toggle-segmented-${Math.random().toString(36).substr(2, 9)}`;
 
-  // Injeções
+  // ============================================================================
+  // DEPENDÊNCIAS INJETADAS
+  // ============================================================================
+
+  /** Referência para cleanup automático */
   private readonly destroyRef = inject(DestroyRef);
 
-  // ControlValueAccessor
+  // ============================================================================
+  // CONTROL VALUE ACCESSOR - Callbacks
+  // ============================================================================
+
+  /** Callback onChange do ControlValueAccessor */
   private onChange: (value: T | null) => void = () => {};
+  
+  /** Callback onTouched do ControlValueAccessor */
   private onTouched: () => void = () => {};
 
-  // Computed
+  // ============================================================================
+  // COMPUTED - Valores Derivados
+  // ============================================================================
+
+  /**
+   * Configuração de estilo computada (com valores padrão)
+   */
   readonly computedStyleConfig = computed(() => ({
     variant: 'outline' as const,
     size: 'md' as const,
@@ -108,6 +206,9 @@ export class ToggleSegmentedComponent<T = string> implements ControlValueAccesso
     ...this.styleConfig()
   }));
 
+  /**
+   * Classes CSS do host baseadas na configuração
+   */
   readonly hostClasses = computed(() => {
     const config = this.computedStyleConfig();
     const classes: Record<string, boolean> = {
@@ -117,7 +218,6 @@ export class ToggleSegmentedComponent<T = string> implements ControlValueAccesso
       'toggle-segmented--full-width': config.fullWidth
     };
 
-    // Adicionar classes opcionais
     if (config.rounded) {
       classes[`toggle-segmented--rounded-${config.rounded}`] = true;
     }
@@ -129,8 +229,12 @@ export class ToggleSegmentedComponent<T = string> implements ControlValueAccesso
     return classes;
   });
 
+  // ============================================================================
+  // CONSTRUCTOR
+  // ============================================================================
+
   constructor() {
-    // Effect: Emitir mudanças
+    // Emitir mudanças de valor
     effect(() => {
       const value = this.internalValue();
       if (value !== null) {
@@ -138,172 +242,175 @@ export class ToggleSegmentedComponent<T = string> implements ControlValueAccesso
       }
     });
 
-    // Effect: Sincronizar cliques e foco nos elementos visuais e acessíveis
+    // Sincronizar elementos visuais e acessíveis
     effect(() => {
       const opts = this.options();
       
-      // Aguardar DOM estar completamente pronto
       setTimeout(() => {
         requestAnimationFrame(() => {
-        opts.forEach((option, idx) => {
-          // Sincronizar cliques visuais
-          const visualElement = document.getElementById(`visual-${this.getOptionId(option, idx)}`);
-          if (visualElement) {
-            // Remover listener anterior se existir
-            const oldClickListener = (visualElement as any)._clickListener;
-            if (oldClickListener) {
-              visualElement.removeEventListener('click', oldClickListener);
-            }
-            
-            // Adicionar novo listener de click
-            const newClickListener = () => this.selectOption(option);
-            visualElement.addEventListener('click', newClickListener);
-            (visualElement as any)._clickListener = newClickListener;
-          }
-
-          // Sincronizar dimensões e foco dos elementos acessíveis com visual
-          const a11yElement = document.getElementById(this.getOptionId(option, idx)) as HTMLElement;
-          if (a11yElement && visualElement) {
-            // Sincronizar dimensões do botão acessível com o elemento visual
-            const rect = visualElement.getBoundingClientRect();
-            const parentRect = visualElement.parentElement?.getBoundingClientRect();
-            
-            if (parentRect) {
-              a11yElement.style.left = `${rect.left - parentRect.left}px`;
-              a11yElement.style.width = `${rect.width}px`;
-              a11yElement.style.height = `${rect.height}px`;
-            }
-            
-            // Remover listeners anteriores se existirem
-            const oldFocusListener = (a11yElement as any)._focusListener;
-            const oldBlurListener = (a11yElement as any)._blurListener;
-            
-            if (oldFocusListener) {
-              a11yElement.removeEventListener('focus', oldFocusListener);
-            }
-            if (oldBlurListener) {
-              a11yElement.removeEventListener('blur', oldBlurListener);
-            }
-            
-            // Adicionar novos listeners
-            const newFocusListener = () => this.updateVisualFocus(idx);
-            const newBlurListener = () => this.clearVisualFocus();
-            
-            a11yElement.addEventListener('focus', newFocusListener);
-            a11yElement.addEventListener('blur', newBlurListener);
-            
-            (a11yElement as any)._focusListener = newFocusListener;
-            (a11yElement as any)._blurListener = newBlurListener;
-          }
-        });
+          opts.forEach((option, idx) => {
+            this.setupOptionEventListeners(option, idx);
+            this.syncA11yWithVisual(option, idx);
+          });
         });
       }, 0);
     });
   }
 
+  // ============================================================================
+  // CONTROL VALUE ACCESSOR - Integração com Angular Forms
+  // ============================================================================
+
   /**
-   * ControlValueAccessor: Escrever valor
+   * Escreve um novo valor no componente
+   * Chamado pelo Angular Forms quando o valor externo muda
    */
   writeValue(value: T | null): void {
     this.internalValue.set(value);
   }
 
   /**
-   * ControlValueAccessor: Registrar callback de mudança
+   * Registra callback para notificar mudanças de valor
+   * Chamado pelo Angular Forms durante inicialização
    */
   registerOnChange(fn: (value: T | null) => void): void {
     this.onChange = fn;
   }
 
   /**
-   * ControlValueAccessor: Registrar callback de toque
+   * Registra callback para notificar quando componente foi tocado
+   * Chamado pelo Angular Forms durante inicialização
    */
   registerOnTouched(fn: () => void): void {
     this.onTouched = fn;
   }
 
   /**
-   * ControlValueAccessor: Definir estado desabilitado
+   * Define estado desabilitado do componente
+   * Chamado pelo Angular Forms quando disabled muda
    */
   setDisabledState(isDisabled: boolean): void {
-    // Implementado via input signal
+    // Estado disabled é controlado pelo input signal
   }
 
-  /**
-   * Verifica se opção está selecionada
-   */
-  isSelected(option: ToggleOption<T>): boolean {
-    return this.internalValue() === option.value;
-  }
+  // ============================================================================
+  // MÉTODOS PRIVADOS - Setup e Sincronização
+  // ============================================================================
 
   /**
-   * Obtém tabindex para opção (roving tabindex pattern)
+   * Configura event listeners para uma opção
+   * Sincroniza cliques visuais com elementos acessíveis
    */
-  getTabIndex(option: ToggleOption<T>): number {
-    if (this.disabled() || option.disabled) return -1;
-    
-    // Se há uma opção selecionada, apenas ela tem tabindex=0
-    if (this.internalValue() !== null) {
-      return this.isSelected(option) ? 0 : -1;
-    }
-    
-    // Se nenhuma opção está selecionada, a primeira opção habilitada tem tabindex=0
-    const firstEnabledOption = this.options().find(opt => !opt.disabled);
-    return option === firstEnabledOption ? 0 : -1;
-  }
-
-  /**
-   * Obtém ID único para opção
-   */
-  getOptionId(option: ToggleOption<T>, index: number): string {
-    return `toggle-option-${index}`;
-  }
-
-  /**
-   * Seleciona uma opção
-   */
-  selectOption(option: ToggleOption<T>): void {
-    if (this.disabled() || option.disabled) return;
-
-    const previousValue = this.internalValue();
-    this.internalValue.set(option.value);
-    this.onChange(option.value);
-    this.onTouched();
-
-    // Anunciar seleção
-    const index = this.options().indexOf(option);
-    if (index !== -1) {
-      this.announceSelection(option, index);
+  private setupOptionEventListeners(option: ToggleOption<T>, idx: number): void {
+    const visualElement = document.getElementById(`visual-${this.getOptionId(option, idx)}`);
+    if (visualElement) {
+      // Remover listener anterior se existir
+      const oldClickListener = (visualElement as any)._clickListener;
+      if (oldClickListener) {
+        visualElement.removeEventListener('click', oldClickListener);
+      }
+      
+      // Adicionar novo listener
+      const newClickListener = () => this.selectOption(option);
+      visualElement.addEventListener('click', newClickListener);
+      (visualElement as any)._clickListener = newClickListener;
     }
   }
 
   /**
-   * Anuncia seleção de um item
-   * Força narração usando blur/focus e aria-live
+   * Sincroniza dimensões e eventos do elemento acessível com o visual
+   * Garante que navegação por teclado reflita visualmente
+   */
+  private syncA11yWithVisual(option: ToggleOption<T>, idx: number): void {
+    const a11yElement = document.getElementById(this.getOptionId(option, idx)) as HTMLElement;
+    const visualElement = document.getElementById(`visual-${this.getOptionId(option, idx)}`);
+    
+    if (a11yElement && visualElement) {
+      // Sincronizar dimensões
+      const rect = visualElement.getBoundingClientRect();
+      const parentRect = visualElement.parentElement?.getBoundingClientRect();
+      
+      if (parentRect) {
+        a11yElement.style.left = `${rect.left - parentRect.left}px`;
+        a11yElement.style.width = `${rect.width}px`;
+        a11yElement.style.height = `${rect.height}px`;
+      }
+      
+      // Remover listeners anteriores
+      const oldFocusListener = (a11yElement as any)._focusListener;
+      const oldBlurListener = (a11yElement as any)._blurListener;
+      
+      if (oldFocusListener) {
+        a11yElement.removeEventListener('focus', oldFocusListener);
+      }
+      if (oldBlurListener) {
+        a11yElement.removeEventListener('blur', oldBlurListener);
+      }
+      
+      // Adicionar novos listeners
+      const newFocusListener = () => this.updateVisualFocus(idx);
+      const newBlurListener = () => this.clearVisualFocus();
+      
+      a11yElement.addEventListener('focus', newFocusListener);
+      a11yElement.addEventListener('blur', newBlurListener);
+      
+      (a11yElement as any)._focusListener = newFocusListener;
+      (a11yElement as any)._blurListener = newBlurListener;
+    }
+  }
+
+  /**
+   * Atualiza o foco visual para sincronizar com elemento acessível
+   * Adiciona outline no elemento visual quando acessível está focado
+   */
+  private updateVisualFocus(index: number): void {
+    const option = this.options()[index];
+    if (!option) return;
+
+    const visualId = `visual-${this.getOptionId(option, index)}`;
+    const visualElement = document.getElementById(visualId);
+    
+    if (visualElement) {
+      this.clearVisualFocus();
+
+      visualElement.style.outline = '2px solid #0046c0';
+      visualElement.style.outlineOffset = '2px';
+      visualElement.style.zIndex = '10';
+    }
+  }
+
+  /**
+   * Remove o foco visual de todos os elementos
+   */
+  private clearVisualFocus(): void {
+    document.querySelectorAll('.toggle-segmented__option').forEach(el => {
+      (el as HTMLElement).style.outline = '';
+      (el as HTMLElement).style.outlineOffset = '';
+      (el as HTMLElement).style.zIndex = '';
+    });
+  }
+
+  /**
+   * Anuncia seleção de um item para leitores de tela
+   * Usa blur temporário + aria-live para forçar narração
    */
   private announceSelection(option: ToggleOption<T>, index: number): void {
     const currentFocusedElement = document.activeElement as HTMLElement;
     const a11yElement = document.getElementById(this.getOptionId(option, index));
 
-    // Verificar se o foco está em um elemento acessível (não no visual)
     const isA11yFocused = currentFocusedElement?.classList.contains('sr-only-option');
 
     if (isA11yFocused && currentFocusedElement) {
-      // Fazer blur temporário para forçar narração
       currentFocusedElement.blur();
     }
 
-    // Limpar aria-live primeiro para forçar nova narração
     this.anuncioSelecao.set('');
 
-    // Preparar mensagem de narração
     const announcement = this.getCustomAnnouncement(option, index);
 
     setTimeout(() => {
-      // Anunciar via aria-live
       this.anuncioSelecao.set(announcement);
 
-      // Restaurar foco após narração
       setTimeout(() => {
         if (a11yElement) {
           a11yElement.focus();
@@ -313,13 +420,44 @@ export class ToggleSegmentedComponent<T = string> implements ControlValueAccesso
     }, 50);
   }
 
+  // ============================================================================
+  // MÉTODOS PÚBLICOS - Seleção e Navegação
+  // ============================================================================
+
+  /**
+   * Seleciona uma opção
+   * Atualiza estado interno e notifica Angular Forms
+   */
+  selectOption(option: ToggleOption<T>): void {
+    if (this.disabled() || option.disabled) return;
+
+    const previousValue = this.internalValue();
+    this.internalValue.set(option.value);
+    this.onChange(option.value);
+    this.onTouched();
+
+    const index = this.options().indexOf(option);
+    if (index !== -1) {
+      this.announceSelection(option, index);
+    }
+  }
+
   /**
    * Handler de teclado para navegação
+   * Implementa padrão de navegação com setas + roving tabindex
+   * 
+   * **Teclas suportadas:**
+   * - ArrowLeft/ArrowUp: Opção anterior (com wrap)
+   * - ArrowRight/ArrowDown: Próxima opção (com wrap)
+   * - Home: Primeira opção habilitada
+   * - End: Última opção habilitada
+   * - Space/Enter: Seleciona opção atual
+   * - Tab: Navega para fora do componente
    */
   onKeyDown(event: KeyboardEvent, currentOption: ToggleOption<T>, currentIndex: number): void {
     if (this.disabled()) return;
 
-    // Arrow keys - navega sem marcar
+    // Navegação com setas
     if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
       event.preventDefault();
 
@@ -350,7 +488,7 @@ export class ToggleSegmentedComponent<T = string> implements ControlValueAccesso
       return;
     }
 
-    // Space/Enter - marca
+    // Seleção com Space/Enter
     if (event.key === ' ' || event.key === 'Enter') {
       event.preventDefault();
       this.selectOption(currentOption);
@@ -393,40 +531,41 @@ export class ToggleSegmentedComponent<T = string> implements ControlValueAccesso
     // Tab - navega normalmente (não preventDefault)
   }
 
-  /**
-   * Atualiza o foco visual para sincronizar com elemento acessível
-   */
-  private updateVisualFocus(index: number): void {
-    const option = this.options()[index];
-    if (!option) return;
+  // ============================================================================
+  // MÉTODOS PÚBLICOS - Utilitários
+  // ============================================================================
 
-    const visualId = `visual-${this.getOptionId(option, index)}`;
-    const visualElement = document.getElementById(visualId);
+  /**
+   * Verifica se opção está selecionada
+   */
+  isSelected(option: ToggleOption<T>): boolean {
+    return this.internalValue() === option.value;
+  }
+
+  /**
+   * Obtém tabindex para opção (roving tabindex pattern)
+   * Apenas uma opção tem tabindex=0 por vez (a selecionada ou a primeira)
+   */
+  getTabIndex(option: ToggleOption<T>): number {
+    if (this.disabled() || option.disabled) return -1;
     
-    if (visualElement) {
-      // Remover outline de todos os elementos visuais
-      this.clearVisualFocus();
-
-      // Adicionar outline no elemento focado
-      visualElement.style.outline = '2px solid #0046c0';
-      visualElement.style.outlineOffset = '2px';
-      visualElement.style.zIndex = '10';
+    if (this.internalValue() !== null) {
+      return this.isSelected(option) ? 0 : -1;
     }
+    
+    const firstEnabledOption = this.options().find(opt => !opt.disabled);
+    return option === firstEnabledOption ? 0 : -1;
   }
 
   /**
-   * Remove o foco visual de todos os elementos
+   * Gera ID único para uma opção
    */
-  private clearVisualFocus(): void {
-    document.querySelectorAll('.toggle-segmented__option').forEach(el => {
-      (el as HTMLElement).style.outline = '';
-      (el as HTMLElement).style.outlineOffset = '';
-      (el as HTMLElement).style.zIndex = '';
-    });
+  getOptionId(option: ToggleOption<T>, index: number): string {
+    return `toggle-option-${index}`;
   }
 
   /**
-   * Obtém classes CSS para opção
+   * Obtém classes CSS para uma opção
    */
   getOptionClasses(option: ToggleOption<T>, index: number): Record<string, boolean> {
     return {
@@ -439,7 +578,7 @@ export class ToggleSegmentedComponent<T = string> implements ControlValueAccesso
   }
 
   /**
-   * Obtém aria-label para opção
+   * Obtém aria-label para uma opção
    */
   getOptionAriaLabel(option: ToggleOption<T>): string {
     return option.ariaLabel || option.label;
@@ -447,16 +586,13 @@ export class ToggleSegmentedComponent<T = string> implements ControlValueAccesso
 
   /**
    * Gera mensagem de narração customizada para um item
-   * Segue o mesmo padrão do modal-select-generic.component.ts
+   * Formato: "x de total, selecionado/não selecionado, label"
    */
   getCustomAnnouncement(option: ToggleOption<T>, index: number): string {
     const position = index + 1;
     const total = this.options().length;
     const status = this.isSelected(option) ? 'selecionado' : 'não selecionado';
     
-    // Formato personalizado: "x de x, selecionado" ou "x de x, não selecionado"
     return `${position} de ${total}, ${status} ${option.label}`;
-   
   }
 }
-
