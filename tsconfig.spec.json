@@ -11,11 +11,13 @@
     "emitDecoratorMetadata": true
   },
   "files": [
-    "src/test.ts",
-    "src/polyfills.ts"
+    "src/test.ts"
   ],
   "include": [
     "src/**/*.spec.ts",
     "src/**/*.d.ts"
+  ],
+  "exclude": [
+    "src/**/*.e2e-spec.ts"
   ]
 }
