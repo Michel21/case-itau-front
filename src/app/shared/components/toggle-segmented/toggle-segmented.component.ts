@@ -249,7 +249,6 @@ export class ToggleSegmentedComponent<T = string> implements ControlValueAccesso
       setTimeout(() => {
         requestAnimationFrame(() => {
           opts.forEach((option, idx) => {
-            this.setupOptionEventListeners(option, idx);
             this.syncA11yWithVisual(option, idx);
           });
         });
@@ -296,26 +295,6 @@ export class ToggleSegmentedComponent<T = string> implements ControlValueAccesso
   // ============================================================================
   // MÉTODOS PRIVADOS - Setup e Sincronização
   // ============================================================================
-
-  /**
-   * Configura event listeners para uma opção
-   * Sincroniza cliques visuais com elementos acessíveis
-   */
-  private setupOptionEventListeners(option: ToggleOption<T>, idx: number): void {
-    const visualElement = document.getElementById(`visual-${this.getOptionId(option, idx)}`);
-    if (visualElement) {
-      // Remover listener anterior se existir
-      const oldClickListener = (visualElement as any)._clickListener;
-      if (oldClickListener) {
-        visualElement.removeEventListener('click', oldClickListener);
-      }
-      
-      // Adicionar novo listener
-      const newClickListener = () => this.selectOption(option);
-      visualElement.addEventListener('click', newClickListener);
-      (visualElement as any)._clickListener = newClickListener;
-    }
-  }
 
   /**
    * Sincroniza dimensões e eventos do elemento acessível com o visual
