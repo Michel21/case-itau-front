@@ -7,7 +7,8 @@ import {
   signal,
   type ElementRef,
   viewChild,
-  DestroyRef
+  DestroyRef,
+  AfterViewInit
 } from '@angular/core';
 import {
   FormBuilder,
@@ -89,7 +90,7 @@ const MESES: readonly OpcaoSelect[] = [
   styleUrls: ['./periodo-mobile.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PeriodoMobileComponent {
+export class PeriodoMobileComponent implements AfterViewInit {
   // ============================================================================
   // INJEÇÃO DE DEPENDÊNCIAS
   // ============================================================================
@@ -104,6 +105,7 @@ export class PeriodoMobileComponent {
   readonly campoMes = viewChild<InputSelectComponent>('campoMes');
   readonly campoAno = viewChild<InputSelectComponent>('campoAno');
   readonly btnAplicar = viewChild<ElementRef<HTMLButtonElement>>('btnAplicar');
+  readonly mainTitle = viewChild<ElementRef<HTMLHeadingElement>>('mainTitle');
 
   // ============================================================================
   // CONSTANTES PÚBLICAS
@@ -222,6 +224,18 @@ export class PeriodoMobileComponent {
       const tipo = this.tipoPeriodo();
       console.log('🔘 Tipo de período mudou para:', tipo);
     });
+  }
+
+  // ============================================================================
+  // LIFECYCLE HOOKS
+  // ============================================================================
+
+  ngAfterViewInit(): void {
+    // Focar no título principal ao carregar a tela para situar o usuário
+    // Pequeno delay para garantir que a navegação/renderização completou
+    setTimeout(() => {
+      this.mainTitle()?.nativeElement.focus();
+    }, 100);
   }
 
   // ============================================================================
