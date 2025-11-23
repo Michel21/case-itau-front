@@ -55,6 +55,16 @@ $gray-700: #374151;
   &--full-width {
     display: flex;
     width: 100%;
+    
+    .toggle-segmented__option {
+      flex: 1; // Quando fullWidth, distribui igualmente
+      min-width: 0;
+    }
+    
+    .toggle-segmented__label-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
 
   // Opção (agora é um div com role="radio")
@@ -72,8 +82,8 @@ $gray-700: #374151;
     transition: all 0.2s ease;
     user-select: none;
     position: relative;
-    flex: 1;
-    min-width: 0;
+    flex: 0 1 auto; // Permite que o botão cresça com o conteúdo
+    min-width: fit-content; // Garante que o texto não seja cortado
     
     // Outline de foco para acessibilidade
     &:focus-visible {
@@ -127,9 +137,7 @@ $gray-700: #374151;
   }
 
   &__label-text {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: nowrap; // Mantém o texto em uma linha
   }
 }
 
@@ -496,16 +504,32 @@ $gray-700: #374151;
 
 @media (max-width: 640px) {
   .toggle-segmented {
-    width: 100%;
-    display: flex;
+    // Remove width: 100% e flex para manter comportamento adaptável
+    display: inline-flex;
 
     &__option {
-      flex: 1;
-      min-width: 0;
+      flex: 0 1 auto;
+      min-width: fit-content;
     }
 
     &__label-text {
       font-size: 0.75rem;
+    }
+  }
+  
+  // Quando explicitamente fullWidth, mantém comportamento igual
+  .toggle-segmented--full-width {
+    width: 100%;
+    display: flex;
+    
+    .toggle-segmented__option {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .toggle-segmented__label-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 }
