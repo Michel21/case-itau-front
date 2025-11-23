@@ -248,23 +248,24 @@ $black: #1A1A1A;
 
 .modal-actions {
   display: flex;
-  gap: 0.75rem;
+  gap: 1rem;
   padding: 1rem 1.5rem 1.5rem;
   border-top: 1px solid $itau-gray-border;
   background: $white;
+  justify-content: flex-end;
 }
 
 .modal-btn {
-  flex: 1;
   height: 48px;
-  padding: 0 1.5rem;
+  padding: 0 2rem;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 500;
   border-radius: 24px;
   cursor: pointer;
   transition: all 0.2s ease;
   border: none;
   letter-spacing: 0.01em;
+  min-width: 130px;
 
   &:active {
     transform: scale(0.98);
@@ -288,6 +289,7 @@ $black: #1A1A1A;
 
     &:hover:not(:disabled) {
       background-color: $itau-blue-dark;
+      box-shadow: 0 2px 8px rgba(0, 70, 192, 0.25);
     }
 
     &:disabled {
