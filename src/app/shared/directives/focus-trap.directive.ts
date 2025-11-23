@@ -1,8 +1,6 @@
 import {
   Directive,
   ElementRef,
-  OnInit,
-  OnDestroy,
   inject,
   input,
   effect,
@@ -34,7 +32,7 @@ import {
   selector: '[appFocusTrap]',
   standalone: true
 })
-export class FocusTrapDirective implements OnInit, OnDestroy {
+export class FocusTrapDirective {
   // ============================================================================
   // INPUTS
   // ============================================================================
@@ -99,18 +97,6 @@ export class FocusTrapDirective implements OnInit, OnDestroy {
     this.destroyRef.onDestroy(() => {
       this.cleanup();
     });
-  }
-
-  // ============================================================================
-  // LIFECYCLE
-  // ============================================================================
-  
-  ngOnInit(): void {
-    // Inicialização já é feita pelo effect
-  }
-
-  ngOnDestroy(): void {
-    // Cleanup já é feito pelo destroyRef
   }
 
   // ============================================================================
