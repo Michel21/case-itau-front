@@ -38,12 +38,12 @@ $black: #1A1A1A;
 }
 
 // ============================================================================
-// MODAL CONTENT (Card branco)
+// MODAL CONTENT (Card branco - Layout Vertical)
 // ============================================================================
 
 .modal-content {
   background: $white;
-  border-radius: 4px;
+  border-radius: 8px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   max-width: 480px;
   width: 100%;
@@ -59,13 +59,13 @@ $black: #1A1A1A;
 // ============================================================================
 
 .modal-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: $black;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: $itau-gray-text;
   margin: 0;
-  padding: 1.5rem 1.5rem 1rem;
+  padding: 1.75rem 1.5rem 1.25rem;
   text-align: left;
-  border-bottom: 1px solid $itau-gray-border;
+  border: none;
 }
 
 // ============================================================================
@@ -111,7 +111,7 @@ $black: #1A1A1A;
   margin: 0;
   padding: 0;
   overflow-y: auto;
-  max-height: 227px;
+  max-height: 300px;
 
   // Custom scrollbar
   &::-webkit-scrollbar {
@@ -123,7 +123,7 @@ $black: #1A1A1A;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: transparent;
+    background: $itau-gray-border;
     border-radius: 4px;
   }
 }
@@ -142,7 +142,7 @@ $black: #1A1A1A;
 }
 
 // ============================================================================
-// LABEL (linha clicável - agora é button)
+// LABEL (linha clicável com texto à esquerda e radio à direita)
 // ============================================================================
 
 .modal-label {
@@ -150,20 +150,20 @@ $black: #1A1A1A;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 0.875rem 1.5rem; // Padding um pouco menor (como na imagem)
+  padding: 1rem 1.5rem;
   margin: 0;
   cursor: pointer;
   transition: background-color 0.2s ease;
   user-select: none;
   border: none;
-  border-bottom: 1px solid $itau-gray-border; // Borda movida para o label (já que modal-item usa display: contents)
+  border-bottom: 1px solid $itau-gray-border;
   background: transparent;
   text-align: left;
   font-family: inherit;
   font-size: 1rem;
   color: inherit;
-  gap: 1rem; // Espaço entre texto e radio
-  outline: none; // Remover outline padrão (será controlado por focus-visible)
+  gap: 1rem;
+  outline: none;
 
   // Remover borda do último item
   &:last-of-type {
@@ -171,7 +171,7 @@ $black: #1A1A1A;
   }
 
   &:hover {
-    background-color: $itau-gray-bg;
+    background-color: rgba(0, 70, 192, 0.02);
   }
 
   &:active {
@@ -181,7 +181,7 @@ $black: #1A1A1A;
   &:focus-visible {
     outline: 2px solid $itau-blue-primary;
     outline-offset: -2px;
-    background-color: rgba(0, 70, 192, 0.08);
+    background-color: rgba(0, 70, 192, 0.05);
   }
 
   // Estado selecionado
@@ -221,24 +221,25 @@ $black: #1A1A1A;
 }
 
 // ============================================================================
-// CHECK (ícone de rádio - como na imagem)
+// CHECK (ícone de rádio à direita)
 // ============================================================================
 
 .modal-check {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px; // Maior (como na imagem)
-  height: 28px; // Maior (como na imagem)
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
   transition: transform 0.15s ease;
 
   &--active {
-    transform: scale(1.05); // Leve aumento quando selecionado
+    transform: scale(1.05);
   }
 
   svg {
-    width: 24px; // Círculo maior
-    height: 24px; // Círculo maior
+    width: 24px;
+    height: 24px;
   }
 }
 
@@ -248,23 +249,24 @@ $black: #1A1A1A;
 
 .modal-actions {
   display: flex;
-  gap: 0.75rem;
-  padding: 1rem 1.5rem 1.5rem;
-  border-top: 1px solid $itau-gray-border;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem 1.5rem;
+  border-top: none;
   background: $white;
+  justify-content: flex-end;
 }
 
 .modal-btn {
-  flex: 1;
-  height: 48px;
-  padding: 0 1.5rem;
+  height: 44px;
+  padding: 0 2rem;
   font-size: 1rem;
-  font-weight: 600;
-  border-radius: 24px;
+  font-weight: 500;
+  border-radius: 22px;
   cursor: pointer;
   transition: all 0.2s ease;
   border: none;
   letter-spacing: 0.01em;
+  min-width: 120px;
 
   &:active {
     transform: scale(0.98);
@@ -275,6 +277,7 @@ $black: #1A1A1A;
     background: transparent;
     color: $itau-blue-primary;
     border: none;
+    flex: 0;
 
     &:hover {
       background-color: rgba(0, 70, 192, 0.05);
@@ -285,9 +288,11 @@ $black: #1A1A1A;
   &--confirm {
     background-color: $itau-blue-primary;
     color: $white;
+    flex: 0;
 
     &:hover:not(:disabled) {
       background-color: $itau-blue-dark;
+      box-shadow: 0 2px 8px rgba(0, 70, 192, 0.3);
     }
 
     &:disabled {
