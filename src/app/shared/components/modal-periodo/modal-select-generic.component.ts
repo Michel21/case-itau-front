@@ -190,7 +190,7 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
   /** Configurações de estilo e comportamento */
   readonly config = input<ModalSelectConfig>({
     showCheckIcon: true,
-    maxHeight: '227px'
+    maxHeight: '211px'
   });
 
   // ============================================================================
