@@ -1,7 +1,7 @@
 import { Directive, HostListener, Input } from '@angular/core';
 
 /**
- * Diretiva para transferir o foco para um elemento específico ao clicar.
+ * Diretiva para transferir o foco para um elemento específico ao clicar ou pressionar teclas de navegação.
  * 
  * Útil para:
  * - Botões de "Pular para conteúdo"
@@ -35,6 +35,28 @@ export class FocusTargetDirective {
 
   @HostListener('click', ['$event'])
   onClick(event: MouseEvent): void {
+    this.triggerFocus();
+  }
+
+  @HostListener('keydown', ['$event'])
+  onKeyDown(event: KeyboardEvent): void {
+    // Ativa com PageDown ou Tab (sem Shift)
+    // Nota: Enter e Space em <button> já disparam o evento click nativamente, 
+    // então são tratados pelo onClick.
+    const isPageDown = event.key === 'PageDown';
+    const isTab = event.key === 'Tab';
+
+    // Se for Tab, queremos interceptar apenas a navegação para frente (Tab),
+    // permitindo Shift+Tab voltar o foco normalmente.
+    if (isPageDown || (isTab && !event.shiftKey)) {
+      if (this.target) {
+        event.preventDefault(); // Previne scroll (PageDown) ou foco natural (Tab)
+        this.triggerFocus();
+      }
+    }
+  }
+
+  private triggerFocus(): void {
     if (!this.target) return;
 
     let element: HTMLElement | null = null;
@@ -71,4 +93,3 @@ export class FocusTargetDirective {
     return !interactiveTags.includes(element.tagName) && !element.isContentEditable;
   }
 }
-

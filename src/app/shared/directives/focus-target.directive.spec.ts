@@ -40,16 +40,14 @@ describe('FocusTargetDirective', () => {
     expect(directive).toBeTruthy();
   });
 
-  it('deve focar elemento alvo via ID (string)', () => {
+  it('deve focar elemento alvo via ID (string) ao clicar', () => {
     const button = fixture.debugElement.query(By.css('#btn-string'));
     const target = fixture.debugElement.query(By.css('#target-string')).nativeElement;
 
-    // Mock do focus para verificar chamada
     const focusSpy = jest.spyOn(target, 'focus');
 
     button.triggerEventHandler('click', new MouseEvent('click'));
 
-    // Deve adicionar tabindex="-1" para elementos não interativos
     expect(target.getAttribute('tabindex')).toBe('-1');
     expect(focusSpy).toHaveBeenCalled();
   });
@@ -73,21 +71,55 @@ describe('FocusTargetDirective', () => {
 
     button.triggerEventHandler('click', new MouseEvent('click'));
 
-    // Não deve ter chamado ainda
     expect(focusSpy).not.toHaveBeenCalled();
 
-    // Avança o tempo
     tick(100);
 
     expect(focusSpy).toHaveBeenCalled();
   }));
 
-  it('não deve lançar erro se alvo não existe', () => {
-    // Cria um botão com alvo inválido dinamicamente ou usa um teste isolado
-    // Aqui vamos apenas verificar que clicar em algo sem target válido não quebra
+  it('deve focar ao pressionar PageDown', () => {
     const button = fixture.debugElement.query(By.css('#btn-string'));
+    const target = fixture.debugElement.query(By.css('#target-string')).nativeElement;
+    const focusSpy = jest.spyOn(target, 'focus');
+
+    const event = new KeyboardEvent('keydown', { key: 'PageDown', cancelable: true });
+    const preventDefaultSpy = jest.spyOn(event, 'preventDefault');
+
+    button.triggerEventHandler('keydown', event);
+
+    expect(preventDefaultSpy).toHaveBeenCalled();
+    expect(focusSpy).toHaveBeenCalled();
+  });
+
+  it('deve focar ao pressionar Tab', () => {
+    const button = fixture.debugElement.query(By.css('#btn-string'));
+    const target = fixture.debugElement.query(By.css('#target-string')).nativeElement;
+    const focusSpy = jest.spyOn(target, 'focus');
+
+    const event = new KeyboardEvent('keydown', { key: 'Tab', cancelable: true });
+    const preventDefaultSpy = jest.spyOn(event, 'preventDefault');
+
+    button.triggerEventHandler('keydown', event);
+
+    expect(preventDefaultSpy).toHaveBeenCalled();
+    expect(focusSpy).toHaveBeenCalled();
+  });
+
+  it('NÃO deve focar ao pressionar Shift+Tab', () => {
+    const button = fixture.debugElement.query(By.css('#btn-string'));
+    const target = fixture.debugElement.query(By.css('#target-string')).nativeElement;
+    const focusSpy = jest.spyOn(target, 'focus');
+
+    const event = new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, cancelable: true });
     
-    // Força target inválido na diretiva
+    button.triggerEventHandler('keydown', event);
+
+    expect(focusSpy).not.toHaveBeenCalled();
+  });
+
+  it('não deve lançar erro se alvo não existe', () => {
+    const button = fixture.debugElement.query(By.css('#btn-string'));
     const directiveInstance = button.injector.get(FocusTargetDirective);
     directiveInstance.target = '#nao-existe';
 
@@ -100,4 +132,3 @@ describe('FocusTargetDirective', () => {
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Elemento alvo não encontrado'), '#nao-existe');
   });
 });
-
