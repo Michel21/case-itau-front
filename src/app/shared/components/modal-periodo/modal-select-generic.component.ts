@@ -17,6 +17,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { FocusTrapDirective } from '../../directives/focus-trap.directive';
+import { PageNavigationDirective } from '../../directives/page-navigation.directive';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -146,7 +147,7 @@ export type NavigationHandlerFn<T> = (
 @Component({
   selector: 'app-modal-select-generic',
   standalone: true,
-  imports: [CommonModule, FocusTrapDirective],
+  imports: [CommonModule, FocusTrapDirective, PageNavigationDirective],
   templateUrl: './modal-select-generic.component.html',
   styleUrls: ['./modal-periodo.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -491,7 +492,8 @@ export class ModalSelectGenericComponent<T = string> implements AfterViewInit, O
     const titulo = this.titulo();
     if (!titulo || !this.isOpen()) return;
     
-    const mensagem = `${titulo}, modal aberta`;
+    const totalItens = this.options().length;
+    const mensagem = `${titulo}, modal aberta, ${totalItens} itens`;
     
     this.anuncioSelecao.set('');
     this.titleAnnouncement.set('');
