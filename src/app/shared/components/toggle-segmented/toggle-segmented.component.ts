@@ -248,7 +248,7 @@ export class ToggleSegmentedComponent<T = string> implements ControlValueAccesso
       
       setTimeout(() => {
         requestAnimationFrame(() => {
-          opts.forEach((option, idx) => {
+        opts.forEach((option, idx) => {
             this.syncA11yWithVisual(option, idx);
           });
         });
@@ -274,8 +274,8 @@ export class ToggleSegmentedComponent<T = string> implements ControlValueAccesso
    */
   registerOnChange(fn: (value: T | null) => void): void {
     this.onChange = fn;
-  }
-
+            }
+            
   /**
    * Registra callback para notificar quando componente foi tocado
    * Chamado pelo Angular Forms durante inicialização
@@ -290,7 +290,7 @@ export class ToggleSegmentedComponent<T = string> implements ControlValueAccesso
    */
   setDisabledState(isDisabled: boolean): void {
     // Estado disabled é controlado pelo input signal
-  }
+          }
 
   // ============================================================================
   // MÉTODOS PRIVADOS - Setup e Sincronização
@@ -301,41 +301,41 @@ export class ToggleSegmentedComponent<T = string> implements ControlValueAccesso
    * Garante que navegação por teclado reflita visualmente
    */
   private syncA11yWithVisual(option: ToggleOption<T>, idx: number): void {
-    const a11yElement = document.getElementById(this.getOptionId(option, idx)) as HTMLElement;
+          const a11yElement = document.getElementById(this.getOptionId(option, idx)) as HTMLElement;
     const visualElement = document.getElementById(`visual-${this.getOptionId(option, idx)}`);
     
-    if (a11yElement && visualElement) {
+          if (a11yElement && visualElement) {
       // Sincronizar dimensões
-      const rect = visualElement.getBoundingClientRect();
-      const parentRect = visualElement.parentElement?.getBoundingClientRect();
-      
-      if (parentRect) {
-        a11yElement.style.left = `${rect.left - parentRect.left}px`;
-        a11yElement.style.width = `${rect.width}px`;
-        a11yElement.style.height = `${rect.height}px`;
-      }
-      
+            const rect = visualElement.getBoundingClientRect();
+            const parentRect = visualElement.parentElement?.getBoundingClientRect();
+            
+            if (parentRect) {
+              a11yElement.style.left = `${rect.left - parentRect.left}px`;
+              a11yElement.style.width = `${rect.width}px`;
+              a11yElement.style.height = `${rect.height}px`;
+            }
+            
       // Remover listeners anteriores
-      const oldFocusListener = (a11yElement as any)._focusListener;
-      const oldBlurListener = (a11yElement as any)._blurListener;
-      
-      if (oldFocusListener) {
-        a11yElement.removeEventListener('focus', oldFocusListener);
-      }
-      if (oldBlurListener) {
-        a11yElement.removeEventListener('blur', oldBlurListener);
-      }
-      
-      // Adicionar novos listeners
-      const newFocusListener = () => this.updateVisualFocus(idx);
-      const newBlurListener = () => this.clearVisualFocus();
-      
-      a11yElement.addEventListener('focus', newFocusListener);
-      a11yElement.addEventListener('blur', newBlurListener);
-      
-      (a11yElement as any)._focusListener = newFocusListener;
-      (a11yElement as any)._blurListener = newBlurListener;
-    }
+            const oldFocusListener = (a11yElement as any)._focusListener;
+            const oldBlurListener = (a11yElement as any)._blurListener;
+            
+            if (oldFocusListener) {
+              a11yElement.removeEventListener('focus', oldFocusListener);
+            }
+            if (oldBlurListener) {
+              a11yElement.removeEventListener('blur', oldBlurListener);
+            }
+            
+            // Adicionar novos listeners
+            const newFocusListener = () => this.updateVisualFocus(idx);
+            const newBlurListener = () => this.clearVisualFocus();
+            
+            a11yElement.addEventListener('focus', newFocusListener);
+            a11yElement.addEventListener('blur', newBlurListener);
+            
+            (a11yElement as any)._focusListener = newFocusListener;
+            (a11yElement as any)._blurListener = newBlurListener;
+          }
   }
 
   /**

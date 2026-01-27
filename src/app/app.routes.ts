@@ -47,10 +47,10 @@ export const routes: Routes = [
     loadComponent: () => import('./shared/components/modal-periodo/modal-periodo-demo.component').then(m => m.ModalPeriodoDemoComponent)
   },
   // Rota do toggle-segmented-demo removida - componente não existe
-  // {
-  //   path: 'demo/toggle-segmented',
-  //   loadComponent: () => import('./shared/components/toggle-segmented/toggle-segmented-demo.component').then(m => m.ToggleSegmentedDemoComponent)
-  // },
+  {
+    path: 'demo/toggle-segmented',
+    loadComponent: () => import('./shared/components/toggle-segmented/toggle-segmented-demo.component').then(m => m.ToggleSegmentedDemoComponent)
+  },
   {
     path: 'extrato-generator-demo',
     loadChildren: () => import('./features/extrato/services/extrato-generator-demo.routes').then(m => m.EXTRATO_GENERATOR_DEMO_ROUTES)

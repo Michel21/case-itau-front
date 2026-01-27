@@ -13,8 +13,7 @@
         class="toggle-segmented__option"
         [ngClass]="getOptionClasses(option, idx)"
         tabindex="-1"
-        aria-hidden="true"
-        (click)="selectOption(option)">
+        aria-hidden="true">
         
         <span class="toggle-segmented__label-text" aria-hidden="true">
           {{ option.label }}

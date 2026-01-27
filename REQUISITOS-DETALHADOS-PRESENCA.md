@@ -1,6 +1,6 @@
 # 📋 Requisitos Detalhados - Sistema de Controle de Presença
 
-**Contato**: Rebeca - rebecamafra00@gmail.com
+**Contato**: Michel -  michelangelis1@hotmail.com
 
 ---
 
@@ -523,7 +523,7 @@ Domínio próprio: R$ 40/ano
 ## 14. 📞 Próximos Passos
 
 1. **Validar Requisitos**
-   - Revisar este documento com Rebeca
+   - Revisar este documento com Michel
    - Confirmar prioridades
    - Ajustar se necessário
 
@@ -544,7 +544,7 @@ Domínio próprio: R$ 40/ano
 
 ---
 
-**Contato**: rebecamafra00@gmail.com  
+**Contato**:  michelangelis1@hotmail.com  
 **Versão**: 1.0 - Baseado em requisitos manuscritos  
 **Data**: 2025-01-11
 

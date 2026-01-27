@@ -467,6 +467,24 @@ describe('FocusTrapDirective', () => {
       fixture.destroy();
       flush();
     }));
+
+    it('deve executar ngOnInit sem erros', () => {
+      expect(() => {
+        fixture = TestBed.createComponent(TestFocusTrapComponent);
+        fixture.detectChanges();
+      }).not.toThrow();
+    });
+
+    it('deve executar ngOnDestroy sem erros', fakeAsync(() => {
+      component.trapActive.set(true);
+      fixture.detectChanges();
+      tick();
+
+      expect(() => {
+        fixture.destroy();
+        tick();
+      }).not.toThrow();
+    }));
   });
 
   describe('Edge Cases', () => {

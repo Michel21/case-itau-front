@@ -1,0 +1,104 @@
+<!-- Backdrop -->
+<div
+  *ngIf="isOpen()"
+  class="bottom-sheet-backdrop"
+  (click)="onBackdropClick($event)"
+  (touchstart)="onBackdropClick($event)"
+  (keydown)="onKeyDown($event)"
+  role="presentation"
+  aria-hidden="true"
+></div>
+
+<!-- Bottom Sheet -->
+<div
+  *ngIf="isOpen()"
+  class="bottom-sheet-container"
+  [attr.aria-labelledby]="idUnico() + '-title'"
+  [attr.aria-describedby]="idUnico() + '-description'"
+  role="dialog"
+  aria-modal="true"
+  (keydown)="onKeyDown($event)"
+  (touchstart)="onTouchStart($event)"
+  (touchmove)="onTouchMove($event)"
+  (touchend)="onTouchEnd($event)"
+  tabindex="-1"
+  appFocusTrap
+>
+  <!-- Handle para arrastar (mobile) -->
+  <div class="bottom-sheet-drag-handle" aria-hidden="true"></div>
+  
+  <!-- Header com título -->
+  <div class="bottom-sheet-header">
+    <h2
+      [id]="idUnico() + '-title'"
+      class="bottom-sheet-title"
+      tabindex="-1"
+    >
+      Escolha o formato de download
+    </h2>
+  </div>
+
+  <!-- Descrição para acessibilidade -->
+  <p
+    [id]="idUnico() + '-description'"
+    class="sr-only"
+  >
+    Selecione entre PDF ou Excel para fazer o download do arquivo
+  </p>
+
+  <!-- Conteúdo -->
+  <div class="bottom-sheet-content">
+    <!-- Grupo de radio buttons -->
+    <fieldset class="radio-group">
+      <legend class="sr-only">Formato de download</legend>
+      
+      <div class="radio-options">
+        <label
+          *ngFor="let opcao of opcoes"
+          [for]="getRadioId(opcao.value)"
+          class="radio-label"
+          [class.radio-label--selected]="isFormatoSelecionado(opcao.value)"
+        >
+          <input
+            [id]="getRadioId(opcao.value)"
+            type="radio"
+            name="download-format"
+            [value]="opcao.value"
+            [checked]="isFormatoSelecionado(opcao.value)"
+            (change)="selecionarFormato(opcao.value)"
+            class="radio-input"
+            [attr.aria-label]="'Selecionar formato ' + opcao.label"
+          />
+          <span class="radio-custom"></span>
+          <span class="radio-text">{{ opcao.label }}</span>
+        </label>
+      </div>
+    </fieldset>
+
+    <!-- Botão de Download -->
+    <div class="bottom-sheet-actions">
+      <button
+        type="button"
+        class="btn-download"
+        [disabled]="!podeBaixar()"
+        (click)="confirmarDownload()"
+        [attr.aria-label]="'Baixar arquivo em formato ' + formatoSelecionado()"
+      >
+        {{ textoBotao() }}
+      </button>
+    </div>
+
+    <!-- Link final -->
+    <div class="bottom-sheet-footer">
+      <a
+        [href]="linkUrl()"
+        (click)="onLinkClick($event)"
+        class="bottom-sheet-link"
+        [attr.aria-label]="linkTexto()"
+      >
+        {{ linkTexto() }}
+      </a>
+    </div>
+  </div>
+</div>
+

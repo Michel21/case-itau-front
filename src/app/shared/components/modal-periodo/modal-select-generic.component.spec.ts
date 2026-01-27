@@ -58,29 +58,29 @@ describe('ModalSelectGenericComponent', () => {
     const modalDebugElement = fixture.debugElement.query(By.directive(ModalSelectGenericComponent));
     modalComponent = modalDebugElement.componentInstance;
     
-    fixture.detectChanges();
-  });
+      fixture.detectChanges();
+    });
 
   it('should create', () => {
     expect(modalComponent).toBeTruthy();
-  });
+    });
 
   it('should not display modal content when closed', () => {
     const modalElement = fixture.debugElement.query(By.css('.modal-periodo-host--open'));
     expect(modalElement).toBeFalsy();
-  });
+    });
 
   it('should display modal content when open', () => {
     hostComponent.isOpen = true;
-    fixture.detectChanges();
-    
+      fixture.detectChanges();
+      
     const modalElement = fixture.debugElement.query(By.css('.modal-periodo-host--open'));
     expect(modalElement).toBeTruthy();
-  });
+    });
 
   it('should display the title', () => {
     hostComponent.isOpen = true;
-    fixture.detectChanges();
+      fixture.detectChanges();
     
     const titleElement = fixture.debugElement.query(By.css('.modal-title'));
     expect(titleElement.nativeElement.textContent.trim()).toBe('Test Modal');
@@ -88,85 +88,85 @@ describe('ModalSelectGenericComponent', () => {
 
   it('should render options correctly', () => {
     hostComponent.isOpen = true;
-    fixture.detectChanges();
-    
+      fixture.detectChanges();
+
     const options = fixture.debugElement.queryAll(By.css('.modal-label'));
     expect(options.length).toBe(3);
     expect(options[0].nativeElement.textContent.trim()).toContain('Option 1');
-  });
+    });
 
   it('should select an option when clicked', () => {
     hostComponent.isOpen = true;
-    fixture.detectChanges();
+      fixture.detectChanges();
     
     const options = fixture.debugElement.queryAll(By.css('.modal-label'));
     options[1].nativeElement.click();
-    fixture.detectChanges();
+      fixture.detectChanges();
     
     expect(modalComponent.currentValue()).toBe('2');
-  });
+    });
 
   it('should confirm selection', () => {
     hostComponent.isOpen = true;
     hostComponent.selectedValue = '2';
-    fixture.detectChanges();
-    
+      fixture.detectChanges();
+
     modalComponent.selectOption('2');
     modalComponent.onConfirmar();
     
     expect(hostComponent.onConfirm).toHaveBeenCalled();
-  });
+    });
 
   it('should emit cancel event', () => {
     hostComponent.isOpen = true;
-    fixture.detectChanges();
-    
+      fixture.detectChanges();
+      
     modalComponent.onCancelar();
     
     expect(hostComponent.onCancel).toHaveBeenCalled();
-  });
+    });
 
   it('should have LiveAnnouncer injected', () => {
     expect(modalComponent['liveAnnouncer']).toBeDefined();
-  });
+    });
 
   it('should handle keyboard navigation with ArrowDown', fakeAsync(() => {
     hostComponent.isOpen = true;
-    fixture.detectChanges();
+      fixture.detectChanges();
     tick(100);
 
     modalComponent.focusedIndex.set(0);
     const event = new KeyboardEvent('keydown', { key: 'ArrowDown' });
     
     modalComponent.onKeyDown(event, '1', 0);
-    fixture.detectChanges();
-    
+      fixture.detectChanges();
+      
     expect(modalComponent.focusedIndex()).toBe(1);
   }));
 
   it('should handle keyboard navigation with End key', fakeAsync(() => {
     hostComponent.isOpen = true;
-    fixture.detectChanges();
+      fixture.detectChanges();
     tick(100);
 
     const event = new KeyboardEvent('keydown', { key: 'End' });
     
     modalComponent.onKeyDown(event, '1', 0);
-    fixture.detectChanges();
-    
+      fixture.detectChanges();
+      
     expect(modalComponent.focusedIndex()).toBe(2);
   }));
 
   it('should announce selection changes', fakeAsync(() => {
     hostComponent.isOpen = true;
-    fixture.detectChanges();
+      fixture.detectChanges();
     tick(1000);
-
+      
     modalComponent.selectOption('2');
-    fixture.detectChanges();
+      fixture.detectChanges();
     tick(100);
-
+      
     expect(modalComponent.anuncioSelecao()).toContain('2 de 3');
     expect(modalComponent.anuncioSelecao()).toContain('Option 2');
-  }));
-});
+    }));
+  });

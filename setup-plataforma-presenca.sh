@@ -13,7 +13,7 @@
 #
 # Autor: Sistema Automatizado
 # Data: 2025-01-11
-# Contato: Rebeca - rebecamafra00@gmail.com
+# Contato: Michel -  michelangelis1@hotmail.com
 
 set -e
 

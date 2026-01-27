@@ -42,10 +42,7 @@
         [style.max-height]="config().maxHeight || '227px'"
         aria-hidden="true"
         role="presentation"
-        tabindex="-1"
-        appPageNavigation
-        [pageSize]="5"
-        itemSelector=".modal-label">
+        tabindex="-1">
 
         <!-- Itens focáveis usando button para evitar narração "grupo" -->
         @for (option of options(); track option.value; let idx = $index) {

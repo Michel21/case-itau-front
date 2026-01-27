@@ -42,27 +42,27 @@ describe('ToggleSegmentedComponent', () => {
     const toggleDebugElement = fixture.debugElement.query(By.directive(ToggleSegmentedComponent));
     toggleComponent = toggleDebugElement.componentInstance;
     
-    fixture.detectChanges();
-  });
+      fixture.detectChanges();
+    });
 
   it('should create', () => {
     expect(toggleComponent).toBeTruthy();
-  });
+    });
 
   it('should render all options', () => {
     const labels = fixture.debugElement.queryAll(By.css('.toggle-segmented__label-text'));
     expect(labels.length).toBe(3);
     expect(labels[0].nativeElement.textContent.trim()).toBe('Option 1');
-  });
+    });
 
   it('should have first option selected by default', () => {
     expect(toggleComponent.internalValue()).toBe('opt1');
-  });
+    });
 
   it('should select option on click', fakeAsync(() => {
     const buttons = fixture.debugElement.queryAll(By.css('button'));
     buttons[1].nativeElement.click();
-    fixture.detectChanges();
+      fixture.detectChanges();
     tick();
 
     expect(hostComponent.value).toBe('opt2');
@@ -73,22 +73,22 @@ describe('ToggleSegmentedComponent', () => {
     const initialValue = hostComponent.value;
     const buttons = fixture.debugElement.queryAll(By.css('button'));
     buttons[2].nativeElement.click();
-    fixture.detectChanges();
-
+      fixture.detectChanges();
+      
     expect(hostComponent.value).toBe(initialValue);
-  });
+    });
 
   it('should reflect disabled state from host', () => {
     hostComponent.disabled = true;
-    fixture.detectChanges();
-    
+        fixture.detectChanges();
+
     const initialValue = hostComponent.value;
     
     toggleComponent.selectOption(hostComponent.options[1]);
-    fixture.detectChanges();
-    
+      fixture.detectChanges();
+
     expect(hostComponent.value).toBe(initialValue);
-  });
+    });
 
   it('should handle keyboard navigation with ArrowRight', fakeAsync(() => {
     const buttons = fixture.debugElement.queryAll(By.css('button'));
@@ -97,7 +97,7 @@ describe('ToggleSegmentedComponent', () => {
     
     buttons[0].nativeElement.dispatchEvent(event);
     tick();
-    
+      
     expect(preventDefaultSpy).toHaveBeenCalled();
   }));
 
@@ -108,13 +108,13 @@ describe('ToggleSegmentedComponent', () => {
     
     buttons[1].nativeElement.dispatchEvent(event);
     tick();
-    
+      
     expect(preventDefaultSpy).toHaveBeenCalled();
   }));
 
   it('should update value via ControlValueAccessor', fakeAsync(() => {
     toggleComponent.writeValue('opt2');
-    fixture.detectChanges();
+      fixture.detectChanges();
     tick();
     
     expect(toggleComponent.internalValue()).toBe('opt2');
@@ -125,10 +125,10 @@ describe('ToggleSegmentedComponent', () => {
     toggleComponent.registerOnChange(onChangeSpy);
     
     toggleComponent.selectOption(hostComponent.options[1]);
-    fixture.detectChanges();
-    
+      fixture.detectChanges();
+      
     expect(onChangeSpy).toHaveBeenCalledWith('opt2');
-  });
+    });
 
   it('should register onChange and onTouched callbacks', () => {
     const onChangeSpy = jest.fn();
@@ -139,11 +139,11 @@ describe('ToggleSegmentedComponent', () => {
     
     expect(toggleComponent.registerOnChange).toBeDefined();
     expect(toggleComponent.registerOnTouched).toBeDefined();
-  });
+    });
 
   it('should apply correct tabindex for roving tabindex pattern', () => {
     const buttons = fixture.debugElement.queryAll(By.css('button'));
-    
+
     // First enabled button should have tabindex 0
     expect(buttons[0].nativeElement.getAttribute('tabindex')).toBe('0');
     
