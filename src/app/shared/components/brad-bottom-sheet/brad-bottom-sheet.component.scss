@@ -1,0 +1,154 @@
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.brad-bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-radius: 16px 16px 0 0;
+  z-index: 1000;
+  
+  &__header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__btn-close {
+    min-width: 44px;
+    min-height: 44px;
+    
+    &:focus {
+      outline: 2px solid #007AFF;
+      outline-offset: 2px;
+    }
+  }
+
+  &__content {
+    padding: 16px;
+  }
+}
+
+#modal-title {
+  margin: 0;
+  
+  // IMPORTANTE: Nunca adicionar outline no título
+  &:focus {
+    outline: none !important;
+  }
+}
+
+// Radio buttons acessíveis
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 12px;
+  min-width: 44px;
+  min-height: 44px;
+  position: relative;
+
+  input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+
+    &:focus + .checkmark {
+      outline: 2px solid #007AFF;
+      outline-offset: 2px;
+    }
+
+    &:checked + .checkmark {
+      background-color: #007AFF;
+      border-color: #007AFF;
+
+      &::after {
+        display: block;
+      }
+    }
+  }
+
+  .checkmark {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ccc;
+    border-radius: 50%;
+    position: relative;
+    transition: all 0.2s;
+
+    &::after {
+      content: '';
+      position: absolute;
+      display: none;
+      left: 5px;
+      top: 2px;
+      width: 6px;
+      height: 10px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+  }
+
+  .label-text {
+    font-size: 16px;
+    user-select: none;
+  }
+}
+
+// Link como botão
+.brad-text-link {
+  appearance: none;
+  background: transparent;
+  border: none;
+  color: #007AFF;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 8px;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  &:focus {
+    outline: 2px solid #007AFF;
+    outline-offset: 2px;
+  }
+
+  &:hover {
+    background-color: rgba(0, 122, 255, 0.08);
+  }
+
+  &:active {
+    background-color: rgba(0, 122, 255, 0.15);
+  }
+}
+
+.destaque-link {
+  font-weight: 600;
+}
+
+// Otimizações iOS
+@supports (-webkit-touch-callout: none) {
+  .brad-bottom-sheet {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+}

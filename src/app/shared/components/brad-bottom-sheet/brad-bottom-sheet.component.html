@@ -1,0 +1,128 @@
+<div 
+  id="bs-modal"
+  class="brad-bottom-sheet" 
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-labelledby]="hasTitle() ? 'modal-title' : null"
+  [attr.aria-label]="!hasTitle() ? title() : null"
+  [appFocusTrap]="isOpen()"
+  [trapActive]="isOpen()">
+  
+  <!-- Header -->
+  <div class="brad-bottom-sheet__header">
+    @if(title()) {
+      <h2 
+        id="modal-title"
+        #titleRef 
+        class="brad-font-title-xl brad-font-weight-bold brad-m-xs-t"
+        tabindex="-1">
+        {{title()}}
+      </h2>
+    }
+    
+    <button 
+      class="brad-bottom-sheet__btn-close icon-component-close-delete"
+      type="button"
+      [hidden]="!hasCloseIcon()"
+      aria-label="Fechar modal"
+      (click)="closeBsModal()"
+      (keydown.escape)="closeBsModal()">
+    </button>
+  </div>
+
+  <!-- Subtitle -->
+  @if(subtitle()) {
+    <div class="brad-m-sm-t brad-m-md-b">
+      <div class="brad-flex brad-flex-column brad-flex-align-items-start">
+        <p class="brad-font-subtitle-sm brad-text-color-neutral-40">
+          {{subtitle()}}
+        </p>
+      </div>
+    </div>
+  }
+
+  <!-- Estrutura acessível para radio buttons -->
+  <section 
+    class="brad-m-lg-b brad-p-xxl-x"
+    role="radiogroup"
+    aria-labelledby="format-label">
+    
+    <div class="sr-only" id="format-label">Selecione o formato do arquivo</div>
+    
+    <div class="brad-flex brad-flex-row brad-flex-gap-md">
+      
+      <!-- Radio PDF -->
+      <div class="brad-chip brad-chip--md brad-flex brad-m-xs-y">
+        <label 
+          for="chip-pdf"
+          class="radio-label">
+          <input 
+            id="chip-pdf" 
+            type="radio"
+            name="formato"
+            value="pdf"
+            [(ngModel)]="formatoSelecionado"
+            (change)="onFormatoChange('pdf')"
+            [attr.aria-describedby]="formatoSelecionado === 'pdf' ? 'pdf-selected' : null">
+          <span class="checkmark" aria-hidden="true"></span>
+          <span class="label-text">PDF</span>
+        </label>
+        <span id="pdf-selected" class="sr-only">
+          @if(formatoSelecionado === 'pdf') { Formato PDF selecionado }
+        </span>
+      </div>
+
+      <!-- Radio Excel -->
+      <div class="brad-chip brad-chip--md brad-flex brad-m-xs-y">
+        <label 
+          for="chip-xls"
+          class="radio-label">
+          <input 
+            id="chip-xls" 
+            type="radio"
+            name="formato"
+            value="xls"
+            [(ngModel)]="formatoSelecionado"
+            (change)="onFormatoChange('xls')"
+            [attr.aria-describedby]="formatoSelecionado === 'xls' ? 'xls-selected' : null">
+          <span class="checkmark" aria-hidden="true"></span>
+          <span class="label-text">XLS (Excel)</span>
+        </label>
+        <span id="xls-selected" class="sr-only">
+          @if(formatoSelecionado === 'xls') { Formato Excel selecionado }
+        </span>
+      </div>
+      
+    </div>
+  </section>
+
+  <!-- Botão Baixar -->
+  <div class="brad-btn-modal-baixar brad-p-xxl-x">
+    <button 
+      id="btn-baixar"
+      type="button"
+      class="brad-btn brad-btn-primary"
+      [disabled]="botaoBaixarDesabilitado()"
+      [attr.aria-label]="getAriaLabelBaixar()"
+      (click)="onBaixarExtrato.emit()">
+      Baixar
+    </button>
+  </div>
+
+  <!-- Link corrigido para não verbalizar "fim de diálogo" -->
+  <div class="brad-m-md-t brad-m-sm-b">
+    <div class="brad-bottom-sheet__content brad-scrollbar">
+      <button
+        type="button"
+        class="brad-text-link brad-font-link-sm"
+        aria-label="Se preferir ver na tela, acesse por aqui para visualizar o extrato"
+        (click)="onRedirecionarParaVisualizarHtml.emit()">
+        <span aria-hidden="true">
+          Se preferir ver na tela, 
+          <span class="destaque-link">acesse por aqui.</span>
+        </span>
+      </button>
+    </div>
+  </div>
+
+</div>
