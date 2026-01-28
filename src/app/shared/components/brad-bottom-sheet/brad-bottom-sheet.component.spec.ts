@@ -112,125 +112,40 @@ describe('BradBottomSheetComponent', () => {
       expect(component['previousActiveElement']).toBe(elementoAnterior);
     });
 
-    it('deve chamar setupModalAccessibility após requestAnimationFrame', () => {
-      jest.spyOn(component as any, 'setupModalAccessibility');
+    it('deve chamar focusTitle e ativar modalTrapDirective', () => {
+      jest.useFakeTimers();
+      const mockDirective = {
+        activate: jest.fn(),
+        deactivate: jest.fn()
+      };
+      component.modalTrapDirective = mockDirective as any;
+      
+      const focusTitleSpy = jest.spyOn(component as any, 'focusTitle');
+      const activateSpy = jest.spyOn(mockDirective, 'activate');
+      
+      // Mock requestAnimationFrame para executar callbacks imediatamente
+      const rafCallbacks: FrameRequestCallback[] = [];
+      const rafSpy = jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb: FrameRequestCallback) => {
+        rafCallbacks.push(cb);
+        // Executa callback imediatamente
+        setTimeout(() => cb(0), 0);
+        return 1;
+      });
       
       component.openBsModal();
       
-      expect(window.requestAnimationFrame).toHaveBeenCalled();
-    });
-  });
-
-  describe('setupModalAccessibility', () => {
-    beforeEach(() => {
-      component.ngOnInit();
-      jest.spyOn(window, 'setTimeout').mockImplementation((cb) => {
-        cb();
-        return 0 as any;
-      });
-    });
-
-    it('deve chamar setupIOSFocus quando for iOS', () => {
-      jest.spyOn(component as any, 'isIOSDevice').mockReturnValue(true);
-      jest.spyOn(component as any, 'setupIOSFocus');
-      jest.spyOn(component as any, 'setupStandardFocus');
+      expect(focusTitleSpy).toHaveBeenCalled();
+      expect(rafSpy).toHaveBeenCalled();
       
-      component['setupModalAccessibility']();
+      // Executa callbacks do requestAnimationFrame
+      rafCallbacks.forEach(cb => cb(0));
       
-      expect(component['setupIOSFocus']).toHaveBeenCalled();
-      expect(component['setupStandardFocus']).not.toHaveBeenCalled();
-    });
-
-    it('deve chamar setupStandardFocus quando não for iOS', () => {
-      jest.spyOn(component as any, 'isIOSDevice').mockReturnValue(false);
-      jest.spyOn(component as any, 'setupIOSFocus');
-      jest.spyOn(component as any, 'setupStandardFocus');
+      // Avança timers para executar setTimeout dentro do requestAnimationFrame
+      jest.advanceTimersByTime(400);
       
-      component['setupModalAccessibility']();
-      
-      expect(component['setupStandardFocus']).toHaveBeenCalled();
-      expect(component['setupIOSFocus']).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('setupIOSFocus', () => {
-    beforeEach(() => {
-      component.ngOnInit();
-      fixture.detectChanges();
-      jest.useFakeTimers();
-      
-      const titleEl = document.createElement('h2');
-      titleEl.id = 'modal-title';
-      document.getElementById('bs-modal')?.appendChild(titleEl);
-      
-      component.titleRef = {
-        nativeElement: titleEl,
-      } as any;
-    });
-
-    afterEach(() => {
+      expect(activateSpy).toHaveBeenCalled();
       jest.useRealTimers();
-    });
-
-    it('deve configurar título com tabindex -1', () => {
-      component['setupIOSFocus']();
-      
-      expect(component.titleRef?.nativeElement.getAttribute('tabindex')).toBe('-1');
-    });
-
-    it('deve remover tabindex do modal', () => {
-      const modalEl = document.getElementById('bs-modal');
-      modalEl?.setAttribute('tabindex', '0');
-      
-      component['setupIOSFocus']();
-      
-      expect(modalEl?.hasAttribute('tabindex')).toBe(false);
-    });
-
-    it('deve anunciar abertura do modal', () => {
-      component.title.set('Teste');
-      jest.spyOn(component as any, 'announceModalOpened');
-      
-      component['setupIOSFocus']();
-      
-      expect(component['announceModalOpened']).toHaveBeenCalled();
-    });
-
-    it('deve focar no primeiro elemento interativo', () => {
-      const radio = document.createElement('input');
-      radio.id = 'chip-pdf';
-      radio.type = 'radio';
-      document.getElementById('bs-modal')?.appendChild(radio);
-      
-      jest.spyOn(component as any, 'focusFirstInteractiveElement');
-      
-      component['setupIOSFocus']();
-      jest.advanceTimersByTime(100);
-      
-      expect(component['focusFirstInteractiveElement']).toHaveBeenCalled();
-    });
-
-    it('não deve fazer nada se titleRef não existir', () => {
-      component.titleRef = undefined;
-      
-      expect(() => component['setupIOSFocus']()).not.toThrow();
-    });
-
-    it('deve lidar com modal não encontrado', () => {
-      const titleEl = document.createElement('h2');
-      titleEl.id = 'modal-title';
-      component.titleRef = {
-        nativeElement: titleEl,
-      } as any;
-      
-      // Remove modal do DOM
-      const modalEl = document.getElementById('bs-modal');
-      if (modalEl) {
-        modalEl.remove();
-      }
-      
-      // Não deve lançar erro mesmo que modal não exista
-      expect(() => component['setupIOSFocus']()).not.toThrow();
+      rafSpy.mockRestore();
     });
   });
 
@@ -259,48 +174,7 @@ describe('BradBottomSheetComponent', () => {
     });
   });
 
-  describe('setupStandardFocus', () => {
-    beforeEach(() => {
-      component.ngOnInit();
-      fixture.detectChanges();
-      jest.useFakeTimers();
-      
-      const titleEl = document.createElement('h2');
-      titleEl.id = 'modal-title';
-      document.getElementById('bs-modal')?.appendChild(titleEl);
-      
-      component.titleRef = {
-        nativeElement: titleEl,
-      } as any;
-    });
-
-    afterEach(() => {
-      jest.useRealTimers();
-    });
-
-    it('deve configurar título com tabindex -1', () => {
-      component['setupStandardFocus']();
-      
-      expect(component.titleRef?.nativeElement.getAttribute('tabindex')).toBe('-1');
-    });
-
-    it('deve focar no título após timeout', () => {
-      jest.spyOn(component.titleRef!.nativeElement, 'focus');
-      
-      component['setupStandardFocus']();
-      jest.advanceTimersByTime(100);
-      
-      expect(component.titleRef!.nativeElement.focus).toHaveBeenCalled();
-    });
-
-    it('não deve fazer nada se titleRef não existir', () => {
-      component.titleRef = undefined;
-      
-      expect(() => component['setupStandardFocus']()).not.toThrow();
-    });
-  });
-
-  describe('observeTitleTabIndex', () => {
+  describe('focusTitle', () => {
     let titleEl: HTMLElement;
 
     beforeEach(() => {
@@ -316,122 +190,42 @@ describe('BradBottomSheetComponent', () => {
       } as any;
     });
 
-    it('deve criar MutationObserver e observar mudanças no tabindex', () => {
-      component['observeTitleTabIndex'](titleEl);
+    it('deve criar MutationObserver e observar mudanças no tabindex e aria-hidden', () => {
+      component.focusTitle();
       
       // Verifica se o observer foi criado
       expect(component['mutationObserver']).toBeTruthy();
       expect(component['mutationObserver']).toBeInstanceOf(MutationObserver);
     });
 
-    it('deve forçar tabindex -1 quando mudar para outro valor', () => {
-      component['observeTitleTabIndex'](titleEl);
-      
-      // Verifica que o observer foi criado
-      const observer = component['mutationObserver'];
-      expect(observer).toBeTruthy();
-      
-      // Testa a lógica diretamente simulando o comportamento
-      titleEl.setAttribute('tabindex', '1');
-      const currentTabIndex = titleEl.getAttribute('tabindex');
-      if (currentTabIndex !== '-1') {
-        component['renderer'].setAttribute(titleEl, 'tabindex', '-1');
-      }
+    it('deve configurar título com tabindex -1', () => {
+      component.focusTitle();
       
       expect(titleEl.getAttribute('tabindex')).toBe('-1');
     });
 
-    it('não deve fazer nada quando tabindex já é -1', () => {
-      titleEl.setAttribute('tabindex', '-1');
-      const rendererSpy = jest.spyOn(component['renderer'], 'setAttribute');
+    it('deve configurar aria-hidden false no iOS', () => {
+      jest.spyOn(component as any, 'isIOSDevice').mockReturnValue(true);
       
-      component['observeTitleTabIndex'](titleEl);
+      component.focusTitle();
       
-      // Simula callback com tabindex já sendo -1
-      titleEl.setAttribute('tabindex', '-1');
-      const currentTabIndex = titleEl.getAttribute('tabindex');
-      
-      // Se já é -1, não deve chamar setAttribute novamente
-      if (currentTabIndex !== '-1') {
-        component['renderer'].setAttribute(titleEl, 'tabindex', '-1');
-      }
-      
-      // Não deve ter chamado setAttribute porque já estava correto
-      expect(titleEl.getAttribute('tabindex')).toBe('-1');
+      expect(titleEl.getAttribute('aria-hidden')).toBe('false');
     });
 
-    it('deve observar apenas mudanças no atributo tabindex', () => {
-      component['observeTitleTabIndex'](titleEl);
+    it('deve desconectar observer anterior se existir', () => {
+      const observerAnterior = new MutationObserver(() => {});
+      component['mutationObserver'] = observerAnterior;
+      jest.spyOn(observerAnterior, 'disconnect');
       
-      const observer = component['mutationObserver'];
-      expect(observer).toBeTruthy();
+      component.focusTitle();
       
-      // Verifica que o observer está configurado para observar apenas tabindex
-      // Isso é testado indiretamente pela criação do observer
-      expect(observer).toBeInstanceOf(MutationObserver);
-    });
-  });
-
-  describe('announceModalOpened', () => {
-    beforeEach(() => {
-      component.title.set('Modal de Teste');
-      document.body.innerHTML = '';
-      jest.useFakeTimers();
+      expect(observerAnterior.disconnect).toHaveBeenCalled();
     });
 
-    afterEach(() => {
-      document.body.innerHTML = '';
-      jest.useRealTimers();
-    });
-
-    it('deve criar elemento de anúncio', () => {
-      const initialLength = document.body.children.length;
+    it('não deve fazer nada se titleRef não existir', () => {
+      component.titleRef = undefined;
       
-      component['announceModalOpened']();
-      
-      expect(document.body.children.length).toBeGreaterThan(initialLength);
-      const announcement = document.body.querySelector('.sr-only');
-      expect(announcement).toBeTruthy();
-      expect(announcement?.textContent).toBe('Modal de Teste aberto');
-      expect(announcement?.getAttribute('role')).toBe('status');
-      expect(announcement?.getAttribute('aria-live')).toBe('polite');
-    });
-
-    it('deve remover elemento após timeout', () => {
-      component['announceModalOpened']();
-      
-      const announcement = document.body.querySelector('.sr-only');
-      expect(announcement).toBeTruthy();
-      
-      jest.advanceTimersByTime(1100);
-      
-      expect(document.body.querySelector('.sr-only')).toBeNull();
-    });
-
-    it('não deve remover elemento se já foi removido', () => {
-      component['announceModalOpened']();
-      
-      const announcement = document.body.querySelector('.sr-only');
-      expect(announcement).toBeTruthy();
-      
-      // Remove manualmente antes do timeout
-      if (announcement && announcement.parentNode) {
-        announcement.parentNode.removeChild(announcement);
-      }
-      
-      jest.advanceTimersByTime(1100);
-      
-      // Não deve lançar erro mesmo que elemento já tenha sido removido
-      expect(document.body.querySelector('.sr-only')).toBeNull();
-    });
-
-    it('deve lidar com título vazio', () => {
-      component.title.set('');
-      component['announceModalOpened']();
-      
-      const announcement = document.body.querySelector('.sr-only');
-      expect(announcement).toBeTruthy();
-      expect(announcement?.textContent).toBe(' aberto');
+      expect(() => component.focusTitle()).not.toThrow();
     });
   });
 
@@ -555,24 +349,58 @@ describe('BradBottomSheetComponent', () => {
     });
   });
 
-  describe('onFormatoChange', () => {
+  describe('onRadioClick', () => {
     beforeEach(() => {
       component.ngOnInit();
+      fixture.detectChanges();
+      jest.useFakeTimers();
       jest.spyOn(component as any, 'announceToScreenReader');
+      jest.spyOn(component as any, 'prevenirFocoNoTitulo');
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
     });
 
     it('deve atualizar formato selecionado para PDF', () => {
-      component.onFormatoChange('pdf');
+      const radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.id = 'chip-pdf';
+      const event = new Event('click');
+      Object.defineProperty(event, 'target', { value: radio, writable: false });
+      
+      component.onRadioClick('pdf', event);
       
       expect(component.formatoSelecionado()).toBe('pdf');
+      expect(radio.checked).toBe(true);
       expect(component['announceToScreenReader']).toHaveBeenCalledWith('Formato PDF selecionado');
+      expect(component['prevenirFocoNoTitulo']).toHaveBeenCalled();
     });
 
     it('deve atualizar formato selecionado para XLS', () => {
-      component.onFormatoChange('xls');
+      const radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.id = 'chip-xls';
+      const event = new Event('click');
+      Object.defineProperty(event, 'target', { value: radio, writable: false });
+      
+      component.onRadioClick('xls', event);
       
       expect(component.formatoSelecionado()).toBe('xls');
+      expect(radio.checked).toBe(true);
       expect(component['announceToScreenReader']).toHaveBeenCalledWith('Formato Excel selecionado');
+      expect(component['prevenirFocoNoTitulo']).toHaveBeenCalled();
+    });
+
+    it('deve emitir evento onHabilitarBtBaixar', () => {
+      jest.spyOn(component.onHabilitarBtBaixar, 'emit');
+      const radio = document.createElement('input');
+      const event = new Event('click');
+      Object.defineProperty(event, 'target', { value: radio, writable: false });
+      
+      component.onRadioClick('pdf', event);
+      
+      expect(component.onHabilitarBtBaixar.emit).toHaveBeenCalled();
     });
   });
 
@@ -1022,13 +850,18 @@ describe('BradBottomSheetComponent', () => {
       jest.useRealTimers();
     });
 
-    it('deve ativar focus trap após setupModalAccessibility', () => {
-      jest.spyOn(component as any, 'ativarFocusTrap');
+    it('deve ativar modalTrapDirective após requestAnimationFrame', () => {
+      const mockDirective = {
+        activate: jest.fn(),
+        deactivate: jest.fn()
+      };
+      component.modalTrapDirective = mockDirective as any;
+      const activateSpy = jest.spyOn(mockDirective, 'activate');
       
       component.openBsModal();
-      jest.advanceTimersByTime(800);
+      jest.advanceTimersByTime(400);
       
-      expect(component['ativarFocusTrap']).toHaveBeenCalled();
+      expect(activateSpy).toHaveBeenCalled();
     });
 
     it('deve desativar focus trap ao fechar modal', () => {
@@ -1072,35 +905,7 @@ describe('BradBottomSheetComponent', () => {
       expect(() => component['cleanup']()).not.toThrow();
     });
 
-    it('deve limpar focusTimeoutId', () => {
-      component['focusTimeoutId'] = 123 as any;
-      jest.spyOn(window, 'clearTimeout');
-      
-      component['cleanup']();
-      
-      expect(window.clearTimeout).toHaveBeenCalledWith(123);
-    });
 
-    it('não deve fazer nada se focusTimeoutId não existir', () => {
-      component['focusTimeoutId'] = undefined;
-      
-      expect(() => component['cleanup']()).not.toThrow();
-    });
-
-    it('deve limpar announcementTimeoutId', () => {
-      component['announcementTimeoutId'] = 456 as any;
-      jest.spyOn(window, 'clearTimeout');
-      
-      component['cleanup']();
-      
-      expect(window.clearTimeout).toHaveBeenCalledWith(456);
-    });
-
-    it('não deve fazer nada se announcementTimeoutId não existir', () => {
-      component['announcementTimeoutId'] = undefined;
-      
-      expect(() => component['cleanup']()).not.toThrow();
-    });
   });
 
   describe('ngOnDestroy', () => {
@@ -1147,7 +952,7 @@ describe('BradBottomSheetComponent', () => {
     it('deve renderizar título quando existir', () => {
       fixture.detectChanges();
       
-      const titleEl = fixture.debugElement.query(By.css('#modal-title'));
+      const titleEl = fixture.debugElement.query(By.css('#title-id'));
       expect(titleEl).toBeTruthy();
       expect(titleEl.nativeElement.textContent.trim()).toBe('Título do Modal');
     });
@@ -1155,7 +960,7 @@ describe('BradBottomSheetComponent', () => {
     it('deve renderizar subtítulo quando existir', () => {
       fixture.detectChanges();
       
-      const subtitleEl = fixture.debugElement.query(By.css('.brad-font-subtitle-sm'));
+      const subtitleEl = fixture.debugElement.query(By.css('.brad-font-subtitle-sa'));
       expect(subtitleEl).toBeTruthy();
       expect(subtitleEl.nativeElement.textContent.trim()).toBe('Subtítulo');
     });
@@ -1163,7 +968,7 @@ describe('BradBottomSheetComponent', () => {
     it('deve renderizar botão de fechar quando hasCloseIcon for true', () => {
       fixture.detectChanges();
       
-      const closeBtn = fixture.debugElement.query(By.css('.brad-bottom-sheet__btn-close'));
+      const closeBtn = fixture.debugElement.query(By.css('.brad-bottom-sheet_btn-close'));
       expect(closeBtn).toBeTruthy();
     });
 
@@ -1171,12 +976,11 @@ describe('BradBottomSheetComponent', () => {
       component.hasCloseIcon.set(false);
       fixture.detectChanges();
       
-      const closeBtn = fixture.debugElement.query(By.css('.brad-bottom-sheet__btn-close'));
+      const closeBtn = fixture.debugElement.query(By.css('.brad-bottom-sheet_btn-close'));
       // O botão ainda existe no DOM mas está hidden via [hidden]
       expect(closeBtn).toBeTruthy();
-      const styles = window.getComputedStyle(closeBtn.nativeElement);
-      // Verifica se está oculto (hidden ou display none)
-      expect(closeBtn.nativeElement.hasAttribute('hidden') || styles.display === 'none').toBeTruthy();
+      // Verifica se está oculto via atributo hidden
+      expect(closeBtn.nativeElement.hasAttribute('hidden')).toBe(true);
     });
 
     it('deve renderizar radio buttons', () => {
@@ -1192,8 +996,12 @@ describe('BradBottomSheetComponent', () => {
       const pdfRadio = fixture.debugElement.query(By.css('#chip-pdf'));
       expect(pdfRadio).toBeTruthy();
       
-      // Chama diretamente o método que é chamado pelo evento change
-      component.onFormatoChange('pdf');
+      // Simula clique no radio
+      const radio = pdfRadio.nativeElement as HTMLInputElement;
+      const event = new Event('click');
+      Object.defineProperty(event, 'target', { value: radio, writable: false });
+      
+      component.onRadioClick('pdf', event);
       fixture.detectChanges();
       
       expect(component.formatoSelecionado()).toBe('pdf');
@@ -1202,7 +1010,12 @@ describe('BradBottomSheetComponent', () => {
     it('deve atualizar formato quando radio XLS for selecionado', () => {
       fixture.detectChanges();
       
-      component.onFormatoChange('xls');
+      const xlsRadio = fixture.debugElement.query(By.css('#chip-xls'));
+      const radio = xlsRadio.nativeElement as HTMLInputElement;
+      const event = new Event('click');
+      Object.defineProperty(event, 'target', { value: radio, writable: false });
+      
+      component.onRadioClick('xls', event);
       fixture.detectChanges();
       
       expect(component.formatoSelecionado()).toBe('xls');

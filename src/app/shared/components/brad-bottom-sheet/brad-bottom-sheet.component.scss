@@ -10,6 +10,10 @@
   border-width: 0;
 }
 
+.brad-bottom-sheet, .brad-bottom-sheet__header {
+  margin-bottom: var(--brad-padding-2g);
+}
+
 .brad-bottom-sheet {
   position: fixed;
   bottom: 0;
@@ -144,6 +148,32 @@
 
 .destaque-link {
   font-weight: 600;
+}
+
+#link-visualizar {
+  text-decoration: none !important;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  &:hover,
+  &:focus {
+    text-decoration: none !important;
+    outline: none;
+    outline-offset: none;
+  }
+}
+
+.reset-Link {
+  color: rgb(var(--brad-color-neutral-50));
+}
+
+.destaque-Link {
+  color: rgb(var(--brad-color-cta));
 }
 
 // Otimizações iOS

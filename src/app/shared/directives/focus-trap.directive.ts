@@ -29,7 +29,7 @@ import {
  * ```
  */
 @Directive({
-  selector: '[appFocusTrap]',
+  selector: '[appFocusTrap], [appModalTrap]',
   standalone: true
 })
 export class FocusTrapDirective {
@@ -87,9 +87,9 @@ export class FocusTrapDirective {
       const active = this.trapActive();
       
       if (active) {
-        this.activate();
+        this.activateInternal();
       } else {
-        this.deactivate();
+        this.deactivateInternal();
       }
     });
 
@@ -100,13 +100,24 @@ export class FocusTrapDirective {
   }
 
   // ============================================================================
+  // MÉTODOS PÚBLICOS
+  // ============================================================================
+
+  /**
+   * Ativa o focus trap (método público para uso programático)
+   */
+  activate(): void {
+    this.activateInternal();
+  }
+
+  // ============================================================================
   // MÉTODOS PRIVADOS
   // ============================================================================
 
   /**
-   * Ativa o focus trap
+   * Ativa o focus trap (implementação interna)
    */
-  private activate(): void {
+  private activateInternal(): void {
     // Salvar elemento que tinha foco antes
     this.previouslyFocusedElement = document.activeElement as HTMLElement;
 
@@ -125,9 +136,16 @@ export class FocusTrapDirective {
   }
 
   /**
-   * Desativa o focus trap
+   * Desativa o focus trap (método público para uso programático)
    */
-  private deactivate(): void {
+  deactivate(): void {
+    this.deactivateInternal();
+  }
+
+  /**
+   * Desativa o focus trap (implementação interna)
+   */
+  private deactivateInternal(): void {
     // Remover listeners
     this.el.nativeElement?.removeEventListener('keydown', this.handleKeyDown);
     document.removeEventListener('focus', this.handleFocus, true);
@@ -225,7 +243,7 @@ export class FocusTrapDirective {
    * Cleanup completo
    */
   private cleanup(): void {
-    this.deactivate();
+    this.deactivateInternal();
     this.focusableElements = [];
     this.firstFocusableElement = null;
     this.lastFocusableElement = null;

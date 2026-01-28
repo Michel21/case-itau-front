@@ -43,6 +43,9 @@ export class BradBottomSheetComponent implements OnInit, OnDestroy {
   botaoBaixarDesabilitado = signal<boolean>(true);
   formatoSelecionado = signal<'pdf' | 'xls' | null>(null);
 
+  // Properties
+  public hasRoleIOS: boolean = false;
+
   // Outputs
   @Output() onHabilitarBtBaixar = new EventEmitter<void>();
   @Output() onBaixarExtrato = new EventEmitter<void>();
@@ -50,7 +53,7 @@ export class BradBottomSheetComponent implements OnInit, OnDestroy {
 
   // ViewChild
   @ViewChild(FocusTrapDirective, { static: false }) 
-  focusTrapDirective?: FocusTrapDirective;
+  modalTrapDirective?: FocusTrapDirective;
   
   @ViewChild('titleRef', { static: false }) 
   titleRef?: ElementRef<HTMLElement>;
@@ -61,8 +64,6 @@ export class BradBottomSheetComponent implements OnInit, OnDestroy {
   private injector = inject(Injector);
   private mutationObserver?: MutationObserver;
   private previousActiveElement: HTMLElement | null = null;
-  private focusTimeoutId?: number;
-  private announcementTimeoutId?: number;
   private focusTrapKeyDownHandler?: (event: KeyboardEvent) => void;
   private focusTrapFocusHandler?: (event: FocusEvent) => void;
 
@@ -97,141 +98,103 @@ export class BradBottomSheetComponent implements OnInit, OnDestroy {
     
     this.bsModal.open();
     this.isOpen.set(true);
-
-    // Aguarda renderização do DOM
+    this.hasRoleIOS = this.isIOSDevice();
+    
+    // Configura título para não ser focável e não ser verbalizado duas vezes
+    this.focusTitle();
+    
+    // Aguarda renderização e foca no primeiro elemento interativo (não no título)
     requestAnimationFrame(() => {
-      this.setupModalAccessibility();
+      if (this.hasRoleIOS) {
+        // Para iOS: foca diretamente no primeiro radio, não no título
+        setTimeout(() => {
+          this.focusFirstInteractiveElement();
+          this.modalTrapDirective?.activate();
+        }, 300);
+      } else {
+        // Para outros: ativa trap normalmente
+        setTimeout(() => this.modalTrapDirective?.activate(), 300);
+      }
     });
   }
 
-  private setupModalAccessibility(): void {
-    const isIOS = this.isIOSDevice();
-    
-    if (isIOS) {
-      this.setupIOSFocus();
-    } else {
-      this.setupStandardFocus();
-    }
-
-    // Ativa focus trap após estabelecer foco
-    this.focusTimeoutId = window.setTimeout(() => {
-      this.ativarFocusTrap();
-    }, isIOS ? 700 : 300);
-  }
-
-  /**
-   * Foco no iOS - Remove verbalização dupla do título
-   */
-  private setupIOSFocus(): void {
-    if (!this.titleRef?.nativeElement) return;
-
-    const titleEl = this.titleRef.nativeElement;
-    const modalEl = document.getElementById('bs-modal');
-
-    // PASSO 1: Garante que título NUNCA seja focável
-    this.renderer.setAttribute(titleEl, 'tabindex', '-1');
-    this.renderer.setAttribute(titleEl, 'aria-hidden', 'false');
-
-    // PASSO 2: Observa mudanças no tabindex (biblioteca LiquidCorp)
-    this.observeTitleTabIndex(titleEl);
-
-    // PASSO 3: Foca no container do modal (não no título)
-    if (modalEl) {
-      // Remove tabindex se existir
-      modalEl.removeAttribute('tabindex');
-      
-      // Força VoiceOver a ler o contexto do diálogo
-      this.announceModalOpened();
-      
-      // Delay para iOS processar o contexto
-      setTimeout(() => {
-        // Foca no primeiro elemento interativo (primeiro radio)
-        this.focusFirstInteractiveElement();
-      }, 100);
-    }
-  }
 
   /**
    * Foca no primeiro elemento interativo (não no título)
    */
   private focusFirstInteractiveElement(): void {
+    const titleEl = this.titleRef?.nativeElement;
+    
+    // Garante que título não seja focável antes de focar no radio
+    if (titleEl) {
+      this.renderer.setAttribute(titleEl, 'tabindex', '-1');
+      titleEl.blur();
+    }
+    
     const firstRadio = document.getElementById('chip-pdf') as HTMLInputElement;
     
     if (firstRadio) {
       firstRadio.focus();
       
-      // Anuncia contexto para VoiceOver
+      // Anuncia contexto para VoiceOver (sem mencionar título duas vezes)
       this.announceToScreenReader(
         'Modal de download aberto. Selecione o formato do arquivo.'
       );
     }
   }
 
-  /**
-   * Configuração padrão para outros navegadores
-   */
-  private setupStandardFocus(): void {
-    if (!this.titleRef?.nativeElement) return;
-
-    const titleEl = this.titleRef.nativeElement;
-    this.renderer.setAttribute(titleEl, 'tabindex', '-1');
-    
-    // Foca no título para leitores de tela desktop
-    setTimeout(() => {
-      titleEl.focus();
-    }, 100);
-  }
 
   /**
-   * Observa e corrige mudanças no tabindex do título
+   * Garantir que o titulo nunca seja focavel e não seja verbalizado duas vezes no iOS
    */
-  private observeTitleTabIndex(titleEl: HTMLElement): void {
-    const callback = (mutations: MutationRecord[]) => {
-      mutations.forEach((mutation) => {
-        if (
-          mutation.type === 'attributes' && 
-          mutation.attributeName === 'tabindex'
-        ) {
-          const currentTabIndex = titleEl.getAttribute('tabindex');
-          
-          // Força tabindex -1 se a biblioteca LiquidCorp tentar mudar
-          if (currentTabIndex !== '-1') {
-            this.renderer.setAttribute(titleEl, 'tabindex', '-1');
-          }
-        }
-      });
-    };
-
-    this.mutationObserver = new MutationObserver(callback);
-
-    this.mutationObserver.observe(titleEl, {
-      attributes: true,
-      attributeFilter: ['tabindex'],
-    });
-  }
-
-  /**
-   * Anuncia abertura do modal para VoiceOver
-   */
-  private announceModalOpened(): void {
-    const announcement = document.createElement('div');
-    announcement.setAttribute('role', 'status');
-    announcement.setAttribute('aria-live', 'polite');
-    announcement.className = 'sr-only';
-    announcement.textContent = `${this.title()} aberto`;
-
-    document.body.appendChild(announcement);
-
-    this.announcementTimeoutId = window.setTimeout(() => {
-      try {
-        if (announcement && document.body.contains(announcement)) {
-          document.body.removeChild(announcement);
-        }
-      } catch (error) {
-        // Ignora erros de remoção
+  focusTitle(): void {
+    if (this.titleRef?.nativeElement) {
+      const titleEl = this.titleRef.nativeElement;
+      const isIOS = this.isIOSDevice();
+      
+      // PASSO 1: Garante que título NUNCA seja focável
+      this.renderer.setAttribute(titleEl, 'tabindex', '-1');
+      
+      // PASSO 2: Para iOS, oculta o título da navegação direta mas mantém para aria-labelledby
+      // Isso evita verbalização dupla: o título é lido apenas uma vez via aria-labelledby
+      if (isIOS) {
+        // aria-hidden="false" permite que seja lido via aria-labelledby, mas não diretamente
+        this.renderer.setAttribute(titleEl, 'aria-hidden', 'false');
+        // Remove qualquer foco que possa ter sido dado ao título
+        titleEl.blur();
       }
-    }, 1000);
+      
+      // PASSO 3: Observar mudancas no tabindex feitas pela biblioteca LiquidCorp
+      if (this.mutationObserver) {
+        this.mutationObserver.disconnect();
+      }
+      
+      this.mutationObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'attributes') {
+            if (mutation.attributeName === 'tabindex') {
+              // Força tabindex -1 se mudado
+              if (titleEl.getAttribute('tabindex') !== '-1') {
+                this.renderer.setAttribute(titleEl, 'tabindex', '-1');
+                titleEl.blur(); // Remove foco se tiver sido dado
+              }
+            } else if (mutation.attributeName === 'aria-hidden' && isIOS) {
+              // Garante que aria-hidden permaneça false no iOS
+              if (titleEl.getAttribute('aria-hidden') === 'true') {
+                this.renderer.setAttribute(titleEl, 'aria-hidden', 'false');
+              }
+            }
+          }
+        });
+      });
+      
+      this.mutationObserver.observe(titleEl, { 
+        attributes: true, 
+        attributeFilter: ['tabindex', 'aria-hidden'] 
+      });
+    }
   }
+
 
   /**
    * Anuncia mensagens para leitores de tela
@@ -260,7 +223,10 @@ export class BradBottomSheetComponent implements OnInit, OnDestroy {
     this.bsModal.close();
     this.isOpen.set(false);
     
-    // Desativa focus trap
+    // Desativar trap de foco ao fechar
+    this.modalTrapDirective?.deactivate();
+    
+    // Desativa focus trap manual
     this.desativarFocusTrap();
     
     // Restaura foco ao elemento anterior
@@ -274,14 +240,80 @@ export class BradBottomSheetComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Handler de mudança de formato
+   * Handler para habilitar botão baixar (chamado pelos radio buttons)
    */
-  onFormatoChange(formato: 'pdf' | 'xls'): void {
+  onHabilitarBtnBaixar(): void {
+    this.onHabilitarBtBaixar.emit();
+  }
+
+  /**
+   * Handler para clique nos radio buttons
+   */
+  onRadioClick(formato: 'pdf' | 'xls', event: Event): void {
+    const radio = event.target as HTMLInputElement;
+    
+    // Marca o radio como selecionado
+    radio.checked = true;
     this.formatoSelecionado.set(formato);
     
-    // Anuncia mudança para leitores de tela
+    // Emite evento para habilitar botão
+    this.onHabilitarBtnBaixar();
+    
+    // Anuncia seleção para leitores de tela
     const formatoTexto = formato === 'pdf' ? 'PDF' : 'Excel';
     this.announceToScreenReader(`Formato ${formatoTexto} selecionado`);
+    
+    // Previne que o foco vá para o título após clicar
+    this.prevenirFocoNoTitulo(event as FocusEvent);
+  }
+
+  /**
+   * Previne que o foco vá para o título após interações
+   */
+  prevenirFocoNoTitulo(event: FocusEvent | Event): void {
+    const titleEl = this.titleRef?.nativeElement;
+    if (!titleEl) return;
+    
+    // Garante que título não seja focável
+    this.renderer.setAttribute(titleEl, 'tabindex', '-1');
+    
+    // Se o evento é um FocusEvent, verifica se o foco está indo para o título
+    if (event instanceof FocusEvent) {
+      const target = event.target as HTMLElement;
+      if (target === titleEl) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }
+    
+    // Verifica e corrige foco após um pequeno delay
+    setTimeout(() => {
+      const elementoAtivo = document.activeElement as HTMLElement;
+      
+      if (elementoAtivo === titleEl) {
+        // Encontra o elemento que deveria ter foco
+        const radioAtivo = document.querySelector('#chip-pdf:checked, #chip-xls:checked') as HTMLInputElement;
+        const elementoOrigem = event.target as HTMLElement;
+        
+        if (radioAtivo && radioAtivo !== titleEl) {
+          radioAtivo.focus();
+        } else if (elementoOrigem && elementoOrigem !== titleEl && 
+                   (elementoOrigem.tagName === 'INPUT' || elementoOrigem.tagName === 'BUTTON' || elementoOrigem.tagName === 'A')) {
+          elementoOrigem.focus();
+        } else {
+          // Foca no primeiro radio se não houver outro elemento válido
+          const primeiroRadio = document.getElementById('chip-pdf') as HTMLInputElement;
+          if (primeiroRadio && primeiroRadio !== titleEl) {
+            primeiroRadio.focus();
+          }
+        }
+      }
+      
+      // Remove foco do título se ainda estiver lá
+      if (document.activeElement === titleEl) {
+        titleEl.blur();
+      }
+    }, 10);
   }
 
   /**
@@ -299,6 +331,35 @@ export class BradBottomSheetComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Previne anúncio de "fim de diálogo" quando o botão/link recebe foco
+   */
+  prevenirAnuncioFimDialogo(event: FocusEvent): void {
+    const elemento = event.target as HTMLElement;
+    const modalEl = document.getElementById('bs-modal');
+    
+    if (!modalEl || !elemento) return;
+    
+    // Garante que o elemento não anuncie "fim de diálogo"
+    // Remove qualquer aria-describedby que possa estar causando isso
+    elemento.removeAttribute('aria-describedby');
+    
+    // Remove role="link" se existir (pode causar anúncio de "link")
+    if (elemento.getAttribute('role') === 'link') {
+      elemento.removeAttribute('role');
+    }
+    
+    // Para iOS, adiciona um pequeno delay e anuncia contexto adequado
+    // Isso sobrescreve qualquer anúncio automático de "fim de diálogo"
+    if (this.isIOSDevice()) {
+      setTimeout(() => {
+        // Anuncia apenas o conteúdo do botão, sem mencionar "fim de diálogo" ou "link"
+        const ariaLabel = elemento.getAttribute('aria-label') || 'Botão para visualizar extrato na tela';
+        this.announceToScreenReader(ariaLabel);
+      }, 150);
+    }
+  }
+
+  /**
    * Detecta se é dispositivo iOS
    */
   private isIOSDevice(): boolean {
@@ -310,6 +371,13 @@ export class BradBottomSheetComponent implements OnInit, OnDestroy {
    */
   hasTitle(): boolean {
     return !!this.title();
+  }
+
+  /**
+   * Retorna o ID do título para aria-labelledby
+   */
+  titleId(): string {
+    return 'title-id';
   }
 
   /**
@@ -419,14 +487,6 @@ export class BradBottomSheetComponent implements OnInit, OnDestroy {
     if (this.mutationObserver) {
       this.mutationObserver.disconnect();
       this.mutationObserver = undefined;
-    }
-
-    if (this.focusTimeoutId) {
-      window.clearTimeout(this.focusTimeoutId);
-    }
-
-    if (this.announcementTimeoutId) {
-      window.clearTimeout(this.announcementTimeoutId);
     }
   }
 }
