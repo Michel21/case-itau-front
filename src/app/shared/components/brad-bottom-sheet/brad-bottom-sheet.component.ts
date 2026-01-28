@@ -63,6 +63,8 @@ export class BradBottomSheetComponent implements OnInit, OnDestroy {
   private previousActiveElement: HTMLElement | null = null;
   private focusTimeoutId?: number;
   private announcementTimeoutId?: number;
+  private focusTrapKeyDownHandler?: (event: KeyboardEvent) => void;
+  private focusTrapFocusHandler?: (event: FocusEvent) => void;
 
   constructor() {
     // Effect para habilitar botão quando formato for selecionado
@@ -113,7 +115,7 @@ export class BradBottomSheetComponent implements OnInit, OnDestroy {
 
     // Ativa focus trap após estabelecer foco
     this.focusTimeoutId = window.setTimeout(() => {
-      // FocusTrapDirective já é ativado via input binding
+      this.ativarFocusTrap();
     }, isIOS ? 700 : 300);
   }
 
@@ -258,6 +260,9 @@ export class BradBottomSheetComponent implements OnInit, OnDestroy {
     this.bsModal.close();
     this.isOpen.set(false);
     
+    // Desativa focus trap
+    this.desativarFocusTrap();
+    
     // Restaura foco ao elemento anterior
     if (this.previousActiveElement) {
       setTimeout(() => {
@@ -308,9 +313,109 @@ export class BradBottomSheetComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Ativa focus trap no modal
+   */
+  private ativarFocusTrap(): void {
+    const modalEl = document.getElementById('bs-modal');
+    if (!modalEl) return;
+
+    // Handler para Tab e Shift+Tab
+    this.focusTrapKeyDownHandler = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') return;
+
+      const elementosFocaveis = this.obterElementosFocaveis(modalEl);
+      if (elementosFocaveis.length === 0) {
+        event.preventDefault();
+        return;
+      }
+
+      const primeiroElemento = elementosFocaveis[0];
+      const ultimoElemento = elementosFocaveis[elementosFocaveis.length - 1];
+      const elementoAtivo = document.activeElement as HTMLElement;
+
+      if (event.shiftKey) {
+        // Shift + Tab (navegação reversa)
+        if (elementoAtivo === primeiroElemento || !modalEl.contains(elementoAtivo)) {
+          event.preventDefault();
+          ultimoElemento.focus();
+        }
+      } else {
+        // Tab (navegação normal)
+        if (elementoAtivo === ultimoElemento || !modalEl.contains(elementoAtivo)) {
+          event.preventDefault();
+          primeiroElemento.focus();
+        }
+      }
+    };
+
+    // Handler para prevenir foco fora do modal
+    this.focusTrapFocusHandler = (event: FocusEvent) => {
+      const target = event.target as HTMLElement;
+      if (!modalEl.contains(target)) {
+        event.stopPropagation();
+        const elementosFocaveis = this.obterElementosFocaveis(modalEl);
+        if (elementosFocaveis.length > 0) {
+          elementosFocaveis[0].focus();
+        }
+      }
+    };
+
+    // Adiciona listeners
+    modalEl.addEventListener('keydown', this.focusTrapKeyDownHandler);
+    document.addEventListener('focus', this.focusTrapFocusHandler, true);
+  }
+
+  /**
+   * Desativa focus trap
+   */
+  private desativarFocusTrap(): void {
+    const modalEl = document.getElementById('bs-modal');
+    
+    if (this.focusTrapKeyDownHandler && modalEl) {
+      modalEl.removeEventListener('keydown', this.focusTrapKeyDownHandler);
+    }
+
+    if (this.focusTrapFocusHandler) {
+      document.removeEventListener('focus', this.focusTrapFocusHandler, true);
+    }
+
+    this.focusTrapKeyDownHandler = undefined;
+    this.focusTrapFocusHandler = undefined;
+  }
+
+  /**
+   * Obtém lista de elementos focáveis dentro do modal
+   */
+  private obterElementosFocaveis(container: HTMLElement): HTMLElement[] {
+    const seletores = [
+      'a[href]',
+      'button:not([disabled])',
+      'textarea:not([disabled])',
+      'input:not([disabled])',
+      'select:not([disabled])',
+      '[tabindex]:not([tabindex="-1"])',
+      '[contenteditable="true"]'
+    ].join(', ');
+
+    const elementos = Array.from(container.querySelectorAll(seletores)) as HTMLElement[];
+
+    // Filtra apenas elementos visíveis
+    return elementos.filter(el => {
+      const estilo = window.getComputedStyle(el);
+      return (
+        el.offsetParent !== null &&
+        estilo.visibility !== 'hidden' &&
+        estilo.display !== 'none'
+      );
+    });
+  }
+
+  /**
    * Limpeza de recursos
    */
   private cleanup(): void {
+    this.desativarFocusTrap();
+
     if (this.mutationObserver) {
       this.mutationObserver.disconnect();
       this.mutationObserver = undefined;
