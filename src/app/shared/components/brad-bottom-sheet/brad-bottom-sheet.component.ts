@@ -8,6 +8,7 @@ import {
   ElementRef,
   Renderer2,
   inject,
+  input,
   signal,
   effect,
   runInInjectionContext,
@@ -15,7 +16,6 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { FocusTrapDirective } from '../../directives/focus-trap.directive';
 
 declare const LiquidCorp: any;
 
@@ -30,16 +30,18 @@ interface BsModalInstance {
 @Component({
   selector: 'app-brad-bottom-sheet',
   standalone: true,
-  imports: [CommonModule, FormsModule, FocusTrapDirective],
+  imports: [CommonModule, FormsModule],
   templateUrl: './brad-bottom-sheet.component.html',
   styleUrls: ['./brad-bottom-sheet.component.scss']
 })
 export class BradBottomSheetComponent implements OnInit, OnDestroy {
-  // Signals
-  title = signal<string>('');
-  subtitle = signal<string>('');
+  // Inputs (recebidos do pai)
+  title = input<string>('Baixar Extrato');
+  subtitle = input<string>('');
+  hasCloseIcon = input<boolean>(true);
+
+  // Signals (estado interno)
   isOpen = signal<boolean>(false);
-  hasCloseIcon = signal<boolean>(true);
   botaoBaixarDesabilitado = signal<boolean>(true);
   formatoSelecionado = signal<'pdf' | 'xls' | null>(null);
 
@@ -52,9 +54,6 @@ export class BradBottomSheetComponent implements OnInit, OnDestroy {
   @Output() onRedirecionarParaVisualizarHtml = new EventEmitter<void>();
 
   // ViewChild
-  @ViewChild(FocusTrapDirective, { static: false }) 
-  modalTrapDirective?: FocusTrapDirective;
-  
   @ViewChild('titleRef', { static: false }) 
   titleRef?: ElementRef<HTMLElement>;
 
@@ -109,11 +108,11 @@ export class BradBottomSheetComponent implements OnInit, OnDestroy {
         // Para iOS: foca diretamente no primeiro radio, não no título
         setTimeout(() => {
           this.focusFirstInteractiveElement();
-          this.modalTrapDirective?.activate();
+          this.ativarFocusTrap();
         }, 300);
       } else {
         // Para outros: ativa trap normalmente
-        setTimeout(() => this.modalTrapDirective?.activate(), 300);
+        setTimeout(() => this.ativarFocusTrap(), 300);
       }
     });
   }
@@ -223,10 +222,7 @@ export class BradBottomSheetComponent implements OnInit, OnDestroy {
     this.bsModal.close();
     this.isOpen.set(false);
     
-    // Desativar trap de foco ao fechar
-    this.modalTrapDirective?.deactivate();
-    
-    // Desativa focus trap manual
+    // Desativa focus trap ao fechar
     this.desativarFocusTrap();
     
     // Restaura foco ao elemento anterior
@@ -381,7 +377,7 @@ export class BradBottomSheetComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Ativa focus trap no modal
+   * Ativa focus trap no modal (método do componente, sem diretiva)
    */
   private ativarFocusTrap(): void {
     const modalEl = document.getElementById('bs-modal');

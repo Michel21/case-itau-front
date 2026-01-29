@@ -22,6 +22,8 @@
   background: #fff;
   border-radius: 16px 16px 0 0;
   z-index: 1000;
+  max-height: 90vh;
+  overflow-y: auto;
   
   &__header {
     padding: 16px 20px;
@@ -55,16 +57,10 @@
   }
 }
 
-// Radio buttons acessíveis
-.radio-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  padding: 12px;
-  min-width: 44px;
-  min-height: 44px;
+// Chips Bradesco para radio buttons
+.brad-chip {
   position: relative;
+  cursor: pointer;
 
   input[type="radio"] {
     position: absolute;
@@ -78,40 +74,24 @@
     }
 
     &:checked + .checkmark {
-      background-color: #007AFF;
-      border-color: #007AFF;
-
-      &::after {
-        display: block;
-      }
+      background-color: #333;
+      color: #fff;
+      border-color: #333;
     }
   }
 
   .checkmark {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #ccc;
-    border-radius: 50%;
-    position: relative;
+    display: inline-block;
+    padding: 12px 24px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #fff;
     transition: all 0.2s;
-
-    &::after {
-      content: '';
-      position: absolute;
-      display: none;
-      left: 5px;
-      top: 2px;
-      width: 6px;
-      height: 10px;
-      border: solid white;
-      border-width: 0 2px 2px 0;
-      transform: rotate(45deg);
-    }
-  }
-
-  .label-text {
-    font-size: 16px;
     user-select: none;
+    min-width: 44px;
+    min-height: 44px;
+    text-align: center;
+    line-height: 1.2;
   }
 }
 

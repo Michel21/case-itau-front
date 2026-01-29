@@ -3,10 +3,9 @@
   class="brad-bottom-sheet" 
   [attr.role]="'dialog'"
   [attr.aria-modal]="true"
-  [attr.aria-labelledby]="titleId()"
-  appModalTrap>
+  [attr.aria-labelledby]="titleId()">
   
-  <!-- Header -->
+  <!-- Header com título e botão fechar -->
   <div class="brad-bottom-sheet__header">
     @if(title()) {
       <h2 
@@ -19,7 +18,7 @@
     }
     
     <button 
-      class="brad-bottom-sheet_btn-close i icon-component-close-delete"
+      class="brad-bottom-sheet__btn-close i icon-component-close-delete"
       [hidden]="!hasCloseIcon()"
       [attr.aria-label]="'Fechar modal'"
       [attr.role]="'button'"
@@ -30,7 +29,7 @@
 
   <!-- Subtitle -->
   @if(subtitle()) {
-    <div class="brad-a-sa-t brad-a-ad-b">
+    <div class="brad-a-sa-t brad-a-ad-b brad-p-xxl-x">
       <div class="brad-flex brad-flex-column brad-flex-align-items-start">
         <p class="brad-font-subtitle-sa brad-text-color-neutral-40">
           {{subtitle()}}
@@ -39,83 +38,83 @@
     </div>
   }
 
-  <!-- Estrutura acessível para radio buttons -->
-  <section 
-    class="brad-m-lg-b brad-p-xxl-x">
+  <!-- Seção: Formato de arquivo -->
+  <section class="brad-m-lg-b brad-p-xxl-x">
     
-    <div class="brad-flex brad-flex-row brad-flex-gap-md">
-      
-      <!-- Radio PDF -->
+    <div class="brad-flex brad-flex-row brad-flex-gap-md brad-m-md-b">
+      <!-- Botão PDF -->
       <div class="brad-chip brad-chip--md brad-flex brad-a-xs-r">
         <input 
           id="chip-pdf" 
           type="radio"
           name="formato-download"
           value="pdf"
+          [checked]="formatoSelecionado() === 'pdf'"
           aria-label="PDF"
           role="radio"
           (click)="onRadioClick('pdf', $event)"
           (focus)="prevenirFocoNoTitulo($event)">
         <label 
           for="chip-pdf"
-          class="checkmark"
+          class="checkmark brad-font-paragraph-sa"
           aria-hidden="true">
           PDF
         </label>
       </div>
 
-      <!-- Radio Excel -->
+      <!-- Botão Excel -->
       <div class="brad-chip brad-chip--md brad-flex">
         <input 
           id="chip-xls" 
           type="radio"
           name="formato-download"
           value="xls"
+          [checked]="formatoSelecionado() === 'xls'"
           aria-label="XLS (Excel)"
           role="radio"
           (click)="onRadioClick('xls', $event)"
           (focus)="prevenirFocoNoTitulo($event)">
         <label 
           for="chip-xls"
-          class="checkmark"
+          class="checkmark brad-font-paragraph-sa"
           aria-hidden="true">
           XLS (Excel)
         </label>
       </div>
-      
     </div>
-  </section>
 
-  <!-- Botão Baixar -->
-  <div class="brad-btn-modal-baixar brad-p-xxl-x">
-    <button 
-      id="btn-baixar"
-      type="submit"
-      class="brad-btn brad-btn-primary"
-      (click)="onBaixarExtrato.emit()"
-      [disabled]="botaoBaixarDesabilitado()">
-      Baixar
-    </button>
-  </div>
-
-  <!-- Link corrigido para não verbalizar "fim de diálogo" -->
-  <div class="brad-m-nd-t brad-m-sa-b">
-    <div class="brad-bottom-sheet_content brad-scrollbar">
-      <button
-        id="link-visualizar"
+    <!-- Botão Baixar -->
+    <div class="brad-btn-modal-baixar brad-m-md-b">
+      <button 
+        id="btn-baixar"
         type="button"
-        class="brad-text-link brad-font-link-sa"
-        [attr.aria-label]="'Se preferir ver na tela, acesse por aqui para visualizar o extrato'"
-        (click)="onRedirecionarParaVisualizarHtml.emit()"
-        (focus)="prevenirAnuncioFimDialogo($event)">
-        <span class="reset-link brad-font-paragraph-sa" aria-hidden="true">
-          Se preferir ver na tela, 
-        </span>
-        <span class="brad-font-paragraph-se destaque-link" aria-hidden="true">
-          acesse por aqui.
-        </span>
+        class="brad-btn brad-btn-primary brad-font-paragraph-sa"
+        [attr.aria-label]="getAriaLabelBaixar()"
+        (click)="onBaixarExtrato.emit()"
+        [disabled]="botaoBaixarDesabilitado()">
+        Baixar
       </button>
     </div>
-  </div>
+
+    <!-- Link para visualizar -->
+    <div class="brad-m-nd-t brad-m-sa-b">
+      <div class="brad-bottom-sheet_content brad-scrollbar">
+        <button
+          id="link-visualizar"
+          type="button"
+          class="brad-text-link brad-font-link-sa"
+          [attr.aria-label]="'Se preferir ver na tela, acesse por aqui para visualizar o extrato'"
+          (click)="onRedirecionarParaVisualizarHtml.emit()"
+          (focus)="prevenirAnuncioFimDialogo($event)">
+          <span class="reset-link brad-font-paragraph-sa" aria-hidden="true">
+            Se preferir ver na tela, 
+          </span>
+          <span class="brad-font-paragraph-se destaque-link" aria-hidden="true">
+            acesse por aqui.
+          </span>
+        </button>
+      </div>
+    </div>
+  </section>
 
 </div>
