@@ -32,21 +32,36 @@ describe('BearerJWTAccountMiddleware', () => {
   });
 
   describe('extrairToken', () => {
-    it('deve prosseguir sem header authorization', () => {
+    it('deve retornar erro 401 sem header authorization', () => {
       middleware.use(requisicaoMock, respostaMock as Response, proximoMock);
-      expect(proximoMock).toHaveBeenCalled();
+      expect(respostaMock.status).toHaveBeenCalledWith(401);
+      expect(respostaMock.json).toHaveBeenCalledWith({
+        error: 'Token Bearer não fornecido',
+        message: 'O header Authorization com Bearer token é obrigatório',
+      });
+      expect(proximoMock).not.toHaveBeenCalled();
     });
 
-    it('deve prosseguir com header authorization vazio', () => {
+    it('deve retornar erro 401 com header authorization vazio', () => {
       requisicaoMock.headers = { authorization: '' };
       middleware.use(requisicaoMock, respostaMock as Response, proximoMock);
-      expect(proximoMock).toHaveBeenCalled();
+      expect(respostaMock.status).toHaveBeenCalledWith(401);
+      expect(respostaMock.json).toHaveBeenCalledWith({
+        error: 'Token Bearer não fornecido',
+        message: 'O header Authorization com Bearer token é obrigatório',
+      });
+      expect(proximoMock).not.toHaveBeenCalled();
     });
 
-    it('deve prosseguir com header authorization sem Bearer', () => {
+    it('deve retornar erro 401 com header authorization sem Bearer', () => {
       requisicaoMock.headers = { authorization: 'Token abc123' };
       middleware.use(requisicaoMock, respostaMock as Response, proximoMock);
-      expect(proximoMock).toHaveBeenCalled();
+      expect(respostaMock.status).toHaveBeenCalledWith(401);
+      expect(respostaMock.json).toHaveBeenCalledWith({
+        error: 'Token Bearer não fornecido',
+        message: 'O header Authorization com Bearer token é obrigatório',
+      });
+      expect(proximoMock).not.toHaveBeenCalled();
     });
 
     it('deve extrair token com Bearer em minúscula', () => {
@@ -75,23 +90,38 @@ describe('BearerJWTAccountMiddleware', () => {
   });
 
   describe('parsearPayloadJwt', () => {
-    it('deve prosseguir com token malformado (menos de 3 partes)', () => {
+    it('deve retornar erro 401 com token malformado (menos de 3 partes)', () => {
       requisicaoMock.headers = { authorization: 'Bearer header.payload' };
       middleware.use(requisicaoMock, respostaMock as Response, proximoMock);
-      expect(proximoMock).toHaveBeenCalled();
+      expect(respostaMock.status).toHaveBeenCalledWith(401);
+      expect(respostaMock.json).toHaveBeenCalledWith({
+        error: 'Token JWT inválido',
+        message: 'O token JWT fornecido é inválido ou está malformado',
+      });
+      expect(proximoMock).not.toHaveBeenCalled();
     });
 
-    it('deve prosseguir com token malformado (mais de 3 partes)', () => {
+    it('deve retornar erro 401 com token malformado (mais de 3 partes)', () => {
       requisicaoMock.headers = { authorization: 'Bearer header.payload.signature.extra' };
       middleware.use(requisicaoMock, respostaMock as Response, proximoMock);
-      expect(proximoMock).toHaveBeenCalled();
+      expect(respostaMock.status).toHaveBeenCalledWith(401);
+      expect(respostaMock.json).toHaveBeenCalledWith({
+        error: 'Token JWT inválido',
+        message: 'O token JWT fornecido é inválido ou está malformado',
+      });
+      expect(proximoMock).not.toHaveBeenCalled();
     });
 
-    it('deve prosseguir com payload JSON inválido', () => {
+    it('deve retornar erro 401 com payload JSON inválido', () => {
       const payloadInvalido = Buffer.from('não é json válido').toString('base64');
       requisicaoMock.headers = { authorization: `Bearer header.${payloadInvalido}.signature` };
       middleware.use(requisicaoMock, respostaMock as Response, proximoMock);
-      expect(proximoMock).toHaveBeenCalled();
+      expect(respostaMock.status).toHaveBeenCalledWith(401);
+      expect(respostaMock.json).toHaveBeenCalledWith({
+        error: 'Token JWT inválido',
+        message: 'O token JWT fornecido é inválido ou está malformado',
+      });
+      expect(proximoMock).not.toHaveBeenCalled();
     });
 
     it('deve processar token válido', () => {
@@ -657,8 +687,8 @@ describe('BearerJWTAccountMiddleware', () => {
       expect(respostaMock.status).toHaveBeenCalledWith(400);
       expect(respostaMock.json).toHaveBeenCalledWith({
         error: 'Formato inválido do header x-pdpj-conta',
-        message: 'O header x-pdpj-conta deve estar no formato: agencia-conta ou agencia-conta-digito',
-        exemplo: '1234-56789 ou 1234-56789-1',
+        message: 'O header x-pdpj-conta deve estar em base64 ou no formato: agencia-conta ou agencia-conta-digito',
+        exemplo: 'MTIzNC01Njc4OQ== (base64) ou 1234-56789',
       });
       expect(proximoMock).not.toHaveBeenCalled();
     });
