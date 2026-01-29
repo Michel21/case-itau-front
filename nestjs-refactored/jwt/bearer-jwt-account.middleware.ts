@@ -27,7 +27,54 @@ export class BearerJWTAccountMiddleware implements NestMiddleware {
     requisicao.contaDecodificada = conta;
     requisicao.agenciaDecodificada = agencia;
 
-    this.injetarHeader(requisicao, agencia, conta);
+    // Validação obrigatória: x-pdpj-conta deve estar presente ou ser injetado
+    const contaHeader = (requisicao.headers as any)['x-pdpj-conta'];
+    
+    // Se não existe no header, tenta injetar
+    if (!contaHeader) {
+      this.injetarHeader(requisicao, agencia, conta);
+    }
+
+    // Validação obrigatória: x-pdpj-conta é obrigatório
+    let contaHeaderFinal = (requisicao.headers as any)['x-pdpj-conta'];
+    if (!contaHeaderFinal) {
+      this.logger.error('Header x-pdpj-conta é obrigatório mas não foi fornecido');
+      resposta.status(400).json({
+        error: 'Header x-pdpj-conta é obrigatório',
+        message: 'O header x-pdpj-conta deve ser fornecido na requisição ou estar presente no JWT',
+      });
+      return;
+    }
+
+    // Decodifica base64 se necessário (o frontend envia em base64)
+    contaHeaderFinal = this.decodificarHeaderConta(contaHeaderFinal);
+    
+    // Se após decodificação ainda não tiver valor válido, retorna erro
+    if (!contaHeaderFinal) {
+      this.logger.error('Header x-pdpj-conta não pôde ser decodificado');
+      resposta.status(400).json({
+        error: 'Formato inválido do header x-pdpj-conta',
+        message: 'O header x-pdpj-conta deve estar em base64 ou no formato: agencia-conta ou agencia-conta-digito',
+        exemplo: 'MTIzNC01Njc4OQ== (base64) ou 1234-56789',
+      });
+      return;
+    }
+
+    // Valida formato do header x-pdpj-conta (deve ser no formato agencia-conta ou agencia-conta-digito)
+    // Remove espaços do header antes de validar e normalizar para uso posterior
+    const contaHeaderNormalizado = contaHeaderFinal.trim().replace(/\s+/g, '');
+    if (!this.validarFormatoHeaderConta(contaHeaderNormalizado)) {
+      this.logger.error(`Formato inválido do header x-pdpj-conta: ${contaHeaderFinal}`);
+      resposta.status(400).json({
+        error: 'Formato inválido do header x-pdpj-conta',
+        message: 'O header x-pdpj-conta deve estar no formato: agencia-conta ou agencia-conta-digito',
+        exemplo: '1234-56789 ou 1234-56789-1',
+      });
+      return;
+    }
+
+    // Atualiza o header com o valor decodificado e normalizado
+    (requisicao.headers as any)['x-pdpj-conta'] = contaHeaderNormalizado;
 
     if (!this.validarPropriedade(payload, requisicao)) {
       resposta.status(403).json({
@@ -133,5 +180,69 @@ export class BearerJWTAccountMiddleware implements NestMiddleware {
     };
 
     return normalizar(headerA) === normalizar(headerB);
+  }
+
+  /**
+   * Decodifica o header x-pdpj-conta se estiver em base64
+   * O frontend envia o valor em base64, então tenta decodificar primeiro
+   * Se não for base64 válido, assume que já está no formato texto
+   */
+  private decodificarHeaderConta(headerConta: string): string {
+    if (!headerConta || typeof headerConta !== 'string') {
+      return headerConta;
+    }
+
+    const headerLimpo = headerConta.trim().replace(/\s+/g, '');
+
+    // Se já está no formato esperado (agencia-conta), retorna como está
+    const formatoRegex = /^\d+-\d+(-\d+)?$/;
+    if (formatoRegex.test(headerLimpo)) {
+      return headerLimpo;
+    }
+
+    // Tenta decodificar base64 (o frontend envia em base64)
+    try {
+      let valorBase64 = headerLimpo.replace(/-/g, '+').replace(/_/g, '/');
+      const padding = valorBase64.length % 4;
+      if (padding) {
+        valorBase64 += '='.repeat(4 - padding);
+      }
+      
+      const decodificado = Buffer.from(valorBase64, 'base64').toString('utf8').trim();
+      
+      // Verifica se o valor decodificado tem o formato esperado
+      if (formatoRegex.test(decodificado)) {
+        return decodificado;
+      }
+      
+      // Se decodificou mas não tem formato válido, retorna o decodificado mesmo assim
+      // A validação de formato será feita depois
+      return decodificado;
+    } catch (error) {
+      // Se não conseguiu decodificar base64, retorna o valor original sem espaços
+      // (pode ser que já esteja no formato correto ou seja inválido)
+      return headerLimpo;
+    }
+  }
+
+  /**
+   * Valida o formato do header x-pdpj-conta
+   * Formato esperado: agencia-conta ou agencia-conta-digito
+   * Exemplos válidos: "1234-56789" ou "1234-56789-1"
+   * Remove espaços antes de validar
+   */
+  private validarFormatoHeaderConta(headerConta: string): boolean {
+    if (!headerConta || typeof headerConta !== 'string') {
+      return false;
+    }
+
+    // Remove espaços e valida formato
+    const headerLimpo = headerConta.trim().replace(/\s+/g, '');
+    
+    // Formato: agencia-conta ou agencia-conta-digito
+    // Exemplos válidos: "1234-56789" ou "1234-56789-1"
+    const formatoRegex = /^\d+-\d+(-\d+)?$/;
+    
+    return formatoRegex.test(headerLimpo);
   }
 }

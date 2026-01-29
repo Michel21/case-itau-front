@@ -17,7 +17,11 @@ describe('BearerJWTAccountMiddleware', () => {
     middleware = modulo.get<BearerJWTAccountMiddleware>(BearerJWTAccountMiddleware);
 
     requisicaoMock = { headers: {}, body: {} };
-    respostaMock = { status: jest.fn().mockReturnThis(), json: jest.fn().mockReturnThis() };
+    respostaMock = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn().mockReturnThis(),
+      setHeader: jest.fn().mockReturnThis(),
+    };
     proximoMock = jest.fn();
   });
 
@@ -114,6 +118,8 @@ describe('BearerJWTAccountMiddleware', () => {
 
       expect(requisicaoMock.agenciaDecodificada).toBe('1234');
       expect(requisicaoMock.contaDecodificada).toBe('5678');
+      expect((requisicaoMock.headers as any)['x-pdpj-conta']).toBe('1234-5678');
+      expect(proximoMock).toHaveBeenCalled();
     });
 
     it('deve extrair conta e agência do body quando não estão no payload', () => {
@@ -128,6 +134,8 @@ describe('BearerJWTAccountMiddleware', () => {
 
       expect(requisicaoMock.agenciaDecodificada).toBe('1234');
       expect(requisicaoMock.contaDecodificada).toBe('5678');
+      expect((requisicaoMock.headers as any)['x-pdpj-conta']).toBe('1234-5678');
+      expect(proximoMock).toHaveBeenCalled();
     });
 
     it('deve extrair conta e agência do body usando account e branch', () => {
@@ -160,7 +168,7 @@ describe('BearerJWTAccountMiddleware', () => {
   });
 
   describe('decodificarValor', () => {
-    it('deve retornar undefined para valor null', () => {
+    it('deve retornar undefined para valor null e erro 400 se não houver header x-pdpj-conta', () => {
       const payload = { agencia: null, conta: '5678' };
       const payloadCodificado = Buffer.from(JSON.stringify(payload)).toString('base64');
       const token = `Bearer header.${payloadCodificado}.signature`;
@@ -169,9 +177,13 @@ describe('BearerJWTAccountMiddleware', () => {
       middleware.use(requisicaoMock, respostaMock as Response, proximoMock);
 
       expect(requisicaoMock.agenciaDecodificada).toBeUndefined();
+      // Como conta existe mas agência não, o header não pode ser injetado
+      // Então deve retornar erro 400
+      expect(respostaMock.status).toHaveBeenCalledWith(400);
+      expect(proximoMock).not.toHaveBeenCalled();
     });
 
-    it('deve retornar undefined para valor undefined', () => {
+    it('deve retornar undefined para valor undefined e erro 400 se não houver header x-pdpj-conta', () => {
       const payload = { conta: '5678' };
       const payloadCodificado = Buffer.from(JSON.stringify(payload)).toString('base64');
       const token = `Bearer header.${payloadCodificado}.signature`;
@@ -180,6 +192,10 @@ describe('BearerJWTAccountMiddleware', () => {
       middleware.use(requisicaoMock, respostaMock as Response, proximoMock);
 
       expect(requisicaoMock.agenciaDecodificada).toBeUndefined();
+      // Como agência não existe, o header não pode ser injetado
+      // Então deve retornar erro 400
+      expect(respostaMock.status).toHaveBeenCalledWith(400);
+      expect(proximoMock).not.toHaveBeenCalled();
     });
 
     it('deve converter número para string', () => {
@@ -302,7 +318,7 @@ describe('BearerJWTAccountMiddleware', () => {
       expect((requisicaoMock.headers as any)['x-pdpj-conta']).toBe('1234-5678');
     });
 
-    it('não deve injetar header quando agência está ausente', () => {
+    it('deve retornar erro 400 quando agência está ausente e não há header x-pdpj-conta', () => {
       const payload = { conta: '5678' };
       const payloadCodificado = Buffer.from(JSON.stringify(payload)).toString('base64');
       const token = `Bearer header.${payloadCodificado}.signature`;
@@ -311,9 +327,15 @@ describe('BearerJWTAccountMiddleware', () => {
       middleware.use(requisicaoMock, respostaMock as Response, proximoMock);
 
       expect((requisicaoMock.headers as any)['x-pdpj-conta']).toBeUndefined();
+      expect(respostaMock.status).toHaveBeenCalledWith(400);
+      expect(respostaMock.json).toHaveBeenCalledWith({
+        error: 'Header x-pdpj-conta é obrigatório',
+        message: 'O header x-pdpj-conta deve ser fornecido na requisição ou estar presente no JWT',
+      });
+      expect(proximoMock).not.toHaveBeenCalled();
     });
 
-    it('não deve injetar header quando conta está ausente', () => {
+    it('deve retornar erro 400 quando conta está ausente e não há header x-pdpj-conta', () => {
       const payload = { agencia: '1234' };
       const payloadCodificado = Buffer.from(JSON.stringify(payload)).toString('base64');
       const token = `Bearer header.${payloadCodificado}.signature`;
@@ -322,6 +344,12 @@ describe('BearerJWTAccountMiddleware', () => {
       middleware.use(requisicaoMock, respostaMock as Response, proximoMock);
 
       expect((requisicaoMock.headers as any)['x-pdpj-conta']).toBeUndefined();
+      expect(respostaMock.status).toHaveBeenCalledWith(400);
+      expect(respostaMock.json).toHaveBeenCalledWith({
+        error: 'Header x-pdpj-conta é obrigatório',
+        message: 'O header x-pdpj-conta deve ser fornecido na requisição ou estar presente no JWT',
+      });
+      expect(proximoMock).not.toHaveBeenCalled();
     });
 
     it('não deve sobrescrever header existente', () => {
@@ -337,7 +365,7 @@ describe('BearerJWTAccountMiddleware', () => {
   });
 
   describe('validarPropriedade', () => {
-    it('deve retornar true quando não há chvIdFatAut e não há header', () => {
+    it('deve prosseguir quando não há chvIdFatAut e header foi injetado', () => {
       const payload = { agencia: '1234', conta: '5678' };
       const payloadCodificado = Buffer.from(JSON.stringify(payload)).toString('base64');
       const token = `Bearer header.${payloadCodificado}.signature`;
@@ -345,10 +373,11 @@ describe('BearerJWTAccountMiddleware', () => {
       requisicaoMock.headers = { authorization: token };
       middleware.use(requisicaoMock, respostaMock as Response, proximoMock);
 
+      expect((requisicaoMock.headers as any)['x-pdpj-conta']).toBe('1234-5678');
       expect(proximoMock).toHaveBeenCalled();
     });
 
-    it('deve retornar true quando há chvIdFatAut mas não há header', () => {
+    it('deve prosseguir quando há chvIdFatAut e header foi injetado', () => {
       const payload = { agencia: '1234', conta: '5678', chvIdFatAut: { agencia: 1234, conta: 5678 } };
       const payloadCodificado = Buffer.from(JSON.stringify(payload)).toString('base64');
       const token = `Bearer header.${payloadCodificado}.signature`;
@@ -356,10 +385,11 @@ describe('BearerJWTAccountMiddleware', () => {
       requisicaoMock.headers = { authorization: token };
       middleware.use(requisicaoMock, respostaMock as Response, proximoMock);
 
+      expect((requisicaoMock.headers as any)['x-pdpj-conta']).toBe('1234-5678');
       expect(proximoMock).toHaveBeenCalled();
     });
 
-    it('deve retornar true quando há header mas não há chvIdFatAut', () => {
+    it('deve prosseguir quando há header válido mas não há chvIdFatAut', () => {
       const payload = { agencia: '1234', conta: '5678' };
       const payloadCodificado = Buffer.from(JSON.stringify(payload)).toString('base64');
       const token = `Bearer header.${payloadCodificado}.signature`;
@@ -436,10 +466,29 @@ describe('BearerJWTAccountMiddleware', () => {
       const token = `Bearer header.${payloadCodificado}.signature`;
 
       requisicaoMock.headers = { authorization: token };
+      // Header com espaços será normalizado durante a decodificação/validação
+      (requisicaoMock as any).headers['x-pdpj-conta'] = '1234-5678';
+
+      middleware.use(requisicaoMock, respostaMock as Response, proximoMock);
+
+      // O header será normalizado (espaços removidos) e a validação deve passar
+      expect((requisicaoMock.headers as any)['x-pdpj-conta']).toBe('1234-5678');
+      expect(proximoMock).toHaveBeenCalled();
+    });
+
+    it('deve normalizar espaços no header x-pdpj-conta', () => {
+      const payload = { agencia: '1234', conta: '5678', chvIdFatAut: { agencia: 1234, conta: 5678 } };
+      const payloadCodificado = Buffer.from(JSON.stringify(payload)).toString('base64');
+      const token = `Bearer header.${payloadCodificado}.signature`;
+
+      requisicaoMock.headers = { authorization: token };
+      // Header com espaços será normalizado
       (requisicaoMock as any).headers['x-pdpj-conta'] = ' 1234 - 5678 ';
 
       middleware.use(requisicaoMock, respostaMock as Response, proximoMock);
 
+      // O header deve ser normalizado removendo espaços
+      expect((requisicaoMock.headers as any)['x-pdpj-conta']).toBe('1234-5678');
       expect(proximoMock).toHaveBeenCalled();
     });
 
@@ -507,9 +556,161 @@ describe('BearerJWTAccountMiddleware', () => {
       // Eles não correspondem, então a validação falha e retorna 403
       middleware.use(requisicaoMock, respostaMock as Response, proximoMock);
 
+      // O header foi injetado corretamente
+      expect((requisicaoMock.headers as any)['x-pdpj-conta']).toBe('1234-5678');
       // A validação deve falhar porque 'undefined-undefined' != '1234-5678'
       expect(respostaMock.status).toHaveBeenCalledWith(403);
       expect(proximoMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Validação obrigatória x-pdpj-conta', () => {
+    it('deve retornar erro 400 quando x-pdpj-conta não pode ser injetado e não está presente', () => {
+      const payload = {};
+      const payloadCodificado = Buffer.from(JSON.stringify(payload)).toString('base64');
+      // Token válido com caracteres seguros para passar na validação de segurança
+      const token = `Bearer header.${payloadCodificado}.signature`;
+
+      requisicaoMock.headers = { authorization: token };
+      requisicaoMock.body = {};
+
+      middleware.use(requisicaoMock, respostaMock as Response, proximoMock);
+
+      expect(respostaMock.status).toHaveBeenCalledWith(400);
+      expect(respostaMock.json).toHaveBeenCalledWith({
+        error: 'Header x-pdpj-conta é obrigatório',
+        message: 'O header x-pdpj-conta deve ser fornecido na requisição ou estar presente no JWT',
+      });
+      expect(proximoMock).not.toHaveBeenCalled();
+    });
+
+    it('deve decodificar x-pdpj-conta quando enviado em base64', () => {
+      const payload = { agencia: '1234', conta: '5678' };
+      const payloadCodificado = Buffer.from(JSON.stringify(payload)).toString('base64');
+      const token = `Bearer header.${payloadCodificado}.signature`;
+
+      // Header em base64: "1234-5678" codificado
+      const headerBase64 = Buffer.from('1234-5678').toString('base64');
+      requisicaoMock.headers = { authorization: token, 'x-pdpj-conta': headerBase64 };
+
+      middleware.use(requisicaoMock, respostaMock as Response, proximoMock);
+
+      // Deve decodificar e normalizar o header
+      expect((requisicaoMock.headers as any)['x-pdpj-conta']).toBe('1234-5678');
+      expect(proximoMock).toHaveBeenCalled();
+    });
+
+    it('deve decodificar x-pdpj-conta em base64 URL-safe', () => {
+      const payload = { agencia: '1234', conta: '5678' };
+      const payloadCodificado = Buffer.from(JSON.stringify(payload)).toString('base64');
+      const token = `Bearer header.${payloadCodificado}.signature`;
+
+      // Header em base64 URL-safe: "1234-5678-1" codificado
+      const headerBase64 = Buffer.from('1234-5678-1').toString('base64').replace(/\+/g, '-').replace(/\//g, '_');
+      requisicaoMock.headers = { authorization: token, 'x-pdpj-conta': headerBase64 };
+
+      middleware.use(requisicaoMock, respostaMock as Response, proximoMock);
+
+      // Deve decodificar e normalizar o header
+      expect((requisicaoMock.headers as any)['x-pdpj-conta']).toBe('1234-5678-1');
+      expect(proximoMock).toHaveBeenCalled();
+    });
+
+    it('deve aceitar x-pdpj-conta já no formato texto quando não é base64', () => {
+      const payload = { agencia: '1234', conta: '5678' };
+      const payloadCodificado = Buffer.from(JSON.stringify(payload)).toString('base64');
+      const token = `Bearer header.${payloadCodificado}.signature`;
+
+      requisicaoMock.headers = { authorization: token, 'x-pdpj-conta': '1234-5678' };
+
+      middleware.use(requisicaoMock, respostaMock as Response, proximoMock);
+
+      // Deve manter o formato texto
+      expect((requisicaoMock.headers as any)['x-pdpj-conta']).toBe('1234-5678');
+      expect(proximoMock).toHaveBeenCalled();
+    });
+
+    it('deve retornar erro 400 quando base64 decodificado não tem formato válido', () => {
+      const payload = { agencia: '1234', conta: '5678' };
+      const payloadCodificado = Buffer.from(JSON.stringify(payload)).toString('base64');
+      const token = `Bearer header.${payloadCodificado}.signature`;
+
+      // Base64 válido mas que decodifica para algo sem formato válido
+      const headerBase64Invalido = Buffer.from('formato-invalido').toString('base64');
+      requisicaoMock.headers = { authorization: token, 'x-pdpj-conta': headerBase64Invalido };
+
+      middleware.use(requisicaoMock, respostaMock as Response, proximoMock);
+
+      expect(respostaMock.status).toHaveBeenCalledWith(400);
+      expect(proximoMock).not.toHaveBeenCalled();
+    });
+
+    it('deve retornar erro 400 quando formato do x-pdpj-conta é inválido', () => {
+      const payload = { agencia: '1234', conta: '5678' };
+      const payloadCodificado = Buffer.from(JSON.stringify(payload)).toString('base64');
+      const token = `Bearer header.${payloadCodificado}.signature`;
+
+      requisicaoMock.headers = { authorization: token, 'x-pdpj-conta': 'formato-invalido' };
+
+      middleware.use(requisicaoMock, respostaMock as Response, proximoMock);
+
+      expect(respostaMock.status).toHaveBeenCalledWith(400);
+      expect(respostaMock.json).toHaveBeenCalledWith({
+        error: 'Formato inválido do header x-pdpj-conta',
+        message: 'O header x-pdpj-conta deve estar no formato: agencia-conta ou agencia-conta-digito',
+        exemplo: '1234-56789 ou 1234-56789-1',
+      });
+      expect(proximoMock).not.toHaveBeenCalled();
+    });
+
+    it('deve retornar erro 400 quando x-pdpj-conta tem formato incorreto (sem números)', () => {
+      const payload = { agencia: '1234', conta: '5678' };
+      const payloadCodificado = Buffer.from(JSON.stringify(payload)).toString('base64');
+      const token = `Bearer header.${payloadCodificado}.signature`;
+
+      requisicaoMock.headers = { authorization: token, 'x-pdpj-conta': 'abc-def' };
+
+      middleware.use(requisicaoMock, respostaMock as Response, proximoMock);
+
+      expect(respostaMock.status).toHaveBeenCalledWith(400);
+      expect(proximoMock).not.toHaveBeenCalled();
+    });
+
+    it('deve aceitar formato válido agencia-conta', () => {
+      const payload = { agencia: '1234', conta: '5678' };
+      const payloadCodificado = Buffer.from(JSON.stringify(payload)).toString('base64');
+      const token = `Bearer header.${payloadCodificado}.signature`;
+
+      requisicaoMock.headers = { authorization: token, 'x-pdpj-conta': '1234-5678' };
+
+      middleware.use(requisicaoMock, respostaMock as Response, proximoMock);
+
+      expect(proximoMock).toHaveBeenCalled();
+    });
+
+    it('deve aceitar formato válido agencia-conta-digito', () => {
+      const payload = { agencia: '1234', conta: '5678' };
+      const payloadCodificado = Buffer.from(JSON.stringify(payload)).toString('base64');
+      const token = `Bearer header.${payloadCodificado}.signature`;
+
+      requisicaoMock.headers = { authorization: token, 'x-pdpj-conta': '1234-5678-1' };
+
+      middleware.use(requisicaoMock, respostaMock as Response, proximoMock);
+
+      expect(proximoMock).toHaveBeenCalled();
+    });
+
+    it('deve aceitar quando x-pdpj-conta é injetado automaticamente', () => {
+      const payload = { agencia: '1234', conta: '5678' };
+      const payloadCodificado = Buffer.from(JSON.stringify(payload)).toString('base64');
+      const token = `Bearer header.${payloadCodificado}.signature`;
+
+      requisicaoMock.headers = { authorization: token };
+
+      middleware.use(requisicaoMock, respostaMock as Response, proximoMock);
+
+      expect((requisicaoMock.headers as any)['x-pdpj-conta']).toBe('1234-5678');
+      expect(proximoMock).toHaveBeenCalled();
     });
   });
 
@@ -547,6 +748,7 @@ describe('BearerJWTAccountMiddleware', () => {
         chvIdFatAut: { agencia: 1234, conta: 5678 },
       };
       const payloadCodificado = Buffer.from(JSON.stringify(payload)).toString('base64');
+      // Token válido com caracteres seguros para passar na validação de segurança
       const token = `Bearer header.${payloadCodificado}.signature`;
 
       requisicaoMock.headers = { authorization: token };
