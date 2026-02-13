@@ -5,16 +5,15 @@ import { catsListResolver } from './resolvers/cats-list.resolver';
 
 export const routes: Routes = [
   {
-    path: 'auth',
-    loadChildren: () => import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES) as any
-  },
-  {
     path: 'home',
-    canActivate: [authGuard],
     resolve: {
       cats: catsListResolver
     },
     loadChildren: () => import('./features/home/home.routes').then(m => m.HOME_ROUTES)
+  },
+  {
+    path: 'auth',
+    loadChildren: () => import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES) as any
   },
   {
     path: 'admin',
@@ -25,6 +24,11 @@ export const routes: Routes = [
     path: 'extrato',
     canActivate: [authGuard],
     loadChildren: () => import('./features/extrato/extrato.routes').then(m => m.EXTRATO_ROUTES)
+  },
+  {
+    path: 'investimentos',
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/investimentos/investimentos.routes').then(m => m.INVESTIMENTOS_ROUTES)
   },
   {
     path: 'demo',
@@ -58,7 +62,7 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'home'
+    redirectTo: 'home/login'
   },
   {
     path: 'unauthorized',

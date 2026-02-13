@@ -1,0 +1,101 @@
+<section class="loginContainer" [@fadeInOut]>
+  <div class="loginContainer__header">
+    <div class="loginContainer__header__title">
+      <h1>🏦 Corporate EDA</h1>
+      <p class="subtitle">Faça login para acessar seus investimentos</p>
+    </div>
+  </div>
+
+  <div class="loginContainer__wrapper">
+    <div class="login-card">
+      <form (ngSubmit)="onSubmit()" class="login-form">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <div class="input-wrapper">
+            <input
+              type="email"
+              id="email"
+              [value]="email()"
+              (input)="onEmailChange($event)"
+              placeholder="Digite seu email"
+              required
+              [disabled]="isLoading()"
+              class="form-input"
+            />
+            <span class="input-icon">📧</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Senha</label>
+          <div class="input-wrapper">
+            <input
+              type="password"
+              id="password"
+              [value]="password()"
+              (input)="onPasswordChange($event)"
+              placeholder="Digite sua senha"
+              required
+              [disabled]="isLoading()"
+              class="form-input"
+            />
+            <span class="input-icon">🔒</span>
+          </div>
+        </div>
+
+        @if (showError()) {
+          <div class="error-message" [@fadeInOut]>
+            <span class="error-icon">⚠️</span>
+            <span>{{ errorMessage() }}</span>
+          </div>
+        }
+
+        <button
+          type="submit"
+          class="login-button"
+          [disabled]="!canSubmit()"
+          [@buttonAnimation]="buttonState()"
+          (mouseenter)="onButtonHover()"
+          (mouseleave)="onButtonLeave()"
+        >
+          @if (isLoading()) {
+            <span class="loading-spinner"></span>
+            <span>Entrando...</span>
+          } @else {
+            <span>Entrar</span>
+            <span class="button-arrow">→</span>
+          }
+        </button>
+      </form>
+
+      <div class="test-credentials">
+        <div class="test-credentials__header">
+          <h3>Credenciais de Teste</h3>
+          <p class="test-subtitle">Clique para preencher automaticamente</p>
+        </div>
+        <div class="credential-buttons">
+          <button
+            type="button"
+            class="test-button admin"
+            (click)="fillAdminCredentials()"
+            [disabled]="isLoading()"
+          >
+            <span class="button-icon">👤</span>
+            <span>Admin</span>
+            <span class="button-detail">admin&#64;example.com</span>
+          </button>
+          <button
+            type="button"
+            class="test-button user"
+            (click)="fillUserCredentials()"
+            [disabled]="isLoading()"
+          >
+            <span class="button-icon">👥</span>
+            <span>User</span>
+            <span class="button-detail">user&#64;example.com</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
